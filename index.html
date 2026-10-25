@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+  :root {
+    --green-900: #0F3D2E; --green-800: #14513C; --green-700: #1A6B4F; --green-600: #208562; --green-100: #E3F1EA; --green-50: #F2F8F5;
+    --orange-600: #D9731A; --orange-100: #FDEBD9;
+    --red-600: #C2410C; --red-700: #B42318; --red-100: #FDE8E6;
+    --ink-900: #18211D; --ink-700: #3B4741; --ink-500: #66736C; --ink-300: #A9B3AE;
+    --line: #E3E8E5; --surface: #FFFFFF; --bg: #F6F8F7; --hover: #F0F4F2;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 2px rgba(16, 40, 30, .06), 0 1px 3px rgba(16, 40, 30, .05);
+    --sidebar: 236px;
+    --font: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink-900); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--green-700); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
+  h1 { font-size: 20px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
+  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .neg { color: var(--red-700); }
+  .muted { color: var(--ink-500); }
+  .small { font-size: 12px; }
+  .hidden { display: none !important; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .spacer { flex: 1; }
+  .stack > * + * { margin-top: 16px; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  /* Layout */
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar); background: var(--green-900); color: #DCEBE3; position: fixed; inset: 0 auto 0 0; display: flex; flex-direction: column; z-index: 30; transition: width .15s, transform .2s; }
+  .brand { padding: 18px 18px 14px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--green-600); display: grid; place-items: center; color: #fff; font-weight: 700; flex: none; }
+  .brand-name { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.1; }
+  .brand-sub { font-size: 11px; color: #9CC2B0; }
+  .nav { padding: 10px 8px; flex: 1; overflow-y: auto; }
+  .nav button { width: 100%; display: flex; gap: 12px; align-items: center; padding: 10px 12px; border: 0; background: none; color: inherit; border-radius: 8px; cursor: pointer; text-align: left; min-height: 42px; }
+  .nav button:hover { background: rgba(255,255,255,.06); }
+  .nav button.active { background: var(--green-700); color: #fff; font-weight: 600; }
+  .nav svg { width: 18px; height: 18px; flex: none; opacity: .9; }
+  .sidebar-foot { padding: 12px 18px; font-size: 11px; color: #8FB5A3; border-top: 1px solid rgba(255,255,255,.08); }
+  .collapsed .sidebar { width: 64px; }
+  .collapsed .sidebar .label, .collapsed .brand-text, .collapsed .sidebar-foot { display: none; }
+  .collapsed .main { margin-left: 64px; }
+  .main { flex: 1; margin-left: var(--sidebar); min-width: 0; transition: margin .15s; }
+  .topbar { position: sticky; top: 0; z-index: 20; background: rgba(246,248,247,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 10px 24px; min-height: 56px; }
+  .topbar h1 { font-size: 17px; }
+  .content { padding: 20px 24px 64px; max-width: 1280px; }
+  .icon-btn { border: 0; background: none; width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--ink-700); }
+  .icon-btn:hover { background: var(--hover); }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--green-100); color: var(--green-800); display: grid; place-items: center; font-weight: 600; font-size: 12px; }
+  .env-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--orange-100); color: var(--orange-600); font-weight: 600; }
+
+  /* Cards & panels */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .card-h { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .card-b { padding: 16px; }
+  .kpi { padding: 14px 16px; }
+  .kpi .k-label { font-size: 12px; color: var(--ink-500); }
+  .kpi .k-value { font-size: 20px; font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .k-sub { font-size: 11px; color: var(--ink-500); margin-top: 2px; }
+  .banner { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+  .banner.warn { background: var(--orange-100); color: #7A3E06; }
+  .banner.err { background: var(--red-100); color: var(--red-700); }
+  .banner.ok { background: var(--green-100); color: var(--green-800); }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 550; white-space: nowrap; }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn.primary { background: var(--green-700); border-color: var(--green-700); color: #fff; }
+  .btn.primary:hover { background: var(--green-800); }
+  .btn.accent { background: var(--orange-600); border-color: var(--orange-600); color: #fff; }
+  .btn.danger { color: var(--red-700); border-color: #F3C7C1; }
+  .btn.danger:hover { background: var(--red-100); }
+  .btn.ghost { border-color: transparent; background: none; }
+  .btn.sm { height: 30px; padding: 0 10px; font-size: 13px; }
+  .btn svg { width: 16px; height: 16px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+  .chip.active { background: var(--green-700); color: #fff; border-color: var(--green-700); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+  .tabs button { border: 0; background: none; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--ink-500); white-space: nowrap; }
+  .tabs button.active { color: var(--green-800); border-bottom-color: var(--green-700); font-weight: 600; }
+
+  /* Forms */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > span { font-size: 12px; font-weight: 600; color: var(--ink-700); }
+  .field .hint { font-size: 11px; color: var(--ink-500); font-weight: 400; }
+  .input, select.input, textarea.input { height: 40px; padding: 0 12px; border: 1px solid #D3DBD7; border-radius: 8px; background: #fff; width: 100%; min-width: 0; }
+  textarea.input { height: auto; padding: 10px 12px; min-height: 64px; resize: vertical; }
+  .input:focus { outline: 2px solid rgba(32,133,98,.25); border-color: var(--green-600); }
+  .input.invalid { border-color: var(--red-600); background: #FFF8F7; }
+  .input.money { text-align: right; font-variant-numeric: tabular-nums; }
+  .err-text { color: var(--red-700); font-size: 12px; }
+  .seg { display: inline-flex; border: 1px solid #D3DBD7; border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; padding: 0 12px; height: 38px; cursor: pointer; border-right: 1px solid #D3DBD7; }
+  .seg button:last-child { border-right: 0; }
+  .seg button.active { background: var(--green-700); color: #fff; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table.t { width: 100%; border-collapse: collapse; }
+  table.t th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ink-500); padding: 10px 12px; border-bottom: 1px solid var(--line); background: #FAFBFA; white-space: nowrap; }
+  table.t td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.t tr.click { cursor: pointer; }
+  table.t tr.click:hover td { background: var(--hover); }
+  table.t tr.sec td { background: #FAFBFA; font-weight: 600; }
+  table.t tr.total td { font-weight: 700; border-top: 2px solid var(--line); }
+  table.t tr.grand td { font-weight: 700; background: var(--green-50); }
+  table.t td.indent { padding-left: 28px; }
+  table.t td.indent2 { padding-left: 44px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: #EEF1EF; color: var(--ink-700); white-space: nowrap; }
+  .badge.POSTED, .badge.ACTIVE, .badge.OPEN { background: var(--green-100); color: var(--green-800); }
+  .badge.DRAFT { background: #EAF0FB; color: #2B4C8C; }
+  .badge.REVERSED, .badge.DISPOSED, .badge.LOCKED { background: #EEF1EF; color: var(--ink-500); }
+  .badge.FAILED, .badge.DISABLED { background: var(--red-100); color: var(--red-700); }
+  .badge.PENDING, .badge.FULLY_DEPRECIATED { background: var(--orange-100); color: #8A4A0B; }
+  .pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; padding: 10px 12px; font-size: 13px; color: var(--ink-500); }
+  .empty { padding: 36px 16px; text-align: center; color: var(--ink-500); }
+  .mlist { display: none; }
+  .mitem { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; cursor: pointer; }
+  .mitem:last-child { border-bottom: 0; }
+
+  /* Drawer & dialog */
+  .scrim { position: fixed; inset: 0; background: rgba(15, 30, 23, .35); z-index: 40; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--surface); z-index: 41; display: flex; flex-direction: column; box-shadow: -8px 0 24px rgba(0,0,0,.08); }
+  .drawer-h { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .drawer-b { padding: 18px; overflow-y: auto; flex: 1; }
+  .drawer-f { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; background: #FAFBFA; }
+  .dialog { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 12px 40px rgba(0,0,0,.18); }
+  .dialog-scrim { z-index: 50; }
+  .preview { background: var(--green-50); border: 1px dashed #BFD9CC; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+  .preview table { width: 100%; border-collapse: collapse; }
+  .preview td { padding: 3px 4px; }
+
+  /* Toast & loader */
+  #toasts { position: fixed; z-index: 60; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; max-width: calc(100% - 32px); }
+  .toast { background: var(--ink-900); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; box-shadow: var(--shadow); max-width: 420px; }
+  .toast.err { background: var(--red-700); }
+  .toast.ok { background: var(--green-800); }
+  .bar-loader { position: fixed; top: 0; left: 0; height: 3px; background: var(--orange-600); z-index: 70; width: 0; transition: width .3s; }
+  .bar-loader.on { width: 70%; transition: width 4s cubic-bezier(.1,.6,.2,1); }
+  .skeleton { background: linear-gradient(90deg, #EEF1EF 25%, #F6F8F7 50%, #EEF1EF 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 6px; height: 14px; }
+  @keyframes sk { to { background-position: -200% 0; } }
+
+  /* Login */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: linear-gradient(180deg, var(--green-50), var(--bg)); }
+  .login-card { width: min(380px, 100%); padding: 28px; }
+  .login-card .brand-mark { width: 44px; height: 44px; font-size: 18px; }
+
+  /* Charts */
+  .chart { width: 100%; height: auto; display: block; }
+  .chart text { font-size: 10px; fill: var(--ink-500); }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--ink-500); flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  .fab { display: none; }
+
+  @media (max-width: 1024px) {
+    .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .sidebar { transform: translateX(-100%); width: 260px; }
+    .nav-open .sidebar { transform: none; }
+    .collapsed .sidebar .label, .collapsed .brand-text { display: initial; }
+    .main, .collapsed .main { margin-left: 0; }
+    .topbar { padding: 8px 16px; }
+    .content { padding: 16px 16px 96px; }
+    .g2, .g3 { grid-template-columns: 1fr; }
+    .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .form-grid { grid-template-columns: 1fr; }
+    .kpi .k-value { font-size: 17px; }
+    .hide-m { display: none !important; }
+    .mlist { display: block; }
+    .tlist { display: none; }
+    .drawer { width: 100%; }
+    .btn { height: 42px; }
+    .input { height: 44px; }
+    .fab { display: grid; position: fixed; right: 16px; bottom: 20px; z-index: 25; width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--orange-600); color: #fff; place-items: center; box-shadow: 0 6px 16px rgba(217,115,26,.4); cursor: pointer; }
+    .fab svg { width: 26px; height: 26px; }
+    .user-chip .uname { display: none; }
+    #toasts { left: 16px; right: 16px; bottom: 88px; }
+  }
+  @media print {
+    .sidebar, .topbar, .no-print, .fab { display: none !important; }
+    .main { margin: 0 !important; }
+    .card { box-shadow: none; border: 0; }
+  }
+</style>
+
+  <title>Meirista FAS — Meirista Financial & Accounting System</title>
+  <meta name="theme-color" content="#0F3D2E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Meirista FAS">
+  <meta name="application-name" content="Meirista FAS">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="39d7bb2-d7e556e4";</script>
+</head>
+<body>
+  <div class="bar-loader" id="loader"></div>
+
+  <section id="login" class="login hidden">
+    <form class="card login-card" id="loginForm" autocomplete="on">
+      <div class="row" style="margin-bottom:20px">
+        <div class="brand-mark">M</div>
+        <div>
+          <div style="font-weight:700;font-size:17px">Meirista FAS</div>
+          <div class="muted small">Meirista Financial & Accounting System</div>
+        </div>
+      </div>
+      <div class="stack">
+        <label class="field"><span>Email</span><input class="input" type="email" name="email" autocomplete="username" required></label>
+        <label class="field"><span>Kata sandi</span><input class="input" type="password" name="password" autocomplete="current-password" required></label>
+        <div class="err-text" id="loginErr"></div>
+        <button class="btn primary" style="width:100%" type="submit" id="loginBtn">Masuk</button>
+      </div>
+      <p class="muted small" style="margin:18px 0 0;text-align:center">Manage Finance. Simplify Accounting. · v0.2.0</p>
+    </form>
+  </section>
+
+  <div id="shell" class="shell hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="brand-name">Meirista FAS</div>
+          <div class="brand-sub">Financial &amp; Accounting System</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="sidebar-foot">v0.2.0 · <span id="envName"></span></div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="navToggle" aria-label="Menu"></button>
+        <h1 id="viewTitle">Dashboard</h1>
+        <span class="env-badge hidden" id="envBadge"></span>
+        <div class="spacer"></div>
+        <div class="user-chip">
+          <div class="avatar" id="avatar"></div>
+          <div class="uname"><div id="uname" style="font-weight:600"></div><div class="muted small" id="urole"></div></div>
+          <button class="icon-btn" id="logoutBtn" title="Keluar" aria-label="Keluar"></button>
+        </div>
+      </header>
+      <main class="content" id="view"></main>
+    </div>
+  </div>
+  <button class="fab hidden" id="fab" aria-label="Tambah transaksi"></button>
+  <div id="overlay"></div>
+  <div id="toasts"></div>
+
+  <script>
+(function () {
+  'use strict';
+
+  /* ================= Utilitas ================= */
+  var S = { token: null, user: null, boot: null, view: 'dashboard', inflight: {}, state: {} };
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var NF = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
+  var rp = function (n) { n = Number(n || 0); return (n < 0 ? '-Rp' : 'Rp') + NF.format(Math.abs(n)); };
+  var rpCell = function (n) { return '<span class="' + (n < 0 ? 'neg' : '') + '">' + (n < 0 ? '(' + rp(-n).slice(0) + ')' : rp(n)) + '</span>'; };
+  var fdate = function (s) { return s ? s.substring(8, 10) + '/' + s.substring(5, 7) + '/' + s.substring(0, 4) : ''; };
+  var fts = function (s) { return s ? fdate(s) + ' ' + s.substring(11, 16) : ''; };
+  var parseMoney = function (s) { var d = String(s || '').replace(/[^\d]/g, ''); return d ? Number(d) : 0; };
+  var uuid = function () {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var a = new Uint8Array(16); crypto.getRandomValues(a);
+    return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+  };
+  var today = function () { return S.boot ? S.boot.app.today : new Date().toISOString().substring(0, 10); };
+  var period = function (d) { return d.substring(0, 7); };
+  var addMonths = function (p, n) { var y = +p.substring(0, 4), m = +p.substring(5, 7) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; return y + '-' + ('0' + (m + 1)).slice(-2); };
+  var lastDay = function (p) { var d = new Date(Date.UTC(+p.substring(0, 4), +p.substring(5, 7), 0)).getUTCDate(); return p + '-' + ('0' + d).slice(-2); };
+  var MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  var mlabel = function (p) { return MONTHS[+p.substring(5, 7) - 1] + ' ' + p.substring(0, 4); };
+  var mshort = function (p) { return MONTHS[+p.substring(5, 7) - 1].substring(0, 3) + ' ' + p.substring(2, 4); };
+  var store = {
+    get: function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* abaikan */ } },
+    del: function (k) { try { sessionStorage.removeItem(k); } catch (e) { /* abaikan */ } }
+  };
+  var isAdmin = function () { return S.user && S.user.role === 'ADMIN'; };
+  var canEntry = function () { return S.user && (S.user.role === 'ADMIN' || S.user.role === 'FINANCE'); };
+  var ROLE_LABEL = { ADMIN: 'Admin', FINANCE: 'Staf Keuangan', VIEWER: 'Viewer' };
+  var STATUS_LABEL = { DRAFT: 'Draft', PENDING: 'Tertunda', POSTED: 'Terposting', REVERSED: 'Dibalik', FAILED: 'Gagal', DELETED: 'Dihapus',
+    ACTIVE: 'Aktif', FULLY_DEPRECIATED: 'Tersusutkan penuh', DISPOSED: 'Dilepas', LOCKED: 'Ditutup', OPEN: 'Terbuka', DISABLED: 'Nonaktif' };
+  var badge = function (s) { return '<span class="badge ' + esc(s) + '">' + esc(STATUS_LABEL[s] || s) + '</span>'; };
+
+  /* ================= Ikon ================= */
+  var P = {
+    dashboard: 'M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z',
+    trx: 'M4 6h16M4 12h16M4 18h10',
+    pl: 'M4 19V5m0 14h16M8 15l3-4 3 2 5-6',
+    cf: 'M7 7h11l-3-3m3 3-3 3M17 17H6l3 3m-3-3 3-3',
+    bs: 'M12 3v18M5 7h14M3 13l2-6 2 6a2.5 2.5 0 0 1-4 0zm14 0 2-6 2 6a2.5 2.5 0 0 1-4 0zM8 21h8',
+    asset: 'M4 7h16v12H4zM9 7V4h6v3',
+    master: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zm0 0v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+    settings: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7.3 7.3 0 0 0-2-1.2L14.5 3h-4l-.4 2.6a7.3 7.3 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7.3 7.3 0 0 0 2 1.2l.4 2.6h4l.4-2.6a7.3 7.3 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z',
+    menu: 'M4 6h16M4 12h16M4 18h16', plus: 'M12 5v14M5 12h14', x: 'M6 6l12 12M18 6 6 18',
+    logout: 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3',
+    down: 'M12 4v12m0 0-5-5m5 5 5-5M5 20h14', clip: 'M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10.2 17.7a1.7 1.7 0 0 1-2.4-2.4L15.5 7.6'
+  };
+  var icon = function (n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + P[n] + '"/></svg>'; };
+
+  /* ================= API ================= */
+  var loaderCount = 0;
+  function loading(on) {
+    loaderCount += on ? 1 : -1;
+    var el = $('#loader');
+    if (loaderCount > 0) { el.classList.add('on'); } else { loaderCount = 0; el.classList.remove('on'); el.style.width = '100%'; setTimeout(function () { el.style.width = ''; }, 250); }
+  }
+  function transport(req) {
+    return new Promise(function (resolve, reject) {
+      if (window.google && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(e); }).api(req);
+      } else {
+        // GitHub Pages / pratinjau lokal: body teks (text/plain) agar tidak memicu CORS preflight ke Apps Script.
+        var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 120000) : null;
+        fetch(window.MFAS_API_URL || '/api', { method: 'POST', body: JSON.stringify(req), signal: ctrl ? ctrl.signal : undefined, redirect: 'follow' })
+          .then(function (r) { return r.text(); })
+          .then(function (txt) { clearTimeout(t); try { resolve(JSON.parse(txt)); } catch (e) { reject(new Error('Respons server tidak valid')); } },
+            function (e) { clearTimeout(t); reject(e); });
+      }
+    });
+  }
+  /** Panggil API. Permintaan baca identik yang sedang berjalan digabung (dedupe). */
+  function call(action, payload, opts) {
+    opts = opts || {};
+    var key = action + ':' + JSON.stringify(payload || {});
+    if (!opts.write && S.inflight[key]) return S.inflight[key];
+    if (!opts.silent) loading(true);
+    var p = transport({ token: S.token, action: action, payload: payload || {} }).then(function (res) {
+      if (!res || !res.ok) {
+        var err = (res && res.error) || { code: 'INTERNAL', message: 'Respons tidak valid dari server.' };
+        if (err.code === 'SESSION_EXPIRED') { logoutLocal(err.message); }
+        if (err.code === 'MUST_CHANGE_PASSWORD') { forcePasswordChange(); }
+        var e = new Error(err.message); e.code = err.code; throw e;
+      }
+      return res.data;
+    }, function (e) {
+      var x = new Error('Tidak dapat terhubung ke server. Periksa koneksi internet lalu coba lagi.'); x.code = 'NETWORK'; x.cause = e; throw x;
+    });
+    if (!opts.write) S.inflight[key] = p;
+    p.then(function () { delete S.inflight[key]; if (!opts.silent) loading(false); },
+      function () { delete S.inflight[key]; if (!opts.silent) loading(false); });
+    return p;
+  }
+
+  /* ================= Toast, drawer, dialog ================= */
+  function toast(msg, type) {
+    var el = document.createElement('div');
+    el.className = 'toast ' + (type || '');
+    el.textContent = msg;
+    $('#toasts').appendChild(el);
+    setTimeout(function () { el.remove(); }, type === 'err' ? 7000 : 3500);
+  }
+  function fail(e) { toast(e && e.message ? e.message : String(e), 'err'); }
+
+  var drawerStack = [];
+  function openDrawer(title, bodyHtml, footHtml, onMount) {
+    closeDrawer();
+    var ov = $('#overlay');
+    ov.innerHTML = '<div class="scrim" data-close></div><aside class="drawer" role="dialog" aria-label="' + esc(title) + '">' +
+      '<div class="drawer-h"><h2>' + esc(title) + '</h2><div class="spacer"></div><button class="icon-btn" data-close aria-label="Tutup">' + icon('x') + '</button></div>' +
+      '<div class="drawer-b">' + bodyHtml + '</div>' + (footHtml ? '<div class="drawer-f">' + footHtml + '</div>' : '') + '</aside>';
+    $$('[data-close]', ov).forEach(function (b) { b.onclick = function () { if (!ov.dataset.busy) closeDrawer(); }; });
+    var d = $('.drawer', ov);
+    drawerStack.push(d);
+    if (onMount) onMount(d);
+    return d;
+  }
+  function closeDrawer() { var ov = $('#overlay'); ov.innerHTML = ''; delete ov.dataset.busy; drawerStack = []; }
+
+  /** Dialog konfirmasi. opts: {title, message, confirm, danger, reason (label), reasonRequired} → Promise<{reason}|null> */
+  function ask(opts) {
+    return new Promise(function (resolve) {
+      var wrap = document.createElement('div');
+      wrap.innerHTML = '<div class="scrim dialog-scrim"></div><div class="dialog" role="alertdialog">' +
+        '<h2>' + esc(opts.title || 'Konfirmasi') + '</h2><p class="muted" style="margin:8px 0 14px">' + esc(opts.message || '') + '</p>' +
+        (opts.reason ? '<label class="field"><span>' + esc(opts.reason) + (opts.reasonRequired ? ' *' : '') + '</span><textarea class="input" id="dlgReason" rows="2"></textarea></label>' : '') +
+        (opts.extraHtml || '') +
+        '<div class="err-text" id="dlgErr" style="margin-top:6px"></div>' +
+        '<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-a="no">Batal</button><button class="btn ' + (opts.danger ? 'danger' : 'primary') + '" data-a="yes">' + esc(opts.confirm || 'Ya, lanjutkan') + '</button></div></div>';
+      document.body.appendChild(wrap);
+      var r = $('#dlgReason', wrap); if (r) r.focus();
+      wrap.addEventListener('click', function (ev) {
+        var a = ev.target.getAttribute && ev.target.getAttribute('data-a');
+        if (!a) return;
+        if (a === 'yes') {
+          var reason = r ? r.value.trim() : '';
+          if (opts.reasonRequired && !reason) { $('#dlgErr', wrap).textContent = 'Alasan wajib diisi.'; return; }
+          var extra = opts.collect ? opts.collect(wrap) : {};
+          if (extra === false) return;
+          wrap.remove(); resolve(Object.assign({ reason: reason }, extra));
+        } else { wrap.remove(); resolve(null); }
+      });
+    });
+  }
+
+  /** Bind input uang: format ribuan saat diketik. */
+  function bindMoney(root) {
+    $$('input.money', root).forEach(function (el) {
+      el.setAttribute('inputmode', 'numeric');
+      el.addEventListener('input', function () {
+        var v = parseMoney(el.value);
+        el.value = v ? NF.format(v) : '';
+      });
+    });
+  }
+  function moneyVal(root, name) { var el = $('[name="' + name + '"]', root); return el ? parseMoney(el.value) : 0; }
+  function val(root, name) { var el = $('[name="' + name + '"]', root); return el ? el.value.trim() : ''; }
+
+  /* ================= Akun & opsi ================= */
+  function coa() { return S.boot ? S.boot.coa : []; }
+  function acc(code) { return coa().filter(function (a) { return a.code === code; })[0]; }
+  function accName(code) { var a = acc(code); return a ? a.name : code; }
+  function cashAccounts() { return coa().filter(function (a) { return a.isCash && a.isActive && !a.isHeader; }); }
+  function accountsInGroups(groups) { return coa().filter(function (a) { return a.isActive && !a.isHeader && groups.indexOf(a.group) !== -1; }); }
+  function options(list, selected, placeholder) {
+    return (placeholder ? '<option value="">' + esc(placeholder) + '</option>' : '') + list.map(function (a) {
+      return '<option value="' + esc(a.code) + '"' + (a.code === selected ? ' selected' : '') + '>' + esc(a.code + ' · ' + a.name) + '</option>';
+    }).join('');
+  }
+  function postableAccounts() { return coa().filter(function (a) { return a.isActive && !a.isHeader; }); }
+
+  /* ================= Login & sesi ================= */
+  function showLogin(msg) {
+    $('#shell').classList.add('hidden'); $('#fab').classList.add('hidden');
+    $('#login').classList.remove('hidden');
+    $('#loginErr').textContent = msg || '';
+  }
+  function logoutLocal(msg) { S.token = null; S.user = null; S.boot = null; store.del('mfas_token'); closeDrawer(); showLogin(msg); }
+
+  $('#loginForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target, btn = $('#loginBtn');
+    btn.disabled = true; btn.textContent = 'Memeriksa…'; $('#loginErr').textContent = '';
+    call('auth.login', { email: f.email.value, password: f.password.value }, { write: true }).then(function (d) {
+      S.token = d.token; store.set('mfas_token', d.token); f.password.value = '';
+      return start();
+    }).catch(function (e) { $('#loginErr').textContent = e.message; })
+      .then(function () { btn.disabled = false; btn.textContent = 'Masuk'; });
+  });
+
+  function forcePasswordChange() {
+    var d = openDrawer('Ganti kata sandi sementara', '<div class="banner warn" style="margin-bottom:14px">Untuk keamanan, ganti kata sandi sementara Anda sebelum melanjutkan.</div>' + passwordFormHtml(),
+      '<button class="btn primary" id="pwSave">Simpan kata sandi</button>');
+    $('[data-close]', $('#overlay')).onclick = null;
+    $('.scrim').onclick = null;
+    $('#pwSave', d.parentNode).onclick = function () { savePassword(d, function () { closeDrawer(); start(); }); };
+  }
+  function passwordFormHtml() {
+    return '<div class="stack"><label class="field"><span>Kata sandi lama</span><input class="input" type="password" name="oldPassword" autocomplete="current-password"></label>' +
+      '<label class="field"><span>Kata sandi baru <span class="hint">min. 8 karakter, huruf & angka</span></span><input class="input" type="password" name="newPassword" autocomplete="new-password"></label>' +
+      '<label class="field"><span>Ulangi kata sandi baru</span><input class="input" type="password" name="newPassword2" autocomplete="new-password"></label><div class="err-text" id="pwErr"></div></div>';
+  }
+  function savePassword(root, done) {
+    var a = val(root, 'oldPassword'), b = $('[name="newPassword"]', root).value, c = $('[name="newPassword2"]', root).value;
+    if (b !== c) { $('#pwErr', root).textContent = 'Konfirmasi kata sandi tidak sama.'; return; }
+    call('auth.changePassword', { oldPassword: a, newPassword: b }, { write: true }).then(function () { toast('Kata sandi berhasil diganti.', 'ok'); done(); })
+      .catch(function (e) { $('#pwErr', root).textContent = e.message; });
+  }
+
+  $('#logoutBtn').innerHTML = icon('logout');
+  $('#logoutBtn').onclick = function () {
+    call('auth.logout', {}, { write: true, silent: true }).catch(function () {});
+    logoutLocal('Anda telah keluar.');
+  };
+
+  /* ================= Shell & navigasi ================= */
+  var NAV = [
+    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', level: 'VIEW' },
+    { id: 'transactions', label: 'Transaksi', icon: 'trx', level: 'ENTRY' },
+    { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW' },
+    { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW' },
+    { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW' },
+    { id: 'assets', label: 'Aset', icon: 'asset', level: 'VIEW' },
+    { id: 'master', label: 'Master Data', icon: 'master', level: 'VIEW' },
+    { id: 'settings', label: 'Pengaturan', icon: 'settings', level: 'VIEW' }
+  ];
+  function allowed(level) { return level === 'VIEW' || (level === 'ENTRY' && canEntry()) || (level === 'ADMIN' && isAdmin()); }
+
+  function renderShell() {
+    $('#login').classList.add('hidden'); $('#shell').classList.remove('hidden');
+    $('#nav').innerHTML = NAV.filter(function (n) { return allowed(n.level); }).map(function (n) {
+      return '<button data-view="' + n.id + '" title="' + esc(n.label) + '">' + icon(n.icon) + '<span class="label">' + esc(n.label) + '</span></button>';
+    }).join('');
+    $$('#nav button').forEach(function (b) { b.onclick = function () { go(b.dataset.view); document.body.classList.remove('nav-open'); }; });
+    $('#navToggle').innerHTML = icon('menu');
+    $('#navToggle').onclick = function () {
+      if (window.innerWidth <= 760) document.body.classList.toggle('nav-open');
+      else { document.body.classList.toggle('collapsed'); store.set('mfas_collapsed', document.body.classList.contains('collapsed') ? '1' : ''); }
+    };
+    if (store.get('mfas_collapsed')) document.body.classList.add('collapsed');
+    $('#avatar').textContent = (S.user.name || S.user.email).split(' ').map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
+    $('#uname').textContent = S.user.name; $('#urole').textContent = ROLE_LABEL[S.user.role] || S.user.role;
+    var env = S.boot.app.environment;
+    $('#envName').textContent = env;
+    if (env !== 'PRODUCTION') { $('#envBadge').textContent = env; $('#envBadge').classList.remove('hidden'); }
+    var fab = $('#fab');
+    fab.innerHTML = icon('plus');
+    fab.classList.toggle('hidden', !canEntry());
+    fab.onclick = function () { openTrxForm('EXPENSE'); };
+    document.addEventListener('click', function (ev) { if (document.body.classList.contains('nav-open') && !ev.target.closest('.sidebar') && !ev.target.closest('#navToggle')) document.body.classList.remove('nav-open'); });
+  }
+
+  var VIEWS = {};
+  function go(view, params) {
+    var n = NAV.filter(function (x) { return x.id === view; })[0];
+    if (!n || !allowed(n.level)) view = 'dashboard';
+    S.view = view;
+    try { history.replaceState(null, '', '#' + view); } catch (e) { /* abaikan */ }
+    $$('#nav button').forEach(function (b) { b.classList.toggle('active', b.dataset.view === view); });
+    $('#viewTitle').textContent = NAV.filter(function (x) { return x.id === view; })[0].label;
+    $('#view').innerHTML = '';
+    VIEWS[view]($('#view'), params || {});
+  }
+  function refreshView() { if (S.view && VIEWS[S.view]) go(S.view); }
+
+  function start() {
+    return call('auth.me').then(function (b) {
+      S.boot = b; S.user = b.user;
+      renderShell();
+      if (b.user.mustChangePassword) { forcePasswordChange(); return; }
+      var h = (location.hash || '').replace('#', '');
+      go(h || 'dashboard');
+    }).catch(function (e) { if (e.code !== 'SESSION_EXPIRED') showLogin(e.message); });
+  }
+  function reloadBoot() { return call('auth.me', {}, { silent: true }).then(function (b) { S.boot = b; S.user = b.user; }); }
+
+  /* ================= Komponen umum ================= */
+  function skeleton(n) { var s = ''; for (var i = 0; i < (n || 4); i++) s += '<div class="skeleton" style="margin:10px 0;width:' + (60 + (i * 13) % 40) + '%"></div>'; return '<div class="card card-b">' + s + '</div>'; }
+  function errorBox(e, retry) {
+    var id = 'r' + Math.random().toString(36).slice(2);
+    setTimeout(function () { var b = document.getElementById(id); if (b) b.onclick = retry; }, 0);
+    return '<div class="banner err">' + esc(e.message) + (retry ? ' <button class="btn sm" id="' + id + '">Coba lagi</button>' : '') + '</div>';
+  }
+  function pager(pg, onPage) {
+    var id = 'p' + Math.random().toString(36).slice(2);
+    setTimeout(function () {
+      var el = document.getElementById(id); if (!el) return;
+      $$('button', el).forEach(function (b) { b.onclick = function () { onPage(+b.dataset.p); }; });
+    }, 0);
+    return '<div class="pager" id="' + id + '">' + pg.total + ' data · hal ' + pg.page + '/' + pg.pages +
+      ' <button class="btn sm" data-p="' + (pg.page - 1) + '"' + (pg.page <= 1 ? ' disabled' : '') + '>‹</button>' +
+      '<button class="btn sm" data-p="' + (pg.page + 1) + '"' + (pg.page >= pg.pages ? ' disabled' : '') + '>›</button></div>';
+  }
+
+  /** Pemilih periode: Bulan ini / Bulan lalu / Tahun ini / Kustom. */
+  function rangeFromPreset(st) {
+    var t = today(), p = period(t);
+    if (st.preset === 'LAST_MONTH') { var lp = addMonths(p, -1); return { from: lp + '-01', to: lastDay(lp) }; }
+    if (st.preset === 'THIS_YEAR') return { from: t.substring(0, 4) + '-01-01', to: t.substring(0, 4) + '-12-31' };
+    if (st.preset === 'MONTH') return { from: st.month + '-01', to: lastDay(st.month) };
+    if (st.preset === 'YEAR') return { from: st.year + '-01-01', to: st.year + '-12-31' };
+    if (st.preset === 'CUSTOM') return { from: st.from, to: st.to };
+    return { from: p + '-01', to: lastDay(p) };
+  }
+  function periodPicker(st, onChange, presets) {
+    presets = presets || [['THIS_MONTH', 'Bulan ini'], ['LAST_MONTH', 'Bulan lalu'], ['THIS_YEAR', 'Tahun ini'], ['MONTH', 'Bulanan'], ['YEAR', 'Tahunan'], ['CUSTOM', 'Kustom']];
+    var id = 'pp' + Math.random().toString(36).slice(2);
+    var r = rangeFromPreset(st);
+    var years = []; for (var y = +today().substring(0, 4); y >= +today().substring(0, 4) - 5; y--) years.push(y);
+    setTimeout(function () {
+      var el = document.getElementById(id); if (!el) return;
+      $$('.chip', el).forEach(function (c) { c.onclick = function () {
+        st.preset = c.dataset.p;
+        if (st.preset === 'MONTH' && !st.month) st.month = period(today());
+        if (st.preset === 'YEAR' && !st.year) st.year = today().substring(0, 4);
+        if (st.preset === 'CUSTOM' && !st.from) { var x = rangeFromPreset({ preset: 'THIS_MONTH' }); st.from = x.from; st.to = x.to; }
+        onChange();
+      }; });
+      var m = $('[name=month]', el); if (m) m.onchange = function () { st.month = m.value; onChange(); };
+      var yy = $('[name=year]', el); if (yy) yy.onchange = function () { st.year = yy.value; onChange(); };
+      var ap = $('[data-apply]', el); if (ap) ap.onclick = function () {
+        st.from = $('[name=from]', el).value; st.to = $('[name=to]', el).value;
+        if (!st.from || !st.to || st.from > st.to) { toast('Rentang tanggal tidak valid.', 'err'); return; }
+        onChange();
+      };
+    }, 0);
+    return '<div class="row" id="' + id + '"><div class="chips">' + presets.map(function (p) {
+      return '<button class="chip' + (st.preset === p[0] ? ' active' : '') + '" data-p="' + p[0] + '">' + p[1] + '</button>';
+    }).join('') + '</div>' +
+      (st.preset === 'MONTH' ? '<input class="input" style="width:170px" type="month" name="month" value="' + esc(st.month) + '">' : '') +
+      (st.preset === 'YEAR' ? '<select class="input" style="width:110px" name="year">' + years.map(function (y) { return '<option' + (String(y) === String(st.year) ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select>' : '') +
+      (st.preset === 'CUSTOM' ? '<input class="input" style="width:160px" type="date" name="from" value="' + esc(st.from) + '"><span class="muted">s.d.</span><input class="input" style="width:160px" type="date" name="to" value="' + esc(st.to) + '"><button class="btn sm" data-apply>Terapkan</button>' : '') +
+      '<span class="muted small">' + fdate(r.from) + ' – ' + fdate(r.to) + '</span></div>';
+  }
+
+  function exportButtons(report, paramsFn) {
+    var id = 'ex' + Math.random().toString(36).slice(2);
+    setTimeout(function () {
+      var el = document.getElementById(id); if (!el) return;
+      $$('button', el).forEach(function (b) { b.onclick = function () {
+        b.disabled = true;
+        call('report.export', Object.assign({ report: report, format: b.dataset.f }, paramsFn()), { write: true }).then(function (r) {
+          toast('Laporan diekspor: ' + r.name, 'ok');
+          window.open(r.url, '_blank');
+        }).catch(fail).then(function () { b.disabled = false; });
+      }; });
+    }, 0);
+    return '<div class="row no-print" id="' + id + '"><button class="btn sm" data-f="SHEET">' + icon('down') + 'Google Sheets</button><button class="btn sm" data-f="PDF">' + icon('down') + 'PDF</button></div>';
+  }
+
+  /* ================= Grafik SVG ================= */
+  function axisMax(v) { if (v <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p) * p; }
+  function shortRp(n) { var a = Math.abs(n), s = n < 0 ? '-' : ''; if (a >= 1e9) return s + (a / 1e9).toFixed(1).replace('.0', '') + ' M'; if (a >= 1e6) return s + (a / 1e6).toFixed(1).replace('.0', '') + ' jt'; if (a >= 1e3) return s + Math.round(a / 1e3) + ' rb'; return s + a; }
+  function barChart(labels, series) {
+    var W = 640, H = 220, L = 52, B = 26, T = 10, R = 8;
+    var all = []; series.forEach(function (s) { all = all.concat(s.values); });
+    var max = axisMax(Math.max.apply(null, all.map(Math.abs).concat([1])));
+    var hasNeg = all.some(function (v) { return v < 0; });
+    var min = hasNeg ? -max : 0;
+    var y = function (v) { return T + (H - T - B) * (max - v) / (max - min); };
+    var gw = (W - L - R) / labels.length, bw = Math.min(18, (gw - 6) / series.length);
+    var out = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img">';
+    [max, max / 2, 0, hasNeg ? -max / 2 : null, hasNeg ? -max : null].forEach(function (t) {
+      if (t === null) return;
+      out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="' + (t === 0 ? '#C9D3CE' : '#EEF1EF') + '"/>' +
+        '<text x="' + (L - 6) + '" y="' + (y(t) + 3) + '" text-anchor="end">' + shortRp(t) + '</text>';
+    });
+    labels.forEach(function (lb, i) {
+      var x0 = L + gw * i + (gw - bw * series.length) / 2;
+      series.forEach(function (s, j) {
+        var v = s.values[i], y1 = y(Math.max(v, 0)), y2 = y(Math.min(v, 0));
+        out += '<rect x="' + (x0 + j * bw) + '" y="' + y1 + '" width="' + (bw - 2) + '" height="' + Math.max(y2 - y1, v ? 1 : 0) + '" rx="2" fill="' + (v < 0 && s.negColor ? s.negColor : s.color) + '"><title>' + esc(lb + ' — ' + s.name + ': ' + rp(v)) + '</title></rect>';
+      });
+      out += '<text x="' + (L + gw * i + gw / 2) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(lb) + '</text>';
+    });
+    return out + '</svg>';
+  }
+  function lineChart(labels, values, color) {
+    var W = 640, H = 200, L = 52, B = 26, T = 10, R = 8;
+    var mx = Math.max.apply(null, values.concat([0])), mn = Math.min.apply(null, values.concat([0]));
+    var max = axisMax(Math.max(Math.abs(mx), Math.abs(mn))), min = mn < 0 ? -max : 0;
+    var y = function (v) { return T + (H - T - B) * (max - v) / (max - min || 1); };
+    var step = (W - L - R) / Math.max(labels.length - 1, 1);
+    var pts = values.map(function (v, i) { return (L + step * i) + ',' + y(v); }).join(' ');
+    var out = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img">';
+    [max, max / 2, 0, min < 0 ? min : null].forEach(function (t) {
+      if (t === null) return;
+      out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="#EEF1EF"/><text x="' + (L - 6) + '" y="' + (y(t) + 3) + '" text-anchor="end">' + shortRp(t) + '</text>';
+    });
+    out += '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linejoin="round"/>';
+    values.forEach(function (v, i) { out += '<circle cx="' + (L + step * i) + '" cy="' + y(v) + '" r="3" fill="' + color + '"><title>' + esc(labels[i] + ': ' + rp(v)) + '</title></circle>'; });
+    labels.forEach(function (lb, i) { out += '<text x="' + (L + step * i) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(lb) + '</text>'; });
+    return out + '</svg>';
+  }
+
+  /* ================= DASHBOARD ================= */
+  VIEWS.dashboard = function (el) {
+    var st = S.state.dash = S.state.dash || { preset: 'THIS_MONTH' };
+    var presets = [['THIS_MONTH', 'Bulan ini'], ['LAST_MONTH', 'Bulan lalu'], ['THIS_YEAR', 'Tahun ini'], ['CUSTOM', 'Kustom']];
+    function render() {
+      var r = rangeFromPreset(st);
+      el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render, presets) + '<div class="spacer"></div>' +
+        (canEntry() ? '<div class="row no-print hide-m"><button class="btn primary" data-q="INCOME">' + icon('plus') + 'Pemasukan</button><button class="btn" data-q="EXPENSE">Pengeluaran</button><button class="btn" data-q="TRANSFER">Transfer Kas</button><button class="btn" data-q="ASSET">Tambah Aset</button></div>' : '') +
+        '</div><div id="dashBody">' + skeleton(6) + '</div></div>';
+      $$('[data-q]', el).forEach(function (b) { b.onclick = function () { if (b.dataset.q === 'ASSET') openAssetForm(); else openTrxForm(b.dataset.q); }; });
+      call('dashboard.get', { preset: 'CUSTOM', from: r.from, to: r.to }).then(function (d) {
+        var k = d.kpi;
+        var labels = d.trend.map(function (t) { return mshort(t.period); });
+        var hasData = d.trend.some(function (t) { return t.revenue || t.expenses || t.cash; }) || k.totalAssets;
+        $('#dashBody', el).innerHTML =
+          (canEntry() ? '<div class="row no-print" style="margin-bottom:12px;display:none" id="qm"></div>' : '') +
+          (d.cogsMissing ? '<div class="banner warn" style="margin-bottom:16px">HPP belum tercatat untuk penjualan periode ini — laba kotor & laba bersih mungkin belum lengkap.</div>' : '') +
+          '<div class="grid g3">' +
+          kpiCard('Total Penjualan', k.sales, 'Penjualan bersih ' + rp(k.netSales)) +
+          kpiCard('Laba Kotor', k.grossProfit, 'Penjualan bersih − HPP') +
+          kpiCard('Laba Bersih', k.netProfit, 'Setelah seluruh beban') +
+          kpiCard('Saldo Kas & Bank', k.cashBalance, 'Per ' + fdate(d.to)) +
+          kpiCard('Total Pengeluaran', k.totalExpenses, 'HPP + beban operasional + beban lain') +
+          kpiCard('Total Aset', k.totalAssets, 'Per ' + fdate(d.to)) + '</div>' +
+          (hasData ? '<div class="grid g2" style="margin-top:16px">' +
+            '<div class="card"><div class="card-h"><h3>Pendapatan vs Beban Bulanan</h3><div class="spacer"></div><div class="legend"><span><i style="background:#1A6B4F"></i>Pendapatan</span><span><i style="background:#D9731A"></i>Beban</span></div></div><div class="card-b">' +
+            barChart(labels, [{ name: 'Pendapatan', color: '#1A6B4F', values: d.trend.map(function (t) { return t.revenue; }) }, { name: 'Beban', color: '#D9731A', values: d.trend.map(function (t) { return t.expenses; }) }]) + '</div></div>' +
+            '<div class="card"><div class="card-h"><h3>Laba Bersih Bulanan</h3></div><div class="card-b">' +
+            barChart(labels, [{ name: 'Laba', color: '#208562', negColor: '#C2410C', values: d.trend.map(function (t) { return t.profit; }) }]) + '</div></div>' +
+            '<div class="card" style="grid-column:1/-1"><div class="card-h"><h3>Tren Saldo Kas & Bank</h3><span class="muted small">akhir bulan</span></div><div class="card-b">' +
+            lineChart(labels, d.trend.map(function (t) { return t.cash; }), '#14513C') + '</div></div></div>'
+            : '<div class="card empty" style="margin-top:16px">Belum ada transaksi terposting. Mulai dengan mencatat saldo awal kas & bank (Admin: Transaksi → Jurnal Umum) lalu transaksi harian.</div>');
+      }).catch(function (e) { $('#dashBody', el).innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+  function kpiCard(label, value, sub) {
+    return '<div class="card kpi"><div class="k-label">' + esc(label) + '</div><div class="k-value' + (value < 0 ? ' neg' : '') + '">' + rp(value) + '</div><div class="k-sub">' + esc(sub || '') + '</div></div>';
+  }
+
+  /* ================= TRANSAKSI ================= */
+  VIEWS.transactions = function (el) {
+    var st = S.state.trx = S.state.trx || { page: 1, type: '', status: '', search: '', from: '', to: '' };
+    var types = S.boot.trxTypes;
+    el.innerHTML = '<div class="stack"><div class="row no-print">' +
+      '<button class="btn primary" data-n="INCOME">' + icon('plus') + 'Pemasukan</button><button class="btn" data-n="EXPENSE">Pengeluaran</button>' +
+      '<button class="btn" data-n="TRANSFER">Transfer</button><button class="btn" data-n="SALE">Penjualan</button><button class="btn" data-n="PURCHASE">Pembelian</button>' +
+      (isAdmin() ? '<button class="btn ghost" data-n="JOURNAL">Jurnal Umum</button>' : '') + '</div>' +
+      '<div class="card"><div class="card-h">' +
+      '<input class="input" style="max-width:260px" placeholder="Cari no., keterangan, referensi…" name="search" value="' + esc(st.search) + '">' +
+      '<select class="input" style="max-width:190px" name="type"><option value="">Semua jenis</option>' + Object.keys(types).map(function (k) { return '<option value="' + k + '"' + (st.type === k ? ' selected' : '') + '>' + esc(types[k]) + '</option>'; }).join('') + '</select>' +
+      '<select class="input" style="max-width:160px" name="status"><option value="">Semua status</option>' + ['POSTED', 'DRAFT', 'REVERSED', 'FAILED', 'PENDING'].map(function (s) { return '<option value="' + s + '"' + (st.status === s ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>'; }).join('') + '</select>' +
+      '<input class="input" style="max-width:160px" type="date" name="from" value="' + esc(st.from) + '" title="Dari tanggal"><input class="input" style="max-width:160px" type="date" name="to" value="' + esc(st.to) + '" title="Sampai tanggal">' +
+      '</div><div id="trxList">' + skeleton(5) + '</div></div></div>';
+    $$('[data-n]', el).forEach(function (b) { b.onclick = function () { openTrxForm(b.dataset.n); }; });
+    var timer;
+    $$('.card-h [name]', el).forEach(function (inp) {
+      inp.addEventListener(inp.name === 'search' ? 'input' : 'change', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () { st[inp.name] = inp.value; st.page = 1; load(); }, inp.name === 'search' ? 350 : 0);
+      });
+    });
+    function load() {
+      call('trx.list', { page: st.page, pageSize: 25, type: st.type, status: st.status, search: st.search, from: st.from, to: st.to }).then(function (pg) {
+        var box = $('#trxList', el); if (!box) return;
+        if (!pg.rows.length) { box.innerHTML = '<div class="empty">Belum ada transaksi yang sesuai filter.</div>'; return; }
+        box.innerHTML = '<div class="table-wrap tlist"><table class="t"><thead><tr><th>Tanggal</th><th>No.</th><th>Jenis</th><th>Keterangan</th><th>Akun</th><th class="num">Nominal</th><th>Status</th></tr></thead><tbody>' +
+          pg.rows.map(function (r) {
+            return '<tr class="click" data-id="' + esc(r.id) + '"><td>' + fdate(r.date) + '</td><td class="small" style="font-family:var(--mono)">' + esc(r.no) + '</td><td>' + esc(r.typeLabel) + '</td>' +
+              '<td>' + esc(r.description || '—') + (r.reference ? '<div class="muted small">Ref: ' + esc(r.reference) + '</div>' : '') + '</td>' +
+              '<td class="small">' + esc(r.type === 'TRANSFER' ? r.cash + ' → ' + r.toCash : [r.category, r.cash].filter(Boolean).join(' · ')) + '</td>' +
+              '<td class="num">' + rp(r.amount) + (r.hasAttachment ? ' <span title="Ada lampiran" class="muted">📎</span>' : '') + '</td><td>' + badge(r.status) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' +
+          '<div class="mlist">' + pg.rows.map(function (r) {
+            return '<div class="mitem" data-id="' + esc(r.id) + '"><div style="flex:1;min-width:0"><div style="font-weight:600">' + esc(r.description || r.typeLabel) + '</div>' +
+              '<div class="muted small">' + fdate(r.date) + ' · ' + esc(r.typeLabel) + ' · ' + esc(r.no) + '</div></div><div style="text-align:right"><div class="num" style="font-weight:600">' + rp(r.amount) + '</div>' + badge(r.status) + '</div></div>';
+          }).join('') + '</div>' + pager(pg, function (p) { st.page = p; load(); });
+        $$('[data-id]', box).forEach(function (tr) { tr.onclick = function () { openTrxDetail(tr.dataset.id); }; });
+      }).catch(function (e) { var b = $('#trxList', el); if (b) b.innerHTML = errorBox(e, load); });
+    }
+    load();
+  };
+
+  var TYPE_HELP = {
+    INCOME: 'Uang masuk ke kas/bank: penjualan tunai, pendapatan lain, setoran modal, penerimaan pinjaman, atau pelunasan piutang.',
+    EXPENSE: 'Uang keluar dari kas/bank: beban operasional, pembayaran utang, cicilan pinjaman, atau prive.',
+    TRANSFER: 'Pemindahan dana antar rekening milik usaha. Tidak dicatat sebagai pendapatan atau beban.',
+    SALE: 'Penjualan barang. Tunai langsung ke kas; kredit menjadi piutang; marketplace menjadi piutang marketplace (dicairkan saat settlement).',
+    PURCHASE: 'Pembelian stok (dicatat sebagai persediaan) atau pembelian untuk beban, tunai atau kredit.',
+    JOURNAL: 'Jurnal manual (Admin): saldo awal, koreksi, atau penyesuaian. Total debit harus sama dengan total kredit.'
+  };
+
+  /** Form transaksi. existing = {id, rowVersion, form} untuk mengubah draft; preset = nilai awal. */
+  function openTrxForm(type, existing, preset) {
+    if (!canEntry()) return;
+    var f = Object.assign({ type: type, date: today(), amount: 0, details: {}, attachmentIds: [] }, preset || {}, existing ? existing.form : {});
+    f.details = Object.assign({}, f.details || {});
+    var attachments = (existing && existing.attachments) ? existing.attachments.slice() : [];
+    var idemKey = uuid();
+    var title = (existing ? 'Ubah Draft — ' : '') + S.boot.trxTypes[f.type];
+    var d = openDrawer(title, '<div id="tf"></div>',
+      '<div class="err-text" id="tfErr" style="flex-basis:100%"></div><button class="btn" id="tfDraft">Simpan Draft</button><button class="btn primary" id="tfPost">Simpan &amp; Posting</button>');
+    var root = $('#tf', d);
+
+    function sel(name, list, cur, ph) { return '<select class="input" name="' + name + '">' + options(list, cur, ph) + '</select>'; }
+    function money(name, label, v, hint) { return '<label class="field"><span>' + label + (hint ? ' <span class="hint">' + hint + '</span>' : '') + '</span><input class="input money" name="' + name + '" value="' + (v ? NF.format(v) : '') + '" placeholder="0"></label>'; }
+    function seg(name, opts, cur) { return '<div class="seg" data-seg="' + name + '">' + opts.map(function (o) { return '<button type="button" data-v="' + o[0] + '" class="' + (cur === o[0] ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>'; }
+
+    function draw() {
+      var t = f.type, dd = f.details, cash = cashAccounts(), G = S.boot.categoryGroups;
+      var h = '<div class="muted small" style="margin-bottom:14px">' + esc(TYPE_HELP[t]) + '</div><div class="form-grid">';
+      h += '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(f.date) + '"></label>';
+      h += '<label class="field"><span>Jenis transaksi</span><select class="input" name="type">' + Object.keys(S.boot.trxTypes).filter(function (k) { return k !== 'JOURNAL' || isAdmin(); }).map(function (k) { return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + esc(S.boot.trxTypes[k]) + '</option>'; }).join('') + '</select></label>';
+      if (t === 'INCOME' || t === 'EXPENSE') {
+        h += '<label class="field"><span>Kategori *</span>' + sel('categoryAccount', accountsInGroups(G[t]), f.categoryAccount, 'Pilih kategori…') + '</label>';
+        h += '<label class="field"><span>' + (t === 'INCOME' ? 'Masuk ke' : 'Dibayar dari') + ' (Kas/Bank) *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
+        h += money('amount', 'Nominal *', f.amount);
+        h += '<label class="field"><span>Pihak <span class="hint">opsional</span></span><input class="input" name="party" value="' + esc(f.party) + '" placeholder="Pelanggan / pemasok"></label>';
+      } else if (t === 'TRANSFER') {
+        h += '<label class="field"><span>Dari rekening *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih…') + '</label>';
+        h += '<label class="field"><span>Ke rekening *</span>' + sel('toCashAccount', cash, f.toCashAccount, 'Pilih…') + '</label>';
+        h += money('amount', 'Nominal *', f.amount) + money('fee', 'Biaya transfer', dd.fee, 'opsional');
+      } else if (t === 'SALE') {
+        dd.paymentMethod = dd.paymentMethod || 'CASH';
+        h += '<div class="field full"><span>Metode penerimaan</span>' + seg('paymentMethod', [['CASH', 'Tunai/Transfer'], ['CREDIT', 'Kredit (Piutang)'], ['MARKETPLACE', 'Marketplace']], dd.paymentMethod) + '</div>';
+        if (dd.paymentMethod === 'CASH') h += '<label class="field"><span>Diterima di (Kas/Bank) *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
+        if (dd.paymentMethod === 'CREDIT') h += '<label class="field"><span>Pelanggan *</span><input class="input" name="party" value="' + esc(f.party) + '"></label>';
+        if (dd.paymentMethod === 'MARKETPLACE') h += '<label class="field"><span>Marketplace *</span><input class="input" name="channel" list="mpList" value="' + esc(dd.channel || '') + '" placeholder="Shopee, Tokopedia, TikTok Shop…"><datalist id="mpList"><option>Shopee</option><option>Tokopedia</option><option>TikTok Shop</option><option>Lazada</option></datalist></label>';
+        var sales = accountsInGroups(G.SALE);
+        if (sales.length > 1) h += '<label class="field"><span>Akun penjualan</span>' + sel('categoryAccount', sales, f.categoryAccount || S.boot.systemAccounts.ACC_SALES) + '</label>';
+        h += money('amount', 'Nilai penjualan (bruto) *', f.amount) + money('discount', 'Diskon penjual', dd.discount, 'opsional');
+        if (dd.paymentMethod === 'MARKETPLACE') h += money('marketplaceFee', 'Biaya admin marketplace', dd.marketplaceFee);
+        h += money('shippingFee', 'Ongkir ditanggung penjual', dd.shippingFee, 'opsional');
+        h += money('cogs', 'HPP (harga pokok) barang terjual', dd.cogs, 'isi bila diketahui');
+      } else if (t === 'PURCHASE') {
+        dd.purchaseKind = dd.purchaseKind || 'INVENTORY'; dd.paymentMethod = dd.paymentMethod || 'CASH';
+        h += '<div class="field"><span>Jenis pembelian</span>' + seg('purchaseKind', [['INVENTORY', 'Stok barang'], ['EXPENSE', 'Beban/perlengkapan']], dd.purchaseKind) + '</div>';
+        h += '<div class="field"><span>Pembayaran</span>' + seg('paymentMethod', [['CASH', 'Tunai'], ['CREDIT', 'Kredit (Utang)']], dd.paymentMethod) + '</div>';
+        if (dd.purchaseKind === 'EXPENSE') h += '<label class="field"><span>Kategori beban *</span>' + sel('categoryAccount', accountsInGroups(G.PURCHASE_EXPENSE), f.categoryAccount, 'Pilih…') + '</label>';
+        if (dd.paymentMethod === 'CASH') h += '<label class="field"><span>Dibayar dari *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
+        h += '<label class="field"><span>Pemasok' + (dd.paymentMethod === 'CREDIT' ? ' *' : '') + '</span><input class="input" name="party" value="' + esc(f.party) + '"></label>';
+        h += money('amount', 'Nominal *', f.amount);
+      } else if (t === 'JOURNAL') {
+        var lines = dd.lines && dd.lines.length ? dd.lines : [{}, {}];
+        dd.lines = lines;
+        h += '<div class="full"><table class="t" id="jl"><thead><tr><th>Akun</th><th class="num">Debit</th><th class="num">Kredit</th><th></th></tr></thead><tbody>' +
+          lines.map(function (l, i) {
+            return '<tr data-i="' + i + '"><td>' + '<select class="input" data-l="account">' + options(postableAccounts(), l.account, 'Pilih akun…') + '</select></td>' +
+              '<td><input class="input money" data-l="debit" value="' + (l.debit ? NF.format(l.debit) : '') + '"></td><td><input class="input money" data-l="credit" value="' + (l.credit ? NF.format(l.credit) : '') + '"></td>' +
+              '<td><button class="icon-btn" data-rm="' + i + '" type="button" aria-label="Hapus baris">' + icon('x') + '</button></td></tr>';
+          }).join('') + '</tbody></table><button class="btn sm" type="button" id="jlAdd" style="margin-top:8px">' + icon('plus') + 'Tambah baris</button></div>';
+      }
+      h += '<label class="field full"><span>Keterangan' + (t === 'JOURNAL' ? ' *' : '') + '</span><input class="input" name="description" value="' + esc(f.description) + '" maxlength="300"></label>';
+      h += '<label class="field"><span>Referensi <span class="hint">no. nota / invoice' + (S.boot.requireReferenceMin ? '; wajib ≥ ' + rp(S.boot.requireReferenceMin) : '') + '</span></span><input class="input" name="reference" value="' + esc(f.reference) + '" maxlength="100"></label>';
+      h += '<div class="field"><span>Lampiran <span class="hint">PDF/JPG/PNG, maks 5 MB</span></span><input type="file" id="tfFile" accept="application/pdf,image/jpeg,image/png,image/webp"><div id="tfAtt" class="small"></div></div>';
+      h += '<div class="full preview" id="tfPrev"></div></div>';
+      root.innerHTML = h;
+      bindMoney(root);
+      drawAttachments();
+      $$('[data-seg]', root).forEach(function (sg) {
+        $$('button', sg).forEach(function (b) { b.onclick = function () { collect(); f.details[sg.dataset.seg] = b.dataset.v; draw(); }; });
+      });
+      $('[name=type]', root).onchange = function (e) { collect(); f.type = e.target.value; f.categoryAccount = ''; f.details = {}; draw(); };
+      if (t === 'JOURNAL') {
+        $('#jlAdd', root).onclick = function () { collect(); f.details.lines.push({}); draw(); };
+        $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { collect(); f.details.lines.splice(+b.dataset.rm, 1); if (f.details.lines.length < 2) f.details.lines.push({}); draw(); }; });
+      }
+      $('#tfFile', root).onchange = upload;
+      root.addEventListener('input', preview); root.addEventListener('change', preview);
+      preview();
+    }
+
+    function collect() {
+      if (!$('[name=date]', root)) return;
+      f.date = val(root, 'date');
+      ['categoryAccount', 'cashAccount', 'toCashAccount', 'party', 'description', 'reference'].forEach(function (k) { var el = $('[name=' + k + ']', root); if (el) f[k] = el.value.trim(); });
+      if ($('[name=amount]', root)) f.amount = moneyVal(root, 'amount');
+      ['fee', 'discount', 'marketplaceFee', 'shippingFee', 'cogs'].forEach(function (k) { if ($('[name=' + k + ']', root)) f.details[k] = moneyVal(root, k); });
+      if ($('[name=channel]', root)) f.details.channel = val(root, 'channel');
+      if (f.type === 'JOURNAL') {
+        f.details.lines = $$('#jl tbody tr', root).map(function (tr) {
+          return { account: $('[data-l=account]', tr).value, debit: parseMoney($('[data-l=debit]', tr).value), credit: parseMoney($('[data-l=credit]', tr).value) };
+        });
+      }
+      f.attachmentIds = attachments.map(function (a) { return a.id; });
+    }
+
+    /** Pratinjau jurnal di sisi klien (server tetap memvalidasi & membangun jurnal final). */
+    function preview() {
+      collect();
+      var L = [], t = f.type, dd = f.details, A = S.boot.systemAccounts, amt = f.amount || 0;
+      if (t === 'INCOME') { L.push([f.cashAccount, amt, 0]); L.push([f.categoryAccount, 0, amt]); }
+      if (t === 'EXPENSE') { L.push([f.categoryAccount, amt, 0]); L.push([f.cashAccount, 0, amt]); }
+      if (t === 'TRANSFER') { L.push([f.toCashAccount, amt, 0]); L.push([f.cashAccount, 0, amt]); if (dd.fee) { L.push([A.ACC_BANK_FEE, dd.fee, 0]); L.push([f.cashAccount, 0, dd.fee]); } }
+      if (t === 'SALE') {
+        var net = amt - (dd.discount || 0) - (dd.marketplaceFee || 0) - (dd.shippingFee || 0);
+        var recv = dd.paymentMethod === 'CASH' ? f.cashAccount : dd.paymentMethod === 'CREDIT' ? A.ACC_AR : A.ACC_AR_MARKETPLACE;
+        if (net > 0) L.push([recv, net, 0]);
+        if (dd.discount) L.push([A.ACC_SALES_DISCOUNT, dd.discount, 0]);
+        if (dd.marketplaceFee) L.push([A.ACC_MARKETPLACE_FEE, dd.marketplaceFee, 0]);
+        if (dd.shippingFee) L.push([A.ACC_SHIPPING, dd.shippingFee, 0]);
+        L.push([f.categoryAccount || A.ACC_SALES, 0, amt]);
+        if (dd.cogs) { L.push([A.ACC_COGS, dd.cogs, 0]); L.push([A.ACC_INVENTORY, 0, dd.cogs]); }
+      }
+      if (t === 'PURCHASE') {
+        var dr = dd.purchaseKind === 'INVENTORY' ? A.ACC_INVENTORY : f.categoryAccount;
+        L.push([dr, amt, 0]); L.push([dd.paymentMethod === 'CREDIT' ? A.ACC_AP : f.cashAccount, 0, amt]);
+      }
+      if (t === 'JOURNAL') (dd.lines || []).forEach(function (l) { if (l.account || l.debit || l.credit) L.push([l.account, l.debit || 0, l.credit || 0]); });
+      var td = 0, tc = 0;
+      L.forEach(function (l) { td += l[1]; tc += l[2]; });
+      var box = $('#tfPrev', root); if (!box) return;
+      box.innerHTML = '<div style="font-weight:600;margin-bottom:6px">Pratinjau jurnal otomatis</div><table>' + L.map(function (l) {
+        return '<tr><td' + (l[2] ? ' style="padding-left:20px"' : '') + '>' + (l[0] ? esc(l[0] + ' · ' + accName(l[0])) : '<span class="muted">(akun belum dipilih)</span>') + '</td><td class="num">' + (l[1] ? rp(l[1]) : '') + '</td><td class="num">' + (l[2] ? rp(l[2]) : '') + '</td></tr>';
+      }).join('') + '<tr style="border-top:1px solid #BFD9CC;font-weight:600"><td>Total</td><td class="num">' + rp(td) + '</td><td class="num">' + rp(tc) + '</td></tr></table>' +
+        (td !== tc ? '<div class="err-text">Debit dan kredit belum seimbang (selisih ' + rp(td - tc) + ').</div>' : '') +
+        (t === 'SALE' && amt && !dd.cogs ? '<div class="small" style="color:#8A4A0B;margin-top:4px">HPP belum diisi — laba kotor akan terlihat lebih tinggi sampai HPP dicatat.</div>' : '');
+    }
+
+    function drawAttachments() {
+      var box = $('#tfAtt', root); if (!box) return;
+      box.innerHTML = attachments.map(function (a, i) { return '<div class="row" style="gap:6px;margin-top:4px">📎 <a href="' + esc(a.url) + '" target="_blank">' + esc(a.name) + '</a><button class="btn sm ghost" data-rma="' + i + '" type="button">hapus</button></div>'; }).join('');
+      $$('[data-rma]', box).forEach(function (b) { b.onclick = function () { attachments.splice(+b.dataset.rma, 1); drawAttachments(); }; });
+    }
+    function upload(ev) {
+      var file = ev.target.files[0]; if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { toast('Ukuran file maksimal 5 MB.', 'err'); ev.target.value = ''; return; }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var b64 = String(reader.result).split(',')[1];
+        $('#tfAtt', root).insertAdjacentHTML('beforeend', '<div class="muted" id="upl">Mengunggah ' + esc(file.name) + '…</div>');
+        call('trx.upload', { name: file.name, mimeType: file.type, base64: b64 }, { write: true }).then(function (r) {
+          attachments.push({ id: r.fileId, name: r.name, url: r.url }); drawAttachments();
+        }).catch(function (e) { fail(e); drawAttachments(); });
+        ev.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function payload(extra) {
+      collect();
+      return Object.assign({ type: f.type, date: f.date, amount: f.amount, categoryAccount: f.categoryAccount, cashAccount: f.cashAccount,
+        toCashAccount: f.toCashAccount, description: f.description, reference: f.reference, party: f.party, details: f.details,
+        attachmentIds: f.attachmentIds, idemKey: idemKey }, extra || {});
+    }
+    function clientValidate(post) {
+      var e = [];
+      if (!f.date) e.push('Tanggal wajib diisi.');
+      if (f.type !== 'JOURNAL' && !(f.amount > 0)) e.push('Nominal harus lebih dari 0.');
+      if (post) {
+        if ((f.type === 'INCOME' || f.type === 'EXPENSE') && (!f.categoryAccount || !f.cashAccount)) e.push('Pilih kategori dan rekening kas/bank.');
+        if (f.type === 'TRANSFER' && (!f.cashAccount || !f.toCashAccount)) e.push('Pilih rekening asal dan tujuan.');
+        if (f.type === 'TRANSFER' && f.cashAccount && f.cashAccount === f.toCashAccount) e.push('Rekening asal dan tujuan tidak boleh sama.');
+        if (S.boot.lockedPeriods.indexOf(period(f.date || '')) !== -1) e.push('Periode ' + mlabel(period(f.date)) + ' sudah ditutup.');
+      }
+      return e;
+    }
+    var busy = false;
+    function setBusy(b) { busy = b; $('#overlay').dataset.busy = b ? '1' : ''; if (!b) delete $('#overlay').dataset.busy; $('#tfPost', d.parentNode).disabled = b; $('#tfDraft', d.parentNode).disabled = b; $('#tfPost', d.parentNode).textContent = b ? 'Memproses…' : 'Simpan & Posting'; }
+    function submit(post, extra) {
+      if (busy) return; // cegah double-click
+      collect();
+      var errs = clientValidate(post);
+      var errEl = $('#tfErr', d.parentNode);
+      errEl.textContent = errs.join(' ');
+      if (errs.length) return;
+      setBusy(true);
+      var p;
+      if (!post) p = call('trx.saveDraft', Object.assign(payload(), existing ? { trxId: existing.id, rowVersion: existing.rowVersion } : {}), { write: true });
+      else if (existing) p = call('trx.saveDraft', Object.assign(payload(), { trxId: existing.id, rowVersion: existing.rowVersion }), { write: true })
+        .then(function (r) { return call('trx.postDraft', Object.assign({ trxId: r.trxId, idemKey: idemKey }, extra || {}), { write: true }); });
+      else p = call('trx.post', payload(extra), { write: true });
+      p.then(function (r) {
+        setBusy(false);
+        closeDrawer();
+        toast(post ? (r.duplicateSubmission ? 'Transaksi sudah tercatat sebelumnya (' + (r.trxNo || '') + ').' : 'Transaksi ' + r.trxNo + ' berhasil diposting.') : 'Draft ' + r.trxNo + ' disimpan.', 'ok');
+        refreshView();
+      }).catch(function (e) {
+        setBusy(false);
+        if (e.code === 'CONFIRM_REQUIRED') {
+          ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap simpan' }).then(function (ok) { if (ok) submit(post, { confirmDuplicate: true }); });
+          return;
+        }
+        if (existing && e.code === 'CONFLICT') { errEl.textContent = e.message; return; }
+        errEl.textContent = e.message;
+        if (e.code === 'NETWORK') errEl.textContent += ' Kunci pengiriman yang sama akan dipakai saat mencoba lagi, sehingga tidak terjadi pencatatan ganda.';
+      });
+    }
+    $('#tfPost', d.parentNode).onclick = function () { submit(true); };
+    $('#tfDraft', d.parentNode).onclick = function () { submit(false); };
+    draw();
+  }
+
+  function journalTable(j) {
+    if (!j) return '';
+    return '<div class="card" style="margin-top:14px"><div class="card-h"><h3>Jurnal ' + esc(j.no) + '</h3>' + badge(j.status) + '<div class="spacer"></div><span class="muted small">' + fdate(j.date) + '</span></div>' +
+      '<div class="table-wrap"><table class="t"><thead><tr><th>Akun</th><th class="num">Debit</th><th class="num">Kredit</th></tr></thead><tbody>' +
+      j.lines.map(function (l) { return '<tr><td' + (l.credit ? ' class="indent"' : '') + '>' + esc(l.account + ' · ' + l.accountName) + (l.memo ? '<div class="muted small">' + esc(l.memo) + '</div>' : '') + '</td><td class="num">' + (l.debit ? rp(l.debit) : '') + '</td><td class="num">' + (l.credit ? rp(l.credit) : '') + '</td></tr>'; }).join('') +
+      '<tr class="total"><td>Total</td><td class="num">' + rp(j.total) + '</td><td class="num">' + rp(j.total) + '</td></tr></tbody></table></div></div>';
+  }
+
+  function openTrxDetail(id) {
+    var d = openDrawer('Detail Transaksi', skeleton(6));
+    call('trx.get', { id: id }).then(function (t) {
+      var info = [['Nomor', t.no], ['Tanggal', fdate(t.date)], ['Jenis', t.typeLabel], ['Nominal', rp(t.amount)], ['Keterangan', t.form.description || '—'],
+        ['Referensi', t.form.reference || '—'], ['Pihak', t.form.party || '—'], ['Dibuat', (t.createdBy || '') + ' · ' + fts(t.createdAt)]];
+      if (t.postedAt) info.push(['Diposting', (t.postedBy || '') + ' · ' + fts(t.postedAt)]);
+      if (t.reversedAt) info.push(['Dibalik', (t.reversedBy || '') + ' · ' + fts(t.reversedAt)]);
+      if (t.statusReason) info.push(['Catatan status', t.statusReason]);
+      var body = '<div class="row" style="margin-bottom:12px">' + badge(t.status) + '</div><table class="t">' +
+        info.map(function (r) { return '<tr><td class="muted" style="width:130px">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>' +
+        (t.attachments.length ? '<div style="margin-top:12px"><b class="small">Lampiran</b>' + t.attachments.map(function (a) { return '<div>📎 ' + (a.url ? '<a target="_blank" href="' + esc(a.url) + '">' + esc(a.name) + '</a>' : esc(a.name)) + '</div>'; }).join('') + '</div>' : '') +
+        journalTable(t.journal) + (t.reversalJournal ? journalTable(t.reversalJournal) : '');
+      var foot = '';
+      if (t.status === 'DRAFT') foot = '<button class="btn danger" data-a="del">Hapus Draft</button><button class="btn" data-a="edit">Ubah</button><button class="btn primary" data-a="post">Posting</button>';
+      if (t.status === 'FAILED') foot = '<button class="btn danger" data-a="del">Hapus</button>';
+      if (t.status === 'POSTED' && isAdmin()) foot = '<button class="btn danger" data-a="rev">Balik (Reversal)</button><button class="btn" data-a="fix">Koreksi</button>';
+      d = openDrawer('Transaksi ' + t.no, body, foot);
+      var f = d.parentNode;
+      var on = function (a, fn) { var b = $('[data-a=' + a + ']', f); if (b) b.onclick = fn; };
+      on('edit', function () { openTrxForm(t.type, { id: t.id, rowVersion: t.rowVersion, form: t.form, attachments: t.attachments }); });
+      on('post', function () {
+        var b = $('[data-a=post]', f); b.disabled = true;
+        var key = uuid();
+        var go2 = function (extra) {
+          call('trx.postDraft', Object.assign({ trxId: t.id, rowVersion: t.rowVersion, idemKey: key }, extra || {}), { write: true }).then(function (r) {
+            closeDrawer(); toast('Transaksi ' + r.trxNo + ' berhasil diposting.', 'ok'); refreshView();
+          }).catch(function (e) {
+            b.disabled = false;
+            if (e.code === 'CONFIRM_REQUIRED') ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap posting' }).then(function (ok) { if (ok) go2({ confirmDuplicate: true }); });
+            else fail(e);
+          });
+        };
+        go2();
+      });
+      on('del', function () {
+        ask({ title: 'Hapus transaksi?', message: 'Transaksi ' + t.no + ' akan ditandai terhapus. Tindakan ini dicatat di audit log.', reason: 'Alasan', reasonRequired: true, confirm: 'Hapus', danger: true }).then(function (r) {
+          if (!r) return;
+          call('trx.deleteDraft', { trxId: t.id, reason: r.reason, rowVersion: t.rowVersion }, { write: true }).then(function () { closeDrawer(); toast('Transaksi dihapus.', 'ok'); refreshView(); }).catch(fail);
+        });
+      });
+      var reverse = function (thenFix) {
+        ask({ title: thenFix ? 'Koreksi transaksi' : 'Balik transaksi?', message: 'Jurnal asli tetap tersimpan. Sistem membuat jurnal pembalik' + (thenFix ? ', lalu membuka form pengganti dengan data yang sama untuk Anda perbaiki.' : '.'),
+          reason: 'Alasan', reasonRequired: true, confirm: thenFix ? 'Balik & buat pengganti' : 'Balik transaksi', danger: true,
+          extraHtml: '<label class="field" style="margin-top:10px"><span>Tanggal pembalikan <span class="hint">kosongkan = otomatis</span></span><input class="input" type="date" id="revDate"></label>',
+          collect: function (w) { return { date: $('#revDate', w).value }; } }).then(function (r) {
+          if (!r) return;
+          call('trx.reverse', { trxId: t.id, reason: r.reason, date: r.date || undefined, idemKey: uuid() }, { write: true }).then(function (res) {
+            toast('Transaksi ' + t.no + ' dibalik.', 'ok');
+            if (thenFix) { var form = res.original; form.reference = form.reference ? form.reference + '-REV' : ''; openTrxForm(form.type, null, form); }
+            else closeDrawer();
+            refreshView();
+          }).catch(fail);
+        });
+      };
+      on('rev', function () { reverse(false); });
+      on('fix', function () { reverse(true); });
+    }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /* ================= LABA RUGI ================= */
+  VIEWS.pl = function (el) {
+    var st = S.state.pl = S.state.pl || { preset: 'THIS_MONTH', compare: true };
+    function render() {
+      var r = rangeFromPreset(st);
+      el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render) + '<div class="spacer"></div><label class="row small" style="gap:6px"><input type="checkbox" id="cmp"' + (st.compare ? ' checked' : '') + '> Bandingkan periode sebelumnya</label>' +
+        exportButtons('PL', function () { return r; }) + '</div><div id="plBody">' + skeleton(10) + '</div></div>';
+      $('#cmp', el).onchange = function (e) { st.compare = e.target.checked; render(); };
+      call('report.pl', r).then(function (d) {
+        var c = d.current, p = d.previous.data, cmp = st.compare;
+        var head = '<tr><th>Akun</th><th class="num">' + fdate(d.from) + ' – ' + fdate(d.to) + '</th>' + (cmp ? '<th class="num hide-m">' + fdate(d.previous.from) + ' – ' + fdate(d.previous.to) + '</th><th class="num hide-m">Perubahan</th>' : '') + '</tr>';
+        var prevOf = function (sec, code) { var x = (p.sections[sec] || []).filter(function (a) { return a.code === code; })[0]; return x ? x.amount : 0; };
+        var row = function (label, a, b, cls, code) {
+          return '<tr class="' + (cls || '') + (code ? ' click' : '') + '"' + (code ? ' data-acc="' + esc(code) + '"' : '') + '><td' + (cls === 'acc' ? ' class="indent"' : '') + '>' + label + '</td><td class="num">' + rpCell(a) + '</td>' +
+            (cmp ? '<td class="num hide-m">' + rpCell(b) + '</td><td class="num hide-m small">' + diff(a, b) + '</td>' : '') + '</tr>';
+        };
+        var accRows = function (sec) {
+          var codes = {}; (c.sections[sec] || []).concat(cmp ? p.sections[sec] || [] : []).forEach(function (a) { codes[a.code] = a.name; });
+          return Object.keys(codes).sort().map(function (code) {
+            var cur = (c.sections[sec].filter(function (a) { return a.code === code; })[0] || { amount: 0 }).amount;
+            return row(esc(code + ' · ' + codes[code]), cur, prevOf(sec, code), 'acc', code);
+          }).join('');
+        };
+        var html = (d.warnings.length ? d.warnings.map(function (w) { return '<div class="banner warn" style="margin-bottom:12px">' + esc(w) + '</div>'; }).join('') : '') +
+          '<div class="card"><div class="table-wrap"><table class="t"><thead>' + head + '</thead><tbody>' +
+          row('<b>Pendapatan Penjualan</b>', c.sales, p.sales, 'sec') + accRows('SALES') +
+          row('(−) Retur dan Diskon Penjualan', c.salesContra, p.salesContra) + accRows('SALES_CONTRA') +
+          row('Penjualan Bersih', c.netSales, p.netSales, 'total') +
+          row('(−) Harga Pokok Penjualan', c.cogs, p.cogs) + accRows('COGS') +
+          row('Laba Kotor', c.grossProfit, p.grossProfit, 'total') +
+          row('<b>(−) Beban Operasional</b>', c.opex, p.opex, 'sec') + accRows('OPEX') +
+          row('Laba Operasional', c.operatingProfit, p.operatingProfit, 'total') +
+          row('(+) Pendapatan Lain', c.otherIncome, p.otherIncome) + accRows('OTHER_INCOME') +
+          row('(−) Beban Lain', c.otherExpense, p.otherExpense) + accRows('OTHER_EXPENSE') +
+          row('Laba Bersih', c.netProfit, p.netProfit, 'grand') +
+          '</tbody></table></div></div><p class="muted small">Klik baris akun untuk melihat rincian transaksi. Angka berasal dari jurnal berstatus terposting.</p>';
+        $('#plBody', el).innerHTML = html;
+        $$('[data-acc]', el).forEach(function (tr) { tr.onclick = function () { openDrilldown(tr.dataset.acc, r.from, r.to); }; });
+      }).catch(function (e) { $('#plBody', el).innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+  function diff(a, b) {
+    var dlt = a - b;
+    if (!dlt) return '<span class="muted">—</span>';
+    var pct = b ? Math.round(dlt / Math.abs(b) * 1000) / 10 : null;
+    return '<span class="' + (dlt < 0 ? 'neg' : '') + '">' + (dlt > 0 ? '+' : '') + rp(dlt).replace('-Rp', '−Rp') + (pct !== null ? ' (' + (pct > 0 ? '+' : '') + String(pct).replace('.', ',') + '%)' : '') + '</span>';
+  }
+
+  function openDrilldown(code, from, to, page) {
+    var d = openDrawer('Rincian ' + accName(code), skeleton(8));
+    call('report.drilldown', { account: code, from: from, to: to, page: page || 1, pageSize: 100 }).then(function (pg) {
+      var body = '<div class="muted small" style="margin-bottom:10px">' + esc(code) + ' · ' + fdate(from) + ' – ' + fdate(to) + '</div>' +
+        '<div class="grid g2" style="margin-bottom:12px"><div class="card kpi"><div class="k-label">Saldo awal</div><div class="k-value">' + rp(pg.opening) + '</div></div><div class="card kpi"><div class="k-label">Saldo akhir</div><div class="k-value">' + rp(pg.closing) + '</div></div></div>' +
+        (pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Tanggal</th><th>Keterangan</th><th class="num">Debit</th><th class="num">Kredit</th><th class="num">Saldo</th></tr></thead><tbody>' +
+          pg.rows.map(function (r) { return '<tr' + (r.sourceType === 'TRX' && canEntry() ? ' class="click" data-trx="' + esc(r.sourceId) + '"' : '') + '><td>' + fdate(r.date) + '</td><td>' + esc(r.description) + '<div class="muted small">' + esc(r.journalNo) + '</div></td><td class="num">' + (r.debit ? rp(r.debit) : '') + '</td><td class="num">' + (r.credit ? rp(r.credit) : '') + '</td><td class="num">' + rp(r.balance) + '</td></tr>'; }).join('') +
+          '</tbody></table></div>' + pager(pg, function (p) { openDrilldown(code, from, to, p); }) : '<div class="empty">Tidak ada mutasi pada periode ini.</div>');
+      d = openDrawer('Rincian ' + accName(code), body);
+      $$('[data-trx]', d).forEach(function (tr) { tr.onclick = function () { openTrxDetail(tr.dataset.trx); }; });
+    }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /* ================= ARUS KAS ================= */
+  VIEWS.cf = function (el) {
+    var st = S.state.cf = S.state.cf || { preset: 'THIS_MONTH' };
+    var LBL = { OPERATING: 'Aktivitas Operasi', INVESTING: 'Aktivitas Investasi', FINANCING: 'Aktivitas Pendanaan', OPENING: 'Saldo Awal yang Dicatat' };
+    function render() {
+      var r = rangeFromPreset(st);
+      el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render) + '<div class="spacer"></div>' + exportButtons('CF', function () { return r; }) + '</div><div id="cfBody">' + skeleton(10) + '</div></div>';
+      call('report.cf', r).then(function (d) {
+        var rows = '<tr class="sec"><td>Saldo Kas & Bank Awal</td><td class="num">' + rpCell(d.opening) + '</td></tr>';
+        Object.keys(LBL).forEach(function (k) {
+          var s = d.sections[k];
+          if (!s.inflows.length && !s.outflows.length) return;
+          rows += '<tr class="sec"><td>' + LBL[k] + '</td><td></td></tr>' +
+            s.inflows.map(function (x) { return '<tr><td class="indent">Penerimaan — ' + esc(x.name) + '</td><td class="num">' + rp(x.amount) + '</td></tr>'; }).join('') +
+            s.outflows.map(function (x) { return '<tr><td class="indent">Pengeluaran — ' + esc(x.name) + '</td><td class="num">' + rpCell(-x.amount) + '</td></tr>'; }).join('') +
+            '<tr class="total"><td>Arus kas bersih ' + LBL[k].toLowerCase() + '</td><td class="num">' + rpCell(s.net) + '</td></tr>';
+        });
+        rows += '<tr class="total"><td>Total penerimaan</td><td class="num">' + rp(d.totalIn) + '</td></tr><tr><td>Total pengeluaran</td><td class="num">' + rpCell(-d.totalOut) + '</td></tr>' +
+          '<tr class="grand"><td>Saldo Kas & Bank Akhir</td><td class="num">' + rpCell(d.closing) + '</td></tr>';
+        var a = d.accounts;
+        $('#cfBody', el).innerHTML =
+          '<div class="banner ' + (d.reconciled ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.reconciled ? '✓ Terekonsiliasi: saldo awal + arus kas bersih = saldo akhir buku besar kas & bank.' : 'Tidak terekonsiliasi: hitungan ' + rp(d.computedClosing) + ' ≠ saldo buku besar ' + rp(d.closing) + '. Jalankan Diagnostik di Pengaturan.') +
+          (d.internalTransfers ? ' Transfer internal ' + rp(d.internalTransfers) + ' tidak dihitung sebagai arus kas.' : '') + '</div>' +
+          '<div class="grid g2"><div class="card"><div class="card-h"><h3>Laporan Arus Kas (metode langsung)</h3></div><div class="table-wrap"><table class="t"><tbody>' + rows + '</tbody></table></div></div>' +
+          '<div class="card"><div class="card-h"><h3>Ringkasan Kas & Bank</h3></div><div class="table-wrap"><table class="t"><thead><tr><th>Rekening</th><th class="num">Awal</th><th class="num">Masuk</th><th class="num">Keluar</th><th class="num">Akhir</th></tr></thead><tbody>' +
+          a.rows.map(function (x) { return '<tr class="click" data-acc="' + esc(x.code) + '"><td>' + esc(x.name) + '</td><td class="num">' + rpCell(x.opening) + '</td><td class="num">' + rp(x.receipts) + '</td><td class="num">' + rp(x.payments) + '</td><td class="num">' + rpCell(x.closing) + '</td></tr>'; }).join('') +
+          '<tr class="total"><td>Total</td><td class="num">' + rpCell(a.totals.opening) + '</td><td class="num">' + rp(a.totals.receipts) + '</td><td class="num">' + rp(a.totals.payments) + '</td><td class="num">' + rpCell(a.totals.closing) + '</td></tr></tbody></table></div>' +
+          '<div class="card-b muted small">Masuk/keluar per rekening termasuk transfer antar rekening; totalnya saling meniadakan.</div></div></div>';
+        $$('[data-acc]', el).forEach(function (tr) { tr.onclick = function () { openDrilldown(tr.dataset.acc, r.from, r.to); }; });
+      }).catch(function (e) { $('#cfBody', el).innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+
+  /* ================= NERACA ================= */
+  VIEWS.bs = function (el) {
+    var st = S.state.bs = S.state.bs || { asOf: today(), tab: 'bs' };
+    function render() {
+      el.innerHTML = '<div class="stack"><div class="row"><label class="row small" style="gap:8px">Per tanggal <input class="input" style="width:170px" type="date" id="asOf" value="' + esc(st.asOf) + '"></label>' +
+        '<div class="chips"><button class="chip' + (st.tab === 'bs' ? ' active' : '') + '" data-t="bs">Neraca</button><button class="chip' + (st.tab === 'tb' ? ' active' : '') + '" data-t="tb">Neraca Saldo</button></div><div class="spacer"></div>' +
+        (st.tab === 'bs' ? exportButtons('BS', function () { return { asOf: st.asOf }; }) : '') + '</div><div id="bsBody">' + skeleton(10) + '</div></div>';
+      $('#asOf', el).onchange = function (e) { if (e.target.value) { st.asOf = e.target.value; render(); } };
+      $$('[data-t]', el).forEach(function (b) { b.onclick = function () { st.tab = b.dataset.t; render(); }; });
+      if (st.tab === 'tb') {
+        call('report.tb', { asOf: st.asOf }).then(function (d) {
+          $('#bsBody', el).innerHTML = '<div class="banner ' + (d.balanced ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.balanced ? '✓ Total debit = total kredit' : 'Neraca saldo tidak seimbang!') + '</div>' +
+            '<div class="card"><div class="table-wrap"><table class="t"><thead><tr><th>Akun</th><th class="num">Mutasi Debit</th><th class="num">Mutasi Kredit</th><th class="num">Saldo Debit</th><th class="num">Saldo Kredit</th></tr></thead><tbody>' +
+            d.rows.map(function (r) { return '<tr><td>' + esc(r.code + ' · ' + r.name) + '</td><td class="num">' + rp(r.debit) + '</td><td class="num">' + rp(r.credit) + '</td><td class="num">' + (r.balanceDebit ? rp(r.balanceDebit) : '') + '</td><td class="num">' + (r.balanceCredit ? rp(r.balanceCredit) : '') + '</td></tr>'; }).join('') +
+            '<tr class="grand"><td>Total</td><td class="num">' + rp(d.totals.debit) + '</td><td class="num">' + rp(d.totals.credit) + '</td><td class="num">' + rp(d.totals.bd) + '</td><td class="num">' + rp(d.totals.bc) + '</td></tr></tbody></table></div></div>';
+        }).catch(function (e) { $('#bsBody', el).innerHTML = errorBox(e, render); });
+        return;
+      }
+      call('report.bs', { asOf: st.asOf }).then(function (d) {
+        var side = function (title, s) {
+          return '<div class="card"><div class="card-h"><h3>' + title + '</h3></div><div class="table-wrap"><table class="t"><tbody>' +
+            s.sections.map(function (x) {
+              if (!x.rows.length) return '<tr><td>' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>';
+              return '<tr class="sec"><td>' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>' +
+                x.rows.map(function (r) { return '<tr class="click" data-acc="' + esc(r.code) + '"><td class="indent">' + esc(r.name) + '</td><td class="num">' + rpCell(r.amount) + '</td></tr>'; }).join('');
+            }).join('') + '<tr class="grand"><td>Total ' + title + '</td><td class="num">' + rpCell(s.total) + '</td></tr></tbody></table></div></div>';
+        };
+        $('#bsBody', el).innerHTML =
+          '<div class="banner ' + (d.balanced ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.balanced ? '✓ Seimbang: Aset ' + rp(d.assets.total) + ' = Liabilitas + Ekuitas ' + rp(d.liabilities.total + d.equity.total) :
+            'Neraca TIDAK seimbang — selisih ' + rp(d.difference) + '.' + (d.diagnostics.length ? '<ul style="margin:6px 0 0;padding-left:18px">' + d.diagnostics.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ' Jalankan Diagnostik di Pengaturan.')) + '</div>' +
+          '<div class="grid g2">' + side('Aset', d.assets) + '<div class="stack">' + side('Liabilitas', d.liabilities) + side('Ekuitas', d.equity) +
+          '<div class="card kpi"><div class="k-label">Total Liabilitas + Ekuitas</div><div class="k-value">' + rp(d.liabilities.total + d.equity.total) + '</div></div></div></div>' +
+          '<p class="muted small">Laba tahun berjalan dihitung sejak ' + fdate(d.fiscalYearStart) + '. Laba ditahan tahun lalu dihitung otomatis dari jurnal sebelum awal tahun buku.</p>';
+        $$('[data-acc]', el).forEach(function (tr) { tr.onclick = function () { openDrilldown(tr.dataset.acc, '2000-01-01', st.asOf); }; });
+      }).catch(function (e) { $('#bsBody', el).innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+
+  /* ================= ASET ================= */
+  VIEWS.assets = function (el) {
+    var st = S.state.as = S.state.as || { period: period(today()) };
+    el.innerHTML = '<div class="stack"><div class="row">' + (canEntry() ? '<button class="btn primary" id="addAsset">' + icon('plus') + 'Tambah Aset</button>' : '') + '</div><div id="asBody">' + skeleton(6) + '</div>' +
+      '<div class="card"><div class="card-h"><h3>Penyusutan Bulanan</h3><span class="muted small">garis lurus · mulai bulan perolehan</span><div class="spacer"></div><input class="input" style="width:170px" type="month" id="depP" value="' + esc(st.period) + '"><button class="btn sm" id="depPrev">Lihat rencana</button></div><div class="card-b" id="depBody"><span class="muted">Pilih periode lalu klik "Lihat rencana".</span></div></div></div>';
+    if ($('#addAsset', el)) $('#addAsset', el).onclick = function () { openAssetForm(); };
+    function load() {
+      call('asset.list').then(function (d) {
+        var s = d.summary;
+        $('#asBody', el).innerHTML = '<div class="grid g4">' + kpiCard('Total Harga Perolehan', s.totalCost, 'Aset aktif') + kpiCard('Akumulasi Penyusutan', s.accumulated, '') + kpiCard('Total Nilai Buku', s.bookValue, '') +
+          '<div class="card kpi"><div class="k-label">Aset Aktif</div><div class="k-value">' + s.activeCount + '</div></div></div>' +
+          '<div class="card" style="margin-top:16px">' + (d.assets.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama</th><th class="hide-m">Kategori</th><th class="hide-m">Perolehan</th><th class="num">Harga</th><th class="num hide-m">Akumulasi</th><th class="num">Nilai Buku</th><th>Status</th></tr></thead><tbody>' +
+            d.assets.map(function (a) { return '<tr class="click" data-id="' + esc(a.id) + '"><td class="small" style="font-family:var(--mono)">' + esc(a.code) + '</td><td>' + esc(a.name) + '</td><td class="hide-m">' + esc(a.categoryLabel) + '</td><td class="hide-m">' + fdate(a.acquisitionDate) + '</td><td class="num">' + rp(a.cost) + '</td><td class="num hide-m">' + rp(a.accumulated) + '</td><td class="num">' + rp(a.bookValue) + '</td><td>' + badge(a.status) + '</td></tr>'; }).join('') +
+            '</tbody></table></div>' : '<div class="empty">Belum ada aset tetap. Catat laptop, peralatan, furnitur, atau kendaraan usaha di sini — bukan stok barang dagang.</div>') + '</div>';
+        $$('[data-id]', el).forEach(function (tr) { tr.onclick = function () { openAssetDetail(tr.dataset.id); }; });
+      }).catch(function (e) { $('#asBody', el).innerHTML = errorBox(e, load); });
+    }
+    $('#depPrev', el).onclick = function () {
+      st.period = $('#depP', el).value || st.period;
+      var box = $('#depBody', el); box.innerHTML = skeleton(3);
+      call('asset.depPlan', { period: st.period }).then(function (p) {
+        box.innerHTML = (p.locked ? '<div class="banner warn">Periode ' + mlabel(p.period) + ' sudah ditutup.</div>' : '') +
+          (p.items.length ? '<table class="t"><thead><tr><th>Aset</th><th class="num">Bulan ke-</th><th class="num">Penyusutan</th></tr></thead><tbody>' + p.items.map(function (i) { return '<tr><td>' + esc(i.code + ' · ' + i.name) + '</td><td class="num">' + i.index + '</td><td class="num">' + rp(i.amount) + '</td></tr>'; }).join('') +
+            '<tr class="total"><td>Total</td><td></td><td class="num">' + rp(p.total) + '</td></tr></tbody></table>' : '<div class="muted">Tidak ada penyusutan yang perlu diposting untuk ' + mlabel(p.period) + '.</div>') +
+          (p.alreadyPosted.length ? '<div class="small muted" style="margin-top:8px">Sudah diposting: ' + p.alreadyPosted.map(function (x) { return esc(x.code); }).join(', ') + '</div>' : '') +
+          (p.blocked.length ? '<div class="banner warn" style="margin-top:8px">Tertahan: ' + p.blocked.map(function (x) { return esc(x.code + ' — ' + x.reason); }).join('; ') + '</div>' : '') +
+          (p.items.length && isAdmin() && !p.locked ? '<div style="margin-top:12px"><button class="btn primary" id="depRun">Posting penyusutan ' + esc(mlabel(p.period)) + '</button></div>' : '');
+        var b = $('#depRun', box);
+        if (b) b.onclick = function () {
+          b.disabled = true;
+          call('asset.depRun', { period: p.period, idemKey: uuid() }, { write: true }).then(function (r) { toast('Penyusutan ' + mlabel(r.period) + ' diposting: ' + rp(r.total), 'ok'); load(); $('#depPrev', el).click(); })
+            .catch(function (e) { b.disabled = false; fail(e); });
+        };
+      }).catch(function (e) { box.innerHTML = errorBox(e); });
+    };
+    load();
+  };
+
+  function openAssetForm() {
+    if (!canEntry()) return;
+    var idemKey = uuid();
+    var cats = S.boot.assetCategories;
+    var d = openDrawer('Tambah Aset Tetap', '<div class="form-grid" id="af">' +
+      '<label class="field full"><span>Nama aset *</span><input class="input" name="name" maxlength="120" placeholder="mis. Laptop Admin Gudang"></label>' +
+      '<label class="field"><span>Kategori *</span><select class="input" name="category">' + Object.keys(cats).map(function (k) { return '<option value="' + k + '">' + esc(cats[k]) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="field"><span>Tanggal perolehan *</span><input class="input" type="date" name="acquisitionDate" value="' + today() + '"></label>' +
+      '<label class="field"><span>Harga perolehan *</span><input class="input money" name="cost"></label>' +
+      '<label class="field"><span>Umur manfaat (bulan) *</span><input class="input" type="number" min="1" max="600" name="lifeMonths" value="48"></label>' +
+      '<label class="field"><span>Nilai residu</span><input class="input money" name="residual" placeholder="0"></label>' +
+      '<label class="field"><span>Sumber dana</span><select class="input" name="funding"><option value="CASH">Dibayar dari kas/bank</option><option value="PAYABLE">Kredit (Utang Usaha)</option>' + (isAdmin() ? '<option value="OPENING">Saldo awal (aset lama)</option>' : '') + '</select></label>' +
+      '<label class="field" id="afCash"><span>Dibayar dari *</span><select class="input" name="cashAccount">' + options(cashAccounts(), '', 'Pilih rekening…') + '</select></label>' +
+      '<label class="field"><span>Referensi <span class="hint">no. faktur</span></span><input class="input" name="reference"></label>' +
+      '<label class="field"><span>Lokasi</span><input class="input" name="location"></label>' +
+      '<label class="field full"><span>Catatan</span><input class="input" name="notes"></label>' +
+      '<div class="full preview" id="afPrev"></div></div>',
+      '<div class="err-text" id="afErr" style="flex-basis:100%"></div><button class="btn primary" id="afSave">Simpan &amp; Posting</button>');
+    var root = $('#af', d); bindMoney(root);
+    var upd = function () {
+      $('#afCash', root).classList.toggle('hidden', val(root, 'funding') !== 'CASH');
+      var cost = moneyVal(root, 'cost'), res = moneyVal(root, 'residual'), life = +val(root, 'lifeMonths') || 0;
+      $('#afPrev', root).innerHTML = cost && life ? 'Penyusutan per bulan: <b>' + rp(Math.floor(Math.max(cost - res, 0) / life)) + '</b> selama ' + life + ' bulan (bulan terakhir menyesuaikan pembulatan).' : 'Isi harga dan umur manfaat untuk melihat penyusutan bulanan.';
+    };
+    root.addEventListener('input', upd); root.addEventListener('change', upd); upd();
+    var btn = $('#afSave', d.parentNode);
+    btn.onclick = function () {
+      btn.disabled = true; $('#afErr', d.parentNode).textContent = '';
+      call('asset.create', { name: val(root, 'name'), category: val(root, 'category'), acquisitionDate: val(root, 'acquisitionDate'), cost: moneyVal(root, 'cost'),
+        lifeMonths: +val(root, 'lifeMonths'), residual: moneyVal(root, 'residual'), funding: val(root, 'funding'), cashAccount: val(root, 'cashAccount'),
+        reference: val(root, 'reference'), location: val(root, 'location'), notes: val(root, 'notes'), idemKey: idemKey }, { write: true }).then(function (r) {
+        closeDrawer(); toast('Aset ' + r.assetCode + ' dicatat.', 'ok'); refreshView();
+      }).catch(function (e) { btn.disabled = false; $('#afErr', d.parentNode).textContent = e.message; });
+    };
+  }
+
+  function openAssetDetail(id) {
+    var d = openDrawer('Detail Aset', skeleton(8));
+    call('asset.get', { id: id }).then(function (a) {
+      var info = [['Kode', a.code], ['Kategori', a.categoryLabel], ['Tanggal perolehan', fdate(a.acquisitionDate)], ['Harga perolehan', rp(a.cost)], ['Nilai residu', rp(a.residual)],
+        ['Umur manfaat', a.lifeMonths + ' bulan'], ['Penyusutan/bulan', rp(a.monthly)], ['Akumulasi', rp(a.accumulated)], ['Nilai buku', rp(a.bookValue)], ['Lokasi', a.location || '—']];
+      if (a.disposalDate) info.push(['Dilepas', fdate(a.disposalDate) + ' · ' + rp(a.disposalProceeds)]);
+      var body = '<div class="row" style="margin-bottom:10px"><b>' + esc(a.name) + '</b>' + badge(a.status) + '</div><table class="t">' + info.map(function (r) { return '<tr><td class="muted" style="width:150px">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>' +
+        '<h3 style="margin:16px 0 8px">Jadwal penyusutan</h3><div class="table-wrap" style="max-height:320px;overflow:auto"><table class="t"><thead><tr><th>#</th><th>Periode</th><th class="num">Penyusutan</th><th class="num">Nilai buku</th><th></th></tr></thead><tbody>' +
+        a.schedule.map(function (s) { return '<tr><td>' + s.index + '</td><td>' + mshort(s.period) + '</td><td class="num">' + rp(s.amount) + '</td><td class="num">' + rp(s.bookValue) + '</td><td>' + (s.posted ? badge('POSTED') : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      var foot = isAdmin() && (a.status === 'ACTIVE' || a.status === 'FULLY_DEPRECIATED') ? '<button class="btn danger" id="disp">Lepas / Jual Aset</button>' : '';
+      d = openDrawer('Aset ' + a.code, body, foot);
+      var b = $('#disp', d.parentNode);
+      if (b) b.onclick = function () {
+        ask({ title: 'Pelepasan aset', message: 'Aset dikeluarkan dari register; selisih hasil dengan nilai buku dicatat sebagai laba/rugi pelepasan. Pastikan penyusutan sampai bulan sebelum pelepasan sudah diposting.', reason: 'Alasan', reasonRequired: true, confirm: 'Posting pelepasan', danger: true,
+          extraHtml: '<div class="form-grid" style="margin-top:10px"><label class="field"><span>Tanggal</span><input class="input" type="date" id="dDate" value="' + today() + '"></label><label class="field"><span>Hasil penjualan</span><input class="input money" id="dProc" placeholder="0"></label><label class="field full"><span>Diterima di</span><select class="input" id="dCash">' + options(cashAccounts(), '', '— tidak ada hasil —') + '</select></label></div>',
+          collect: function (w) { return { date: $('#dDate', w).value, proceeds: parseMoney($('#dProc', w).value), cashAccount: $('#dCash', w).value }; } }).then(function (r) {
+          if (!r) return;
+          call('asset.dispose', { assetId: a.id, date: r.date, proceeds: r.proceeds, cashAccount: r.cashAccount, reason: r.reason, idemKey: uuid() }, { write: true }).then(function (x) {
+            closeDrawer(); toast('Aset dilepas. ' + (x.gain >= 0 ? 'Laba ' : 'Rugi ') + rp(Math.abs(x.gain)), 'ok'); refreshView();
+          }).catch(fail);
+        });
+        setTimeout(function () { bindMoney(document.body); }, 0);
+      };
+    }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /* ================= MASTER DATA ================= */
+  var TYPE_LABEL = { ASSET: 'Aset', LIABILITY: 'Liabilitas', EQUITY: 'Ekuitas', REVENUE: 'Pendapatan', COGS: 'HPP', EXPENSE: 'Beban', OTHER_INCOME: 'Pendapatan Lain', OTHER_EXPENSE: 'Beban Lain' };
+  var GROUP_LABEL = { CASH: 'Kas & Bank', RECEIVABLE: 'Piutang', INVENTORY: 'Persediaan', PREPAID: 'Dibayar di muka', FIXED_ASSET: 'Aset tetap', ACCUM_DEP: 'Akumulasi penyusutan', PAYABLE: 'Utang usaha', LOAN: 'Pinjaman',
+    OTHER_LIABILITY: 'Liabilitas lain', CAPITAL: 'Modal', DRAWINGS: 'Prive', RETAINED: 'Laba ditahan', OPENING: 'Saldo awal', SALES: 'Penjualan', SALES_CONTRA: 'Retur & diskon', COGS: 'HPP', OPEX: 'Beban operasional',
+    OTHER_INCOME: 'Pendapatan lain', OTHER_EXPENSE: 'Beban lain', OTHER_ASSET: 'Aset lain' };
+  VIEWS.master = function (el) {
+    var st = S.state.md = S.state.md || { tab: 'coa' };
+    el.innerHTML = '<div class="tabs"><button data-t="coa">Akun (COA)</button><button data-t="cash">Kas &amp; Bank</button><button data-t="product">Produk (Master SKU)</button></div><div id="mdBody"></div>';
+    $$('.tabs button', el).forEach(function (b) { b.classList.toggle('active', b.dataset.t === st.tab); b.onclick = function () { st.tab = b.dataset.t; VIEWS.master(el); }; });
+    var box = $('#mdBody', el);
+    if (st.tab === 'coa') {
+      box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addAcc">' + icon('plus') + 'Tambah Akun</button>' : '') + '<span class="muted small">Akun sistem dipakai jurnal otomatis; perubahan dicatat di audit log.</span></div><div class="card" id="coaT">' + skeleton(8) + '</div>';
+      if ($('#addAcc', box)) $('#addAcc', box).onclick = function () { openAccountForm(); };
+      call('master.coa').then(function (list) {
+        $('#coaT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama</th><th class="hide-m">Tipe</th><th class="hide-m">Grup laporan</th><th class="hide-m">Arus kas</th><th>Status</th></tr></thead><tbody>' +
+          list.map(function (a) {
+            return '<tr class="' + (a.isHeader ? 'sec' : (isAdmin() ? 'click' : '')) + '" data-code="' + esc(a.code) + '"><td style="font-family:var(--mono)">' + esc(a.code) + '</td><td' + (a.parent && !a.isHeader ? ' class="indent"' : '') + '>' + esc(a.name) + (a.isSystem ? ' <span class="badge">sistem</span>' : '') + '</td><td class="hide-m">' + esc(TYPE_LABEL[a.type] || a.type) + '</td><td class="hide-m">' + esc(GROUP_LABEL[a.group] || '') + '</td><td class="hide-m small">' + esc(a.cashFlow || '') + '</td><td>' + (a.isActive ? '' : badge('DISABLED')) + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+        if (isAdmin()) $$('tr.click', box).forEach(function (tr) { tr.onclick = function () { openAccountForm(list.filter(function (a) { return a.code === tr.dataset.code; })[0]); }; });
+      }).catch(function (e) { $('#coaT', box).innerHTML = errorBox(e); });
+    } else if (st.tab === 'cash') {
+      box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addCb">' + icon('plus') + 'Tambah Rekening</button>' : '') + '</div><div class="card" id="cbT">' + skeleton(4) + '</div>';
+      if ($('#addCb', box)) $('#addCb', box).onclick = function () {
+        ask({ title: 'Tambah rekening kas/bank', message: 'Akun COA baru akan dibuat otomatis di bawah Kas dan Bank.', confirm: 'Simpan',
+          extraHtml: '<div class="stack"><label class="field"><span>Nama *</span><input class="input" id="cbN" placeholder="mis. Bank BRI"></label><label class="field"><span>Jenis</span><select class="input" id="cbK"><option value="BANK">Bank</option><option value="CASH">Kas</option><option value="EWALLET">E-wallet</option></select></label><label class="field"><span>Nama bank</span><input class="input" id="cbB"></label><label class="field"><span>No. rekening <span class="hint">disimpan tersamar</span></span><input class="input" id="cbA"></label></div>',
+          collect: function (w) { return { name: $('#cbN', w).value, kind: $('#cbK', w).value, bankName: $('#cbB', w).value, accountNo: $('#cbA', w).value }; } }).then(function (r) {
+          if (!r) return;
+          call('master.cashBankCreate', r, { write: true }).then(function () { toast('Rekening ditambahkan.', 'ok'); reloadBoot().then(function () { VIEWS.master(el); }); }).catch(fail);
+        });
+      };
+      call('master.cashBank').then(function (list) {
+        $('#cbT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Akun</th><th>Jenis</th><th class="hide-m">Bank</th><th class="hide-m">No. rekening</th><th>Status</th></tr></thead><tbody>' +
+          list.map(function (c) { return '<tr><td>' + esc(c.name) + '</td><td style="font-family:var(--mono)">' + esc(c.accountCode) + '</td><td>' + esc({ CASH: 'Kas', BANK: 'Bank', EWALLET: 'E-wallet' }[c.kind] || c.kind) + '</td><td class="hide-m">' + esc(c.bankName) + '</td><td class="hide-m">' + esc(c.accountNo) + '</td><td>' + badge(c.isActive ? 'ACTIVE' : 'DISABLED') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      }).catch(function (e) { $('#cbT', box).innerHTML = errorBox(e); });
+    } else {
+      box.innerHTML = '<div class="banner ok" style="margin-bottom:12px">Master SKU tetap menjadi sumber kebenaran identitas produk. Meirista FAS hanya menyimpan referensi PRODUCT_ID dan data akuntansi (nilai persediaan, HPP).</div>' +
+        '<div class="card"><div class="card-h"><input class="input" style="max-width:320px" id="pq" placeholder="Cari SKU, GTIN, nama, brand…"><div class="spacer"></div>' + (isAdmin() ? '<button class="btn" id="pVal">Validasi mapping</button><button class="btn primary" id="pSync">Sinkronkan dari Master SKU</button>' : '') + '</div><div id="pBody">' + skeleton(4) + '</div></div>';
+      var loadMap = function (q) {
+        call('product.mappings', { search: q || '', pageSize: 50 }).then(function (pg) {
+          $('#pBody', box).innerHTML = (!pg.configured ? '<div class="card-b"><div class="banner warn">Master SKU belum dihubungkan. Admin perlu mengisi Script Property <b>MASTER_SKU_SPREADSHEET_ID</b> (dan opsional MASTER_SKU_SHEET_NAME / MASTER_SKU_COLUMN_MAP). Lihat docs/INTEGRATION.md.</div></div>' : '') +
+            (pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>SKU</th><th>Nama</th><th class="hide-m">Brand</th><th class="hide-m">GTIN</th><th class="hide-m">Unit</th><th>Sinkron</th></tr></thead><tbody>' +
+              pg.rows.map(function (r) { return '<tr><td style="font-family:var(--mono)">' + esc(r.sku) + '</td><td>' + esc(r.name) + '</td><td class="hide-m">' + esc(r.brand) + '</td><td class="hide-m">' + esc(r.gtin) + '</td><td class="hide-m">' + esc(r.unit) + '</td><td>' + badge(r.syncStatus === 'OK' ? 'ACTIVE' : 'FAILED').replace(/>[^<]+</, '>' + esc(r.syncStatus) + '<') + '</td></tr>'; }).join('') + '</tbody></table></div>' + pager(pg, function () {}) : '<div class="empty">Belum ada referensi produk tersinkron.</div>');
+        }).catch(function (e) { $('#pBody', box).innerHTML = errorBox(e); });
+      };
+      var tm; $('#pq', box).oninput = function (e) { clearTimeout(tm); tm = setTimeout(function () { loadMap(e.target.value); }, 350); };
+      if ($('#pSync', box)) $('#pSync', box).onclick = function () { call('product.sync', {}, { write: true }).then(function (r) { toast('Sinkron: ' + r.inserted + ' baru, ' + r.updated + ' diperbarui, ' + r.markedMissing + ' hilang dari master.', 'ok'); loadMap(); }).catch(fail); };
+      if ($('#pVal', box)) $('#pVal', box).onclick = function () { call('product.validate').then(function (r) { if (r.ok) toast('Mapping valid (' + r.count + ' produk).', 'ok'); else ask({ title: 'Masalah mapping produk', message: r.issues.slice(0, 15).join(' • '), confirm: 'Tutup' }); }).catch(fail); };
+      loadMap();
+    }
+  };
+
+  function openAccountForm(a) {
+    var isNew = !a; a = a || { code: '', name: '', type: 'EXPENSE', normal: 'D', group: 'OPEX', cashFlow: 'OPERATING', isActive: true, isHeader: false, isContra: false, parent: '6000' };
+    var d = openDrawer(isNew ? 'Tambah Akun' : 'Ubah Akun ' + a.code, '<div class="form-grid" id="acf">' +
+      '<label class="field"><span>Kode *</span><input class="input" name="code" value="' + esc(a.code) + '"' + (isNew ? '' : ' disabled') + ' inputmode="numeric"></label>' +
+      '<label class="field"><span>Nama *</span><input class="input" name="name" value="' + esc(a.name) + '"></label>' +
+      '<label class="field"><span>Tipe</span><select class="input" name="type">' + Object.keys(TYPE_LABEL).map(function (k) { return '<option value="' + k + '"' + (a.type === k ? ' selected' : '') + '>' + TYPE_LABEL[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="field"><span>Saldo normal</span><select class="input" name="normal"><option value="D"' + (a.normal === 'D' ? ' selected' : '') + '>Debit</option><option value="C"' + (a.normal === 'C' ? ' selected' : '') + '>Kredit</option></select></label>' +
+      '<label class="field"><span>Grup laporan</span><select class="input" name="group">' + Object.keys(GROUP_LABEL).map(function (k) { return '<option value="' + k + '"' + (a.group === k ? ' selected' : '') + '>' + GROUP_LABEL[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="field"><span>Kategori arus kas</span><select class="input" name="cashFlow">' + ['OPERATING', 'INVESTING', 'FINANCING', 'OPENING'].map(function (k) { return '<option' + (a.cashFlow === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></label>' +
+      '<label class="field"><span>Induk</span><select class="input" name="parent"><option value="">—</option>' + coa().filter(function (x) { return x.isHeader; }).map(function (x) { return '<option value="' + x.code + '"' + (a.parent === x.code ? ' selected' : '') + '>' + esc(x.code + ' · ' + x.name) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="row small" style="gap:6px"><input type="checkbox" name="isContra"' + (a.isContra ? ' checked' : '') + '> Akun kontra</label>' +
+      '<label class="row small" style="gap:6px"><input type="checkbox" name="isActive"' + (a.isActive ? ' checked' : '') + '> Aktif</label>' +
+      '<label class="field full"><span>Alasan perubahan *</span><input class="input" name="reason"></label></div>',
+      '<div class="err-text" id="acErr" style="flex-basis:100%"></div><button class="btn primary" id="acSave">Simpan</button>');
+    var root = $('#acf', d);
+    $('#acSave', d.parentNode).onclick = function () {
+      call('master.coaSave', { code: val(root, 'code'), name: val(root, 'name'), type: val(root, 'type'), normal: val(root, 'normal'), group: val(root, 'group'), cashFlow: val(root, 'cashFlow'),
+        parent: val(root, 'parent'), isContra: $('[name=isContra]', root).checked, isActive: $('[name=isActive]', root).checked, isHeader: !!a.isHeader, reason: val(root, 'reason'), rowVersion: a.rowVersion }, { write: true })
+        .then(function () { closeDrawer(); toast('Akun disimpan.', 'ok'); reloadBoot().then(refreshView); })
+        .catch(function (e) { $('#acErr', d.parentNode).textContent = e.message; });
+    };
+  }
+
+  /* ================= PENGATURAN ================= */
+  VIEWS.settings = function (el) {
+    var tabs = [['me', 'Akun Saya']];
+    if (isAdmin()) tabs = tabs.concat([['users', 'Pengguna'], ['periods', 'Periode'], ['system', 'Sistem'], ['backup', 'Backup'], ['diag', 'Diagnostik'], ['audit', 'Audit Log']]);
+    var st = S.state.set = S.state.set || { tab: 'me' };
+    if (!tabs.some(function (t) { return t[0] === st.tab; })) st.tab = 'me';
+    el.innerHTML = '<div class="tabs">' + tabs.map(function (t) { return '<button data-t="' + t[0] + '" class="' + (st.tab === t[0] ? 'active' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="stBody"></div>';
+    $$('.tabs button', el).forEach(function (b) { b.onclick = function () { st.tab = b.dataset.t; VIEWS.settings(el); }; });
+    var box = $('#stBody', el);
+    var T = SETTINGS_TABS[st.tab];
+    T(box, function () { VIEWS.settings(el); });
+  };
+
+  var SETTINGS_TABS = {
+    me: function (box) {
+      box.innerHTML = '<div class="grid g2"><div class="card card-b"><h3 style="margin-bottom:12px">Profil</h3><table class="t"><tr><td class="muted">Nama</td><td>' + esc(S.user.name) + '</td></tr><tr><td class="muted">Email</td><td>' + esc(S.user.email) + '</td></tr><tr><td class="muted">Peran</td><td>' + esc(ROLE_LABEL[S.user.role]) + '</td></tr></table></div>' +
+        '<div class="card card-b"><h3 style="margin-bottom:12px">Ganti kata sandi</h3><div id="pwf">' + passwordFormHtml() + '<button class="btn primary" style="margin-top:12px" id="pwGo">Simpan</button></div></div></div>';
+      $('#pwGo', box).onclick = function () { savePassword($('#pwf', box), function () { $$('#pwf input', box).forEach(function (i) { i.value = ''; }); }); };
+    },
+    users: function (box, reload) {
+      box.innerHTML = '<div class="row" style="margin-bottom:12px"><button class="btn primary" id="uAdd">' + icon('plus') + 'Tambah Pengguna</button></div><div class="card" id="uT">' + skeleton(4) + '</div>';
+      var roleSel = function (id, cur) { return '<select class="input" id="' + id + '">' + ['ADMIN', 'FINANCE', 'VIEWER'].map(function (r) { return '<option value="' + r + '"' + (cur === r ? ' selected' : '') + '>' + ROLE_LABEL[r] + '</option>'; }).join('') + '</select>'; };
+      var showPw = function (email, pw) { ask({ title: 'Kata sandi sementara', message: 'Berikan kata sandi ini secara langsung kepada ' + email + '. Kata sandi hanya ditampilkan sekali dan wajib diganti saat login pertama.', extraHtml: '<div class="input" style="display:flex;align-items:center;font-family:var(--mono);font-size:16px;user-select:all">' + esc(pw) + '</div>', confirm: 'Sudah dicatat' }); };
+      $('#uAdd', box).onclick = function () {
+        ask({ title: 'Tambah pengguna', message: 'Pengguna login dengan email dan kata sandi sementara.', confirm: 'Buat pengguna',
+          extraHtml: '<div class="stack"><label class="field"><span>Nama</span><input class="input" id="uN"></label><label class="field"><span>Email</span><input class="input" type="email" id="uE"></label><label class="field"><span>Peran</span>' + roleSel('uR', 'FINANCE') + '</label></div>',
+          collect: function (w) { return { name: $('#uN', w).value, email: $('#uE', w).value, role: $('#uR', w).value }; } }).then(function (r) {
+          if (!r) return;
+          call('user.create', r, { write: true }).then(function (x) { showPw(x.email, x.temporaryPassword); reload(); }).catch(fail);
+        });
+      };
+      call('user.list').then(function (list) {
+        $('#uT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Email</th><th>Peran</th><th>Status</th><th class="hide-m">Login terakhir</th><th></th></tr></thead><tbody>' +
+          list.map(function (u) { return '<tr><td>' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(ROLE_LABEL[u.role]) + '</td><td>' + badge(u.status) + '</td><td class="hide-m small">' + fts(u.lastLoginAt) + '</td><td class="num"><button class="btn sm" data-e="' + esc(u.userId) + '">Ubah</button> <button class="btn sm" data-r="' + esc(u.userId) + '">Reset sandi</button></td></tr>'; }).join('') + '</tbody></table></div>';
+        $$('[data-e]', box).forEach(function (b) { b.onclick = function () {
+          var u = list.filter(function (x) { return x.userId === b.dataset.e; })[0];
+          ask({ title: 'Ubah ' + u.email, message: '', reason: 'Alasan perubahan', reasonRequired: true, confirm: 'Simpan',
+            extraHtml: '<div class="form-grid" style="margin-top:10px"><label class="field"><span>Peran</span>' + roleSel('eR', u.role) + '</label><label class="field"><span>Status</span><select class="input" id="eS"><option value="ACTIVE"' + (u.status === 'ACTIVE' ? ' selected' : '') + '>Aktif</option><option value="DISABLED"' + (u.status === 'DISABLED' ? ' selected' : '') + '>Nonaktif</option></select></label></div>',
+            collect: function (w) { return { role: $('#eR', w).value, status: $('#eS', w).value }; } }).then(function (r) {
+            if (!r) return;
+            call('user.update', { userId: u.userId, role: r.role, status: r.status, reason: r.reason, rowVersion: u.rowVersion }, { write: true }).then(function () { toast('Pengguna diperbarui.', 'ok'); reload(); }).catch(fail);
+          });
+        }; });
+        $$('[data-r]', box).forEach(function (b) { b.onclick = function () {
+          var u = list.filter(function (x) { return x.userId === b.dataset.r; })[0];
+          ask({ title: 'Reset kata sandi ' + u.email + '?', message: 'Kata sandi lama tidak berlaku lagi.', reason: 'Alasan', reasonRequired: true, confirm: 'Reset', danger: true }).then(function (r) {
+            if (!r) return;
+            call('user.resetPassword', { userId: u.userId, reason: r.reason }, { write: true }).then(function (x) { showPw(u.email, x.temporaryPassword); }).catch(fail);
+          });
+        }; });
+      }).catch(function (e) { $('#uT', box).innerHTML = errorBox(e); });
+    },
+    periods: function (box, reload) {
+      box.innerHTML = '<p class="muted small">Periode yang ditutup tidak dapat menerima posting, pembalikan, atau penyusutan baru. Membuka kembali periode wajib alasan dan dicatat.</p><div class="card" id="pT">' + skeleton(6) + '</div>';
+      call('period.list').then(function (list) {
+        var map = {}; list.forEach(function (p) { map[p.period] = p; });
+        var cur = period(today()), rows = [];
+        for (var i = 0; i < 18; i++) rows.push(addMonths(cur, -i));
+        $('#pT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Periode</th><th>Status</th><th class="hide-m">Terakhir diubah</th><th class="hide-m">Alasan</th><th></th></tr></thead><tbody>' +
+          rows.map(function (p) {
+            var r = map[p] || { status: 'OPEN' };
+            var locked = r.status === 'LOCKED';
+            return '<tr><td>' + mlabel(p) + '</td><td>' + badge(r.status) + '</td><td class="hide-m small">' + esc(locked ? (r.lockedBy || '') + ' ' + fts(r.lockedAt) : (r.reopenedBy ? r.reopenedBy + ' ' + fts(r.reopenedAt) : '')) + '</td><td class="hide-m small">' + esc(r.reason || '') + '</td>' +
+              '<td class="num"><button class="btn sm' + (locked ? ' danger' : '') + '" data-p="' + p + '" data-l="' + (locked ? '0' : '1') + '">' + (locked ? 'Buka' : 'Tutup buku') + '</button></td></tr>';
+          }).join('') + '</tbody></table></div>';
+        $$('[data-p]', box).forEach(function (b) { b.onclick = function () {
+          var lock = b.dataset.l === '1';
+          ask({ title: (lock ? 'Tutup' : 'Buka kembali') + ' periode ' + mlabel(b.dataset.p) + '?', message: lock ? 'Pastikan penyusutan periode ini sudah diposting.' : 'Membuka periode memungkinkan perubahan pada laporan yang sudah final.',
+            reason: 'Alasan', reasonRequired: !lock, confirm: lock ? 'Tutup periode' : 'Buka periode', danger: !lock }).then(function (r) {
+            if (!r) return;
+            call(lock ? 'period.lock' : 'period.unlock', { period: b.dataset.p, reason: r.reason }, { write: true }).then(function () { toast('Periode diperbarui.', 'ok'); reloadBoot().then(reload); }).catch(fail);
+          });
+        }; });
+      }).catch(function (e) { $('#pT', box).innerHTML = errorBox(e); });
+    },
+    system: function (box, reload) {
+      box.innerHTML = skeleton(6);
+      call('settings.get').then(function (s) {
+        var row = function (x, isAcc) {
+          return '<tr><td><b class="small">' + esc(x.key) + '</b><div class="muted small">' + esc(isAcc ? 'Default ' + x.defaultValue + ' · ' + accName(x.defaultValue) : x.description) + '</div></td><td style="width:260px">' +
+            (isAcc ? '<select class="input" data-k="' + esc(x.key) + '">' + options(postableAccounts(), x.value) + '</select>' : '<input class="input" data-k="' + esc(x.key) + '" value="' + esc(x.value) + '">') + '</td></tr>';
+        };
+        box.innerHTML = '<div class="grid g2"><div class="card"><div class="card-h"><h3>Umum</h3></div><table class="t">' + s.general.map(function (x) { return row(x, false); }).join('') + '</table></div>' +
+          '<div class="card"><div class="card-h"><h3>Pemetaan akun sistem</h3><span class="muted small">risiko tinggi — wajib alasan</span></div><div class="table-wrap"><table class="t">' + s.accounts.map(function (x) { return row(x, true); }).join('') + '</table></div></div></div>' +
+          '<div class="card card-b" style="margin-top:16px"><h3>Integrasi Master SKU</h3><p class="small muted">Spreadsheet: ' + esc(s.masterSku.spreadsheetId || '(belum diatur)') + ' · Sheet: ' + esc(s.masterSku.sheetName) + '. Diatur lewat Script Properties oleh pemilik skrip.</p></div>';
+        $$('[data-k]', box).forEach(function (inp) {
+          inp.dataset.orig = inp.value;
+          inp.onchange = function () {
+            ask({ title: 'Ubah ' + inp.dataset.k + '?', message: 'Dari "' + inp.dataset.orig + '" menjadi "' + inp.value + '".', reason: 'Alasan', reasonRequired: true, confirm: 'Simpan' }).then(function (r) {
+              if (!r) { inp.value = inp.dataset.orig; return; }
+              call('settings.save', { key: inp.dataset.k, value: inp.value, reason: r.reason }, { write: true }).then(function () { toast('Pengaturan disimpan.', 'ok'); reloadBoot().then(reload); })
+                .catch(function (e) { inp.value = inp.dataset.orig; fail(e); });
+            });
+          };
+        });
+      }).catch(function (e) { box.innerHTML = errorBox(e); });
+    },
+    backup: function (box, reload) {
+      box.innerHTML = '<div class="row" style="margin-bottom:12px"><button class="btn primary" id="bk">Backup sekarang</button><span class="muted small">Backup otomatis harian aktif setelah pemilik menjalankan installTriggers().</span></div><div class="card" id="bkT">' + skeleton(4) + '</div>';
+      $('#bk', box).onclick = function (e) { e.target.disabled = true; call('backup.run', {}, { write: true }).then(function (r) { toast('Backup dibuat: ' + r.name, 'ok'); reload(); }).catch(function (x) { e.target.disabled = false; fail(x); }); };
+      call('backup.list').then(function (d) {
+        $('#bkT', box).innerHTML = '<div class="card-b small">Backup terakhir: <b>' + (d.lastBackupAt ? fts(d.lastBackupAt) : 'belum pernah') + '</b></div>' + (d.backups.length ? '<table class="t"><thead><tr><th>File</th><th>Dibuat</th></tr></thead><tbody>' +
+          d.backups.map(function (b) { return '<tr><td><a href="' + esc(b.url) + '" target="_blank">' + esc(b.name) + '</a></td><td>' + esc(b.createdAt) + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty">Belum ada file backup.</div>');
+      }).catch(function (e) { $('#bkT', box).innerHTML = errorBox(e); });
+    },
+    diag: function (box) {
+      box.innerHTML = '<div class="row" style="margin-bottom:12px"><button class="btn primary" id="dg">Jalankan diagnostik</button><button class="btn" id="rc">Pulihkan posting tertunda</button></div><div id="dgB" class="card card-b muted">Diagnostik memeriksa keseimbangan jurnal, posting tertunda, neraca, rekonsiliasi kas, dan register aset.</div>';
+      $('#dg', box).onclick = function () {
+        $('#dgB', box).innerHTML = skeleton(5);
+        call('diag.run').then(function (d) {
+          $('#dgB', box).innerHTML = '<div class="banner ' + (d.ok ? 'ok' : 'err') + '" style="margin-bottom:10px">' + (d.ok ? 'Semua pemeriksaan lulus.' : 'Ada pemeriksaan yang gagal.') + ' · ' + fts(d.at) + '</div><table class="t">' +
+            d.checks.map(function (c) { return '<tr><td style="width:28px">' + (c.ok ? '✅' : '❌') + '</td><td>' + esc(c.name) + (c.detail ? '<div class="muted small">' + esc(c.detail) + '</div>' : '') + '</td></tr>'; }).join('') + '</table>';
+        }).catch(function (e) { $('#dgB', box).innerHTML = errorBox(e); });
+      };
+      $('#rc', box).onclick = function () {
+        ask({ title: 'Pulihkan posting tertunda?', message: 'Record PENDING dari proses yang terhenti akan diselesaikan (jika jurnal sudah lengkap) atau ditandai GAGAL agar dapat dikirim ulang.', confirm: 'Pulihkan' }).then(function (ok) {
+          if (!ok) return;
+          call('diag.recover', {}, { write: true }).then(function (r) { toast('Pemulihan: ' + r.journals + ' jurnal, ' + r.transactions + ' transaksi, ' + r.assets + ' aset.', 'ok'); }).catch(fail);
+        });
+      };
+    },
+    audit: function (box) {
+      var st = { page: 1, search: '' };
+      box.innerHTML = '<div class="card"><div class="card-h"><input class="input" style="max-width:320px" placeholder="Cari aksi, email, alasan…" id="aq"></div><div id="aT">' + skeleton(6) + '</div></div>';
+      var load = function () {
+        call('audit.list', { page: st.page, pageSize: 50, search: st.search }).then(function (pg) {
+          $('#aT', box).innerHTML = pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th class="hide-m">Entitas</th><th>Alasan</th></tr></thead><tbody>' +
+            pg.rows.map(function (r) { return '<tr><td class="small">' + fts(r.at) + '</td><td class="small">' + esc(r.user) + '</td><td><code class="small">' + esc(r.action) + '</code></td><td class="hide-m small muted">' + esc(r.entity + ' ' + (r.entityId || '').substring(0, 13)) + '</td><td class="small">' + esc(r.reason) + '</td></tr>'; }).join('') +
+            '</tbody></table></div>' + pager(pg, function (p) { st.page = p; load(); }) : '<div class="empty">Tidak ada data.</div>';
+        }).catch(function (e) { $('#aT', box).innerHTML = errorBox(e); });
+      };
+      var tm; $('#aq', box).oninput = function (e) { clearTimeout(tm); tm = setTimeout(function () { st.search = e.target.value; st.page = 1; load(); }, 350); };
+      load();
+    }
+  };
+
+  /* ================= Mulai ================= */
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('#overlay').innerHTML && !$('#overlay').dataset.busy && !document.querySelector('.dialog')) closeDrawer(); });
+  /* PWA (GitHub Pages): service worker + pembaruan otomatis saat versi baru terbit. */
+  if (window.MFAS_BUILD) {
+    try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) { /* abaikan */ }
+    var checkUpdate = function () {
+      fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+        if (!v || !v.v || v.v === window.MFAS_BUILD) return;
+        // Jangan ganggu pengguna yang sedang mengisi form.
+        if ($('#overlay').innerHTML || document.querySelector('.dialog')) { setTimeout(checkUpdate, 30000); return; }
+        toast('Memperbarui aplikasi ke versi terbaru…', 'ok');
+        setTimeout(function () { location.reload(); }, 800);
+      }).catch(function () {});
+    };
+    setInterval(checkUpdate, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) checkUpdate(); });
+  }
+
+  window.addEventListener('hashchange', function () {
+    var h = (location.hash || '').replace('#', '');
+    if (S.boot && h && h !== S.view && VIEWS[h]) go(h);
+  });
+  S.token = store.get('mfas_token');
+  if (S.token) start(); else showLogin('');
+})();
+</script>
+
+</body>
+</html>
