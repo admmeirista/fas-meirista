@@ -192,7 +192,7 @@
   .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .75; }
   .badge.POSTED, .badge.ACTIVE, .badge.OPEN { background: var(--ok-soft); color: var(--ok); }
   .badge.DRAFT { background: var(--info-soft); color: var(--info); }
-  .badge.REVERSED, .badge.DISPOSED, .badge.LOCKED { background: #f0efea; color: #8a918c; }
+  .badge.REVERSED, .badge.CANCELLED, .badge.DELETED, .badge.DISPOSED, .badge.LOCKED { background: #f0efea; color: #8a918c; }
   .badge.FAILED, .badge.DISABLED { background: var(--err-soft); color: var(--err); }
   .badge.PENDING, .badge.FULLY_DEPRECIATED { background: var(--warn-soft); color: var(--warn); }
   .badge.ADMIN { background: #ece9f8; color: #5b4fa8; } .badge.FINANCE { background: var(--acc-soft); color: var(--acc-ink); } .badge.VIEWER { background: var(--info-soft); color: var(--info); } .badge.OPERATOR { background: var(--warn-soft); color: var(--warn); }
@@ -204,10 +204,12 @@
 
   /* Drawer, dialog, toast, loader */
   .scrim { position: fixed; inset: 0; background: rgba(29,36,32,.5); backdrop-filter: blur(2px); z-index: 40; animation: fade .12s; }
-  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100%); background: #fff; z-index: 41; display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(0,0,0,.15); animation: fade .15s; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100%); background: #fff; z-index: 41; display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(0,0,0,.15); }
   .drawer-h { padding: 16px 20px; border-bottom: 1px solid var(--line-2); display: flex; align-items: center; gap: 10px; }
   .drawer-h h2 { font-size: 18px; }
-  .drawer-b { padding: 20px; overflow-y: auto; flex: 1; }
+  .drawer-b { padding: 20px; overflow-y: auto; overflow-x: hidden; flex: 1; }
+  .drawer-b table.t .input { min-width: 0; }
+  .drawer-b .seg { display: flex; }
   .drawer-f { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; background: #fcfbf8; }
   .dialog { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100% - 24px)); max-height: 90vh; overflow: auto; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
   .dialog h2 { font-size: 18px; }
@@ -261,6 +263,13 @@
     .btn { min-height: 42px; } .btn.sm { min-height: 36px; }
     .input, select.input { min-height: 44px; font-size: 16px; }
     .card-b { padding: 14px; }
+    table.lines thead { display: none; }
+    table.lines tr { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line-2); }
+    table.lines td { padding: 0; border: 0; }
+    table.lines td:first-child { grid-column: 1 / -1; }
+    table.lines td.hide-m { display: none; }
+    .card-h > .input, .card-h > select.input { flex: 1 1 calc(50% - 6px); max-width: none !important; }
+    .card-h > input[name=search], .card-h > #mq, .card-h > #aq, .card-h > #pq { flex-basis: 100%; }
     #toasts { top: auto; bottom: calc(84px + env(safe-area-inset-bottom)); }
     .tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #fff; border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(0,0,0,.06); }
     .tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; font: inherit; font-size: 10.5px; font-weight: 800; color: var(--muted); padding: 2px 0; cursor: pointer; }
@@ -287,7 +296,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="fbb9dc3-15eede97";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="62bdce2-8846be90";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
@@ -320,7 +329,7 @@
           <div class="auth-help" id="loginHelp"></div>
         </form>
       </div>
-      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.4.0</div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.5.0</div>
     </section>
   </div>
 
@@ -602,7 +611,11 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   /* ================= Shell & navigasi (gaya FMS / Master SKU) ================= */
   var NAV = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', level: 'VIEW', sec: 'Utama' },
-    { id: 'transactions', label: 'Transaksi', icon: 'trx', level: 'ENTRY', sec: 'Utama' },
+    { id: 'sales', label: 'Penjualan', icon: 'receipt', level: 'VIEW', sec: 'Transaksi' },
+    { id: 'purchases', label: 'Pembelian', icon: 'asset', level: 'VIEW', sec: 'Transaksi' },
+    { id: 'expenses', label: 'Biaya', icon: 'trx', level: 'VIEW', sec: 'Transaksi' },
+    { id: 'cashbank', label: 'Kas & Bank', icon: 'wallet', level: 'VIEW', sec: 'Transaksi' },
+    { id: 'journals', label: 'Jurnal Umum', icon: 'book', level: 'ADMIN', sec: 'Transaksi' },
     { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW', sec: 'Laporan' },
     { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW', sec: 'Laporan' },
     { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW', sec: 'Laporan' },
@@ -632,13 +645,13 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     if (store.get('mfas_collapsed')) document.body.classList.add('collapsed');
 
     // Navigasi bawah HP: Dashboard · Transaksi · [+] · Laporan · Lainnya
-    var tabs = [['dashboard', 'Beranda', 'dashboard'], canEntry() ? ['transactions', 'Transaksi', 'trx'] : ['assets', 'Aset', 'asset'],
-      canEntry() ? ['__add', 'Catat', 'plus'] : null, ['pl', 'Laporan', 'pl'], ['__more', 'Lainnya', 'more']].filter(Boolean);
+    var tabs = [['dashboard', 'Beranda', 'dashboard'], ['sales', 'Penjualan', 'receipt'],
+      canInput() ? ['__add', 'Catat', 'plus'] : ['cashbank', 'Kas', 'wallet'], ['pl', 'Laporan', 'pl'], ['__more', 'Lainnya', 'more']].filter(Boolean);
     $('#tabbar').innerHTML = tabs.map(function (t) {
       return '<button data-tab="' + t[0] + '" class="' + (t[0] === '__add' ? 'fab' : '') + '"><span class="ti">' + icon(t[2]) + '</span>' + esc(t[1]) + '</button>';
     }).join('');
     $$('#tabbar button').forEach(function (b) { b.onclick = function () {
-      if (b.dataset.tab === '__add') openTrxForm('EXPENSE');
+      if (b.dataset.tab === '__add') openQuickMenu();
       else if (b.dataset.tab === '__more') document.body.classList.add('nav-open');
       else go(b.dataset.tab);
     }; });
@@ -808,9 +821,9 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     function render() {
       var r = rangeFromPreset(st);
       el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render, presets) + '<div class="spacer"></div>' +
-        (canEntry() ? '<div class="row no-print hide-m"><button class="btn primary" data-q="INCOME">' + icon('plus') + 'Pemasukan</button><button class="btn" data-q="EXPENSE">Pengeluaran</button><button class="btn" data-q="TRANSFER">Transfer Kas</button><button class="btn" data-q="ASSET">Tambah Aset</button></div>' : '') +
+        (canInput() ? '<div class="row no-print hide-m"><button class="btn primary" data-q="SALES">' + icon('plus') + 'Penjualan</button><button class="btn" data-q="EXPENSE">Biaya</button><button class="btn" data-q="CASH">Kas &amp; Bank</button><button class="btn" data-q="ASSET">Tambah Aset</button></div>' : '') +
         '</div><div id="dashBody">' + skeleton(6) + '</div></div>';
-      $$('[data-q]', el).forEach(function (b) { b.onclick = function () { if (b.dataset.q === 'ASSET') openAssetForm(); else openTrxForm(b.dataset.q); }; });
+      $$('[data-q]', el).forEach(function (b) { b.onclick = function () { var q = b.dataset.q; if (q === 'ASSET') openAssetForm(); else if (q === 'SALES') openSalesForm(); else if (q === 'EXPENSE') openExpenseForm(); else openQuickMenu(); }; });
       call('dashboard.get', { preset: 'CUSTOM', from: r.from, to: r.to }).then(function (d) {
         var k = d.kpi;
         var labels = d.trend.map(function (t) { return mshort(t.period); });
@@ -842,324 +855,629 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       '<div class="k-value' + (value < 0 ? ' neg' : '') + '">' + rp(value) + '</div><div class="k-sub">' + esc(sub || '') + '</div></div>';
   }
 
-  /* ================= TRANSAKSI ================= */
-  VIEWS.transactions = function (el) {
-    var st = S.state.trx = S.state.trx || { page: 1, type: '', status: '', search: '', from: '', to: '' };
-    var types = S.boot.trxTypes;
-    el.innerHTML = '<div class="stack"><div class="row no-print">' +
-      '<button class="btn primary" data-n="INCOME">' + icon('plus') + 'Pemasukan</button><button class="btn" data-n="EXPENSE">Pengeluaran</button>' +
-      '<button class="btn" data-n="TRANSFER">Transfer</button><button class="btn" data-n="SALE">Penjualan</button><button class="btn" data-n="PURCHASE">Pembelian</button>' +
-      (isAdmin() ? '<button class="btn ghost" data-n="JOURNAL">Jurnal Umum</button>' : '') + '</div>' +
-      '<div class="card"><div class="card-h">' +
-      '<input class="input" style="max-width:260px" placeholder="Cari no., keterangan, referensi…" name="search" value="' + esc(st.search) + '">' +
-      '<select class="input" style="max-width:190px" name="type"><option value="">Semua jenis</option>' + Object.keys(types).map(function (k) { return '<option value="' + k + '"' + (st.type === k ? ' selected' : '') + '>' + esc(types[k]) + '</option>'; }).join('') + '</select>' +
-      '<select class="input" style="max-width:160px" name="status"><option value="">Semua status</option>' + ['POSTED', 'DRAFT', 'REVERSED', 'FAILED', 'PENDING'].map(function (s) { return '<option value="' + s + '"' + (st.status === s ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>'; }).join('') + '</select>' +
-      '<input class="input" style="max-width:160px" type="date" name="from" value="' + esc(st.from) + '" title="Dari tanggal"><input class="input" style="max-width:160px" type="date" name="to" value="' + esc(st.to) + '" title="Sampai tanggal">' +
-      '</div><div id="trxList">' + skeleton(5) + '</div></div></div>';
-    $$('[data-n]', el).forEach(function (b) { b.onclick = function () { openTrxForm(b.dataset.n); }; });
-    var timer;
-    $$('.card-h [name]', el).forEach(function (inp) {
-      inp.addEventListener(inp.name === 'search' ? 'input' : 'change', function () {
-        clearTimeout(timer);
-        timer = setTimeout(function () { st[inp.name] = inp.value; st.page = 1; load(); }, inp.name === 'search' ? 350 : 0);
-      });
-    });
-    function load() {
-      call('trx.list', { page: st.page, pageSize: 25, type: st.type, status: st.status, search: st.search, from: st.from, to: st.to }).then(function (pg) {
-        var box = $('#trxList', el); if (!box) return;
-        if (!pg.rows.length) { box.innerHTML = '<div class="empty">Belum ada transaksi yang sesuai filter.</div>'; return; }
-        box.innerHTML = '<div class="table-wrap tlist"><table class="t"><thead><tr><th>Tanggal</th><th>No.</th><th>Jenis</th><th>Keterangan</th><th>Akun</th><th class="num">Nominal</th><th>Status</th></tr></thead><tbody>' +
-          pg.rows.map(function (r) {
-            return '<tr class="click" data-id="' + esc(r.id) + '"><td>' + fdate(r.date) + '</td><td class="small" style="font-family:var(--mono)">' + esc(r.no) + '</td><td>' + esc(r.typeLabel) + '</td>' +
-              '<td>' + esc(r.description || '—') + (r.reference ? '<div class="muted small">Ref: ' + esc(r.reference) + '</div>' : '') + '</td>' +
-              '<td class="small">' + esc(r.type === 'TRANSFER' ? r.cash + ' → ' + r.toCash : [r.category, r.cash].filter(Boolean).join(' · ')) + '</td>' +
-              '<td class="num">' + rp(r.amount) + (r.hasAttachment ? ' <span title="Ada lampiran" class="muted">📎</span>' : '') + '</td><td>' + badge(r.status) + '</td></tr>';
-          }).join('') + '</tbody></table></div>' +
-          '<div class="mlist">' + pg.rows.map(function (r) {
-            return '<div class="mitem" data-id="' + esc(r.id) + '"><div style="flex:1;min-width:0"><div style="font-weight:600">' + esc(r.description || r.typeLabel) + '</div>' +
-              '<div class="muted small">' + fdate(r.date) + ' · ' + esc(r.typeLabel) + ' · ' + esc(r.no) + '</div></div><div style="text-align:right"><div class="num" style="font-weight:600">' + rp(r.amount) + '</div>' + badge(r.status) + '</div></div>';
-          }).join('') + '</div>' + pager(pg, function (p) { st.page = p; load(); });
-        $$('[data-id]', box).forEach(function (tr) { tr.onclick = function () { openTrxDetail(tr.dataset.id); }; });
-      }).catch(function (e) { var b = $('#trxList', el); if (b) b.innerHTML = errorBox(e, load); });
-    }
-    load();
+  /* ================= DOKUMEN TRANSAKSI (v2) ================= */
+  var DOC_UI = {
+    SALES: { view: 'sales', title: 'Penjualan', newLabel: 'Penjualan Baru' },
+    PURCHASE: { view: 'purchases', title: 'Pembelian', newLabel: 'Pembelian Baru' },
+    EXPENSE: { view: 'expenses', title: 'Biaya', newLabel: 'Biaya Baru' },
+    PAYMENT: { view: 'cashbank', title: 'Kas & Bank', newLabel: 'Transaksi Kas & Bank' },
+    JOURNAL: { view: 'journals', title: 'Jurnal Umum', newLabel: 'Jurnal Umum' }
   };
+  var SOURCE_TO_DOC = { SALES: 'SALES', PURCHASE: 'PURCHASE', EXPENSE: 'EXPENSE', PAYMENT: 'PAYMENT', JOURNAL: 'JOURNAL', OPENING_BALANCE: 'JOURNAL' };
+  var PAY_LABEL = { PAID: 'Lunas', PARTIAL: 'Sebagian', UNPAID: 'Belum lunas' };
+  var PAY_BADGE = { PAID: 'POSTED', PARTIAL: 'PENDING', UNPAID: 'FAILED' };
+  STATUS_LABEL.CANCELLED = 'Dibatalkan';
+  function canPost(type) { return type === 'JOURNAL' ? isAdmin() : canEntry(); }
+  function payBadge(s) { return s ? '<span class="badge ' + PAY_BADGE[s] + '">' + PAY_LABEL[s] + '</span>' : ''; }
 
-  var TYPE_HELP = {
-    INCOME: 'Uang masuk ke kas/bank: penjualan tunai, pendapatan lain, setoran modal, penerimaan pinjaman, atau pelunasan piutang.',
-    EXPENSE: 'Uang keluar dari kas/bank: beban operasional, pembayaran utang, cicilan pinjaman, atau prive.',
-    TRANSFER: 'Pemindahan dana antar rekening milik usaha. Tidak dicatat sebagai pendapatan atau beban.',
-    SALE: 'Penjualan barang. Tunai langsung ke kas; kredit menjadi piutang; marketplace menjadi piutang marketplace (dicairkan saat settlement).',
-    PURCHASE: 'Pembelian stok (dicatat sebagai persediaan) atau pembelian untuk beban, tunai atau kredit.',
-    JOURNAL: 'Jurnal manual (Admin): saldo awal, koreksi, atau penyesuaian. Total debit harus sama dengan total kredit.'
-  };
+  function loadOpts(force) {
+    if (S.opts && !force) return Promise.resolve(S.opts);
+    return call('master.options', {}, { silent: true }).then(function (o) { S.opts = o; return o; });
+  }
+  function optList(list, sel, ph, labelFn) {
+    return (ph !== undefined ? '<option value="">' + esc(ph) + '</option>' : '') + (list || []).map(function (x) {
+      return '<option value="' + esc(x.id) + '"' + (x.id === sel ? ' selected' : '') + '>' + esc(labelFn ? labelFn(x) : x.name) + '</option>';
+    }).join('');
+  }
+  function settleAccounts(groups) { return cashAccounts().concat(accountsOf(groups)); }
 
-  /** Form transaksi. existing = {id, rowVersion, form} untuk mengubah draft; preset = nilai awal. */
-  function openTrxForm(type, existing, preset) {
-    if (!canEntry()) return;
-    var f = Object.assign({ type: type, date: today(), amount: 0, details: {}, attachmentIds: [] }, preset || {}, existing ? existing.form : {});
-    f.details = Object.assign({}, f.details || {});
-    var attachments = (existing && existing.attachments) ? existing.attachments.slice() : [];
-    var idemKey = uuid();
-    var title = (existing ? 'Ubah Draft — ' : '') + S.boot.trxTypes[f.type];
-    var d = openDrawer(title, '<div id="tf"></div>',
-      '<div class="err-text" id="tfErr" style="flex-basis:100%"></div><button class="btn" id="tfDraft">Simpan Draft</button><button class="btn primary" id="tfPost">Simpan &amp; Posting</button>');
-    var root = $('#tf', d);
-
-    function sel(name, list, cur, ph) { return '<select class="input" name="' + name + '">' + options(list, cur, ph) + '</select>'; }
-    function money(name, label, v, hint) { return '<label class="field"><span>' + label + (hint ? ' <span class="hint">' + hint + '</span>' : '') + '</span><input class="input money" name="' + name + '" value="' + (v ? NF.format(v) : '') + '" placeholder="0"></label>'; }
-    function seg(name, opts, cur) { return '<div class="seg" data-seg="' + name + '">' + opts.map(function (o) { return '<button type="button" data-v="' + o[0] + '" class="' + (cur === o[0] ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>'; }
-
-    function draw() {
-      var t = f.type, dd = f.details, cash = cashAccounts(), G = S.boot.categoryGroups;
-      var h = '<div class="muted small" style="margin-bottom:14px">' + esc(TYPE_HELP[t]) + '</div><div class="form-grid">';
-      h += '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(f.date) + '"></label>';
-      h += '<label class="field"><span>Jenis transaksi</span><select class="input" name="type">' + Object.keys(S.boot.trxTypes).filter(function (k) { return k !== 'JOURNAL' || isAdmin(); }).map(function (k) { return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + esc(S.boot.trxTypes[k]) + '</option>'; }).join('') + '</select></label>';
-      if (t === 'INCOME' || t === 'EXPENSE') {
-        h += '<label class="field"><span>Kategori *</span>' + sel('categoryAccount', accountsInGroups(G[t]), f.categoryAccount, 'Pilih kategori…') + '</label>';
-        h += '<label class="field"><span>' + (t === 'INCOME' ? 'Masuk ke' : 'Dibayar dari') + ' (Kas/Bank) *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
-        h += money('amount', 'Nominal *', f.amount);
-        h += '<label class="field"><span>Pihak <span class="hint">opsional</span></span><input class="input" name="party" value="' + esc(f.party) + '" placeholder="Pelanggan / pemasok"></label>';
-      } else if (t === 'TRANSFER') {
-        h += '<label class="field"><span>Dari rekening *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih…') + '</label>';
-        h += '<label class="field"><span>Ke rekening *</span>' + sel('toCashAccount', cash, f.toCashAccount, 'Pilih…') + '</label>';
-        h += money('amount', 'Nominal *', f.amount) + money('fee', 'Biaya transfer', dd.fee, 'opsional');
-      } else if (t === 'SALE') {
-        dd.paymentMethod = dd.paymentMethod || 'CASH';
-        h += '<div class="field full"><span>Metode penerimaan</span>' + seg('paymentMethod', [['CASH', 'Tunai/Transfer'], ['CREDIT', 'Kredit (Piutang)'], ['MARKETPLACE', 'Marketplace']], dd.paymentMethod) + '</div>';
-        if (dd.paymentMethod === 'CASH') h += '<label class="field"><span>Diterima di (Kas/Bank) *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
-        if (dd.paymentMethod === 'CREDIT') h += '<label class="field"><span>Pelanggan *</span><input class="input" name="party" value="' + esc(f.party) + '"></label>';
-        if (dd.paymentMethod === 'MARKETPLACE') h += '<label class="field"><span>Marketplace *</span><input class="input" name="channel" list="mpList" value="' + esc(dd.channel || '') + '" placeholder="Shopee, Tokopedia, TikTok Shop…"><datalist id="mpList"><option>Shopee</option><option>Tokopedia</option><option>TikTok Shop</option><option>Lazada</option></datalist></label>';
-        var sales = accountsInGroups(G.SALE);
-        if (sales.length > 1) h += '<label class="field"><span>Akun penjualan</span>' + sel('categoryAccount', sales, f.categoryAccount || S.boot.systemAccounts.ACC_SALES) + '</label>';
-        h += money('amount', 'Nilai penjualan (bruto) *', f.amount) + money('discount', 'Diskon penjual', dd.discount, 'opsional');
-        if (dd.paymentMethod === 'MARKETPLACE') h += money('marketplaceFee', 'Biaya admin marketplace', dd.marketplaceFee);
-        h += money('shippingFee', 'Ongkir ditanggung penjual', dd.shippingFee, 'opsional');
-        h += money('cogs', 'HPP (harga pokok) barang terjual', dd.cogs, 'isi bila diketahui');
-      } else if (t === 'PURCHASE') {
-        dd.purchaseKind = dd.purchaseKind || 'INVENTORY'; dd.paymentMethod = dd.paymentMethod || 'CASH';
-        h += '<div class="field"><span>Jenis pembelian</span>' + seg('purchaseKind', [['INVENTORY', 'Stok barang'], ['EXPENSE', 'Beban/perlengkapan']], dd.purchaseKind) + '</div>';
-        h += '<div class="field"><span>Pembayaran</span>' + seg('paymentMethod', [['CASH', 'Tunai'], ['CREDIT', 'Kredit (Utang)']], dd.paymentMethod) + '</div>';
-        if (dd.purchaseKind === 'EXPENSE') h += '<label class="field"><span>Kategori beban *</span>' + sel('categoryAccount', accountsInGroups(G.PURCHASE_EXPENSE), f.categoryAccount, 'Pilih…') + '</label>';
-        if (dd.paymentMethod === 'CASH') h += '<label class="field"><span>Dibayar dari *</span>' + sel('cashAccount', cash, f.cashAccount, 'Pilih rekening…') + '</label>';
-        h += '<label class="field"><span>Pemasok' + (dd.paymentMethod === 'CREDIT' ? ' *' : '') + '</span><input class="input" name="party" value="' + esc(f.party) + '"></label>';
-        h += money('amount', 'Nominal *', f.amount);
-      } else if (t === 'JOURNAL') {
-        var lines = dd.lines && dd.lines.length ? dd.lines : [{}, {}];
-        dd.lines = lines;
-        h += '<div class="full"><table class="t" id="jl"><thead><tr><th>Akun</th><th class="num">Debit</th><th class="num">Kredit</th><th></th></tr></thead><tbody>' +
-          lines.map(function (l, i) {
-            return '<tr data-i="' + i + '"><td>' + '<select class="input" data-l="account">' + options(postableAccounts(), l.account, 'Pilih akun…') + '</select></td>' +
-              '<td><input class="input money" data-l="debit" value="' + (l.debit ? NF.format(l.debit) : '') + '"></td><td><input class="input money" data-l="credit" value="' + (l.credit ? NF.format(l.credit) : '') + '"></td>' +
-              '<td><button class="icon-btn" data-rm="' + i + '" type="button" aria-label="Hapus baris">' + icon('x') + '</button></td></tr>';
-          }).join('') + '</tbody></table><button class="btn sm" type="button" id="jlAdd" style="margin-top:8px">' + icon('plus') + 'Tambah baris</button></div>';
+  /* ---------- Daftar dokumen (generik) ---------- */
+  function docListView(type) {
+    return function (el) {
+      var ui = DOC_UI[type];
+      var st = S.state['doc' + type] = S.state['doc' + type] || { page: 1, search: '', status: '', from: '', to: '', paymentType: '', paymentStatus: '' };
+      var buttons = '';
+      if (canInput() && (type !== 'JOURNAL' || isAdmin())) {
+        if (type === 'PAYMENT') {
+          buttons = [['CASH_IN', 'Kas Masuk', 'primary'], ['CASH_OUT', 'Kas Keluar', ''], ['TRANSFER', 'Transfer', ''], ['RECEIVE_PAYMENT', 'Terima Pembayaran', ''],
+            ['PAY_SUPPLIER', 'Bayar Pemasok', ''], ['MARKETPLACE_SETTLEMENT', 'Pencairan Marketplace', '']].map(function (b) {
+            return '<button class="btn ' + b[2] + '" data-new="' + b[0] + '">' + (b[2] ? icon('plus') : '') + b[1] + '</button>'; }).join('');
+        } else if (type === 'JOURNAL') {
+          buttons = '<button class="btn primary" data-new="GENERAL">' + icon('plus') + 'Jurnal Umum</button><button class="btn" data-new="OPENING_BALANCE">Saldo Awal</button>';
+        } else buttons = '<button class="btn primary" data-new="1">' + icon('plus') + esc(ui.newLabel) + '</button>';
       }
-      h += '<label class="field full"><span>Keterangan' + (t === 'JOURNAL' ? ' *' : '') + '</span><input class="input" name="description" value="' + esc(f.description) + '" maxlength="300"></label>';
-      h += '<label class="field"><span>Referensi <span class="hint">no. nota / invoice' + (S.boot.requireReferenceMin ? '; wajib ≥ ' + rp(S.boot.requireReferenceMin) : '') + '</span></span><input class="input" name="reference" value="' + esc(f.reference) + '" maxlength="100"></label>';
-      h += '<div class="field"><span>Lampiran <span class="hint">PDF/JPG/PNG, maks 5 MB</span></span><input type="file" id="tfFile" accept="application/pdf,image/jpeg,image/png,image/webp"><div id="tfAtt" class="small"></div></div>';
-      h += '<div class="full preview" id="tfPrev"></div></div>';
-      root.innerHTML = h;
-      bindMoney(root);
-      drawAttachments();
-      $$('[data-seg]', root).forEach(function (sg) {
-        $$('button', sg).forEach(function (b) { b.onclick = function () { collect(); f.details[sg.dataset.seg] = b.dataset.v; draw(); }; });
-      });
-      $('[name=type]', root).onchange = function (e) { collect(); f.type = e.target.value; f.categoryAccount = ''; f.details = {}; draw(); };
-      if (t === 'JOURNAL') {
-        $('#jlAdd', root).onclick = function () { collect(); f.details.lines.push({}); draw(); };
-        $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { collect(); f.details.lines.splice(+b.dataset.rm, 1); if (f.details.lines.length < 2) f.details.lines.push({}); draw(); }; });
-      }
-      $('#tfFile', root).onchange = upload;
-      root.addEventListener('input', preview); root.addEventListener('change', preview);
-      preview();
-    }
-
-    function collect() {
-      if (!$('[name=date]', root)) return;
-      f.date = val(root, 'date');
-      ['categoryAccount', 'cashAccount', 'toCashAccount', 'party', 'description', 'reference'].forEach(function (k) { var el = $('[name=' + k + ']', root); if (el) f[k] = el.value.trim(); });
-      if ($('[name=amount]', root)) f.amount = moneyVal(root, 'amount');
-      ['fee', 'discount', 'marketplaceFee', 'shippingFee', 'cogs'].forEach(function (k) { if ($('[name=' + k + ']', root)) f.details[k] = moneyVal(root, k); });
-      if ($('[name=channel]', root)) f.details.channel = val(root, 'channel');
-      if (f.type === 'JOURNAL') {
-        f.details.lines = $$('#jl tbody tr', root).map(function (tr) {
-          return { account: $('[data-l=account]', tr).value, debit: parseMoney($('[data-l=debit]', tr).value), credit: parseMoney($('[data-l=credit]', tr).value) };
+      el.innerHTML = '<div class="stack"><div class="row no-print">' + buttons + '</div><div class="card"><div class="card-h">' +
+        '<input class="input" style="max-width:260px" placeholder="Cari nomor, pihak, keterangan…" name="search" value="' + esc(st.search) + '">' +
+        '<select class="input" style="max-width:150px" name="status"><option value="">Semua status</option>' + ['DRAFT', 'POSTED', 'CANCELLED'].map(function (s) { return '<option value="' + s + '"' + (st.status === s ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>'; }).join('') + '</select>' +
+        (type === 'PAYMENT' ? '<select class="input" style="max-width:200px" name="paymentType"><option value="">Semua jenis</option>' + Object.keys(S.boot.paymentTypes).map(function (k) { return '<option value="' + k + '"' + (st.paymentType === k ? ' selected' : '') + '>' + esc(S.boot.paymentTypes[k]) + '</option>'; }).join('') + '</select>' : '') +
+        (['SALES', 'PURCHASE', 'EXPENSE'].indexOf(type) !== -1 ? '<select class="input" style="max-width:160px" name="paymentStatus"><option value="">Semua pembayaran</option>' + ['UNPAID', 'PARTIAL', 'PAID'].map(function (s) { return '<option value="' + s + '"' + (st.paymentStatus === s ? ' selected' : '') + '>' + PAY_LABEL[s] + '</option>'; }).join('') + '</select>' : '') +
+        '<input class="input" style="max-width:160px" type="date" name="from" value="' + esc(st.from) + '" title="Dari tanggal"><input class="input" style="max-width:160px" type="date" name="to" value="' + esc(st.to) + '" title="Sampai tanggal">' +
+        '</div><div id="docList">' + skeleton(5) + '</div></div></div>';
+      $$('[data-new]', el).forEach(function (b) { b.onclick = function () {
+        if (type === 'PAYMENT') openPaymentForm(null, { paymentType: b.dataset.new });
+        else if (type === 'JOURNAL') openJournalForm(null, { kind: b.dataset.new });
+        else DOC_FORMS[type](null, null);
+      }; });
+      var timer;
+      $$('.card-h [name]', el).forEach(function (inp) {
+        inp.addEventListener(inp.name === 'search' ? 'input' : 'change', function () {
+          clearTimeout(timer);
+          timer = setTimeout(function () { st[inp.name] = inp.value; st.page = 1; load(); }, inp.name === 'search' ? 350 : 0);
         });
+      });
+      function load() {
+        call('doc.list', { type: type, page: st.page, pageSize: 25, search: st.search, status: st.status, from: st.from, to: st.to, paymentType: st.paymentType, paymentStatus: st.paymentStatus }).then(function (pg) {
+          var box = $('#docList', el); if (!box) return;
+          if (!pg.rows.length) { box.innerHTML = '<div class="empty"><b>Belum ada ' + esc(ui.title.toLowerCase()) + '</b>' + (canInput() ? 'Gunakan tombol di atas untuk mencatat transaksi pertama.' : '') + '</div>'; return; }
+          box.innerHTML = '<div class="table-wrap tlist"><table class="t"><thead><tr><th>Tanggal</th><th>No.</th><th>' + (type === 'PAYMENT' ? 'Jenis' : 'Pihak') + '</th><th>Keterangan</th><th class="num">Nominal</th><th>Status</th></tr></thead><tbody>' +
+            pg.rows.map(function (r) {
+              return '<tr class="click" data-id="' + esc(r.id) + '"><td class="nowrap">' + fdate(r.date) + '</td><td style="font-weight:700;white-space:nowrap">' + esc(r.no) + '</td>' +
+                '<td>' + esc(type === 'PAYMENT' ? (S.boot.paymentTypes[r.paymentType] || '') : r.party || '—') + (type === 'PAYMENT' && r.party ? '<div class="muted small">' + esc(r.party) + '</div>' : '') + '</td>' +
+                '<td>' + esc(r.description || '') + (r.reference ? '<div class="muted small">Ref: ' + esc(r.reference) + '</div>' : '') + '</td>' +
+                '<td class="num">' + rp(r.amount) + (r.outstanding ? '<div class="small neg">sisa ' + rp(r.outstanding) + '</div>' : '') + '</td>' +
+                '<td>' + badge(r.status) + ' ' + (r.status === 'POSTED' && r.paymentStatus && r.paymentStatus !== 'PAID' ? payBadge(r.paymentStatus) : '') + '</td></tr>';
+            }).join('') + '</tbody></table></div>' +
+            '<div class="mlist">' + pg.rows.map(function (r) {
+              return '<div class="mitem" data-id="' + esc(r.id) + '"><div style="flex:1;min-width:0"><div style="font-weight:700">' + esc(r.party || r.description || r.no) + '</div>' +
+                '<div class="muted small">' + fdate(r.date) + ' · ' + esc(r.no) + (type === 'PAYMENT' ? ' · ' + esc(S.boot.paymentTypes[r.paymentType] || '') : '') + '</div></div>' +
+                '<div style="text-align:right"><div class="num" style="font-weight:800">' + rp(r.amount) + '</div>' + badge(r.status) + '</div></div>';
+            }).join('') + '</div>' + pager(pg, function (p) { st.page = p; load(); });
+          $$('[data-id]', box).forEach(function (tr) { tr.onclick = function () { openDocDetail(type, tr.dataset.id); }; });
+        }).catch(function (e) { var b = $('#docList', el); if (b) b.innerHTML = errorBox(e, load); });
       }
-      f.attachmentIds = attachments.map(function (a) { return a.id; });
-    }
+      load();
+    };
+  }
+  VIEWS.sales = docListView('SALES');
+  VIEWS.purchases = docListView('PURCHASE');
+  VIEWS.expenses = docListView('EXPENSE');
+  VIEWS.cashbank = docListView('PAYMENT');
+  VIEWS.journals = docListView('JOURNAL');
 
-    /** Pratinjau jurnal di sisi klien (server tetap memvalidasi & membangun jurnal final). */
-    function preview() {
-      collect();
-      var L = [], t = f.type, dd = f.details, A = S.boot.systemAccounts, amt = f.amount || 0;
-      if (t === 'INCOME') { L.push([f.cashAccount, amt, 0]); L.push([f.categoryAccount, 0, amt]); }
-      if (t === 'EXPENSE') { L.push([f.categoryAccount, amt, 0]); L.push([f.cashAccount, 0, amt]); }
-      if (t === 'TRANSFER') { L.push([f.toCashAccount, amt, 0]); L.push([f.cashAccount, 0, amt]); if (dd.fee) { L.push([A.ACC_BANK_FEE, dd.fee, 0]); L.push([f.cashAccount, 0, dd.fee]); } }
-      if (t === 'SALE') {
-        var net = amt - (dd.discount || 0) - (dd.marketplaceFee || 0) - (dd.shippingFee || 0);
-        var recv = dd.paymentMethod === 'CASH' ? f.cashAccount : dd.paymentMethod === 'CREDIT' ? A.ACC_AR : A.ACC_AR_MARKETPLACE;
-        if (net > 0) L.push([recv, net, 0]);
-        if (dd.discount) L.push([A.ACC_SALES_DISCOUNT, dd.discount, 0]);
-        if (dd.marketplaceFee) L.push([A.ACC_MARKETPLACE_FEE, dd.marketplaceFee, 0]);
-        if (dd.shippingFee) L.push([A.ACC_SHIPPING, dd.shippingFee, 0]);
-        L.push([f.categoryAccount || A.ACC_SALES, 0, amt]);
-        if (dd.cogs) { L.push([A.ACC_COGS, dd.cogs, 0]); L.push([A.ACC_INVENTORY, 0, dd.cogs]); }
-      }
-      if (t === 'PURCHASE') {
-        var dr = dd.purchaseKind === 'INVENTORY' ? A.ACC_INVENTORY : f.categoryAccount;
-        L.push([dr, amt, 0]); L.push([dd.paymentMethod === 'CREDIT' ? A.ACC_AP : f.cashAccount, 0, amt]);
-      }
-      if (t === 'JOURNAL') (dd.lines || []).forEach(function (l) { if (l.account || l.debit || l.credit) L.push([l.account, l.debit || 0, l.credit || 0]); });
-      var td = 0, tc = 0;
-      L.forEach(function (l) { td += l[1]; tc += l[2]; });
-      var box = $('#tfPrev', root); if (!box) return;
-      box.innerHTML = '<div style="font-weight:600;margin-bottom:6px">Pratinjau jurnal otomatis</div><table>' + L.map(function (l) {
-        return '<tr><td' + (l[2] ? ' style="padding-left:20px"' : '') + '>' + (l[0] ? esc(l[0] + ' · ' + accName(l[0])) : '<span class="muted">(akun belum dipilih)</span>') + '</td><td class="num">' + (l[1] ? rp(l[1]) : '') + '</td><td class="num">' + (l[2] ? rp(l[2]) : '') + '</td></tr>';
-      }).join('') + '<tr style="border-top:1px solid #BFD9CC;font-weight:600"><td>Total</td><td class="num">' + rp(td) + '</td><td class="num">' + rp(tc) + '</td></tr></table>' +
-        (td !== tc ? '<div class="err-text">Debit dan kredit belum seimbang (selisih ' + rp(td - tc) + ').</div>' : '') +
-        (t === 'SALE' && amt && !dd.cogs ? '<div class="small" style="color:#8A4A0B;margin-top:4px">HPP belum diisi — laba kotor akan terlihat lebih tinggi sampai HPP dicatat.</div>' : '');
-    }
-
-    function drawAttachments() {
-      var box = $('#tfAtt', root); if (!box) return;
-      box.innerHTML = attachments.map(function (a, i) { return '<div class="row" style="gap:6px;margin-top:4px">📎 <a href="' + esc(a.url) + '" target="_blank">' + esc(a.name) + '</a><button class="btn sm ghost" data-rma="' + i + '" type="button">hapus</button></div>'; }).join('');
-      $$('[data-rma]', box).forEach(function (b) { b.onclick = function () { attachments.splice(+b.dataset.rma, 1); drawAttachments(); }; });
-    }
-    function upload(ev) {
+  /* ---------- Lampiran ---------- */
+  function attachWidget(box, list) {
+    var draw = function () {
+      $('.att-list', box).innerHTML = list.map(function (a, i) { return '<div class="row" style="gap:6px;margin-top:4px">📎 ' + (a.url ? '<a href="' + esc(a.url) + '" target="_blank">' + esc(a.name) + '</a>' : esc(a.name)) + '<button class="btn sm ghost" data-rma="' + i + '" type="button">hapus</button></div>'; }).join('');
+      $$('[data-rma]', box).forEach(function (b) { b.onclick = function () { list.splice(+b.dataset.rma, 1); draw(); }; });
+    };
+    box.innerHTML = '<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp"><div class="att-list small"></div>';
+    $('input', box).onchange = function (ev) {
       var file = ev.target.files[0]; if (!file) return;
       if (file.size > 5 * 1024 * 1024) { toast('Ukuran file maksimal 5 MB.', 'err'); ev.target.value = ''; return; }
       var reader = new FileReader();
       reader.onload = function () {
-        var b64 = String(reader.result).split(',')[1];
-        $('#tfAtt', root).insertAdjacentHTML('beforeend', '<div class="muted" id="upl">Mengunggah ' + esc(file.name) + '…</div>');
-        call('trx.upload', { name: file.name, mimeType: file.type, base64: b64 }, { write: true }).then(function (r) {
-          attachments.push({ id: r.fileId, name: r.name, url: r.url }); drawAttachments();
-        }).catch(function (e) { fail(e); drawAttachments(); });
+        $('.att-list', box).insertAdjacentHTML('beforeend', '<div class="muted">Mengunggah ' + esc(file.name) + '…</div>');
+        call('file.upload', { name: file.name, mimeType: file.type, base64: String(reader.result).split(',')[1] }, { write: true })
+          .then(function (r) { list.push({ id: r.fileId, name: r.name, url: r.url }); draw(); }).catch(function (e) { fail(e); draw(); });
         ev.target.value = '';
       };
       reader.readAsDataURL(file);
-    }
-
-    function payload(extra) {
-      collect();
-      return Object.assign({ type: f.type, date: f.date, amount: f.amount, categoryAccount: f.categoryAccount, cashAccount: f.cashAccount,
-        toCashAccount: f.toCashAccount, description: f.description, reference: f.reference, party: f.party, details: f.details,
-        attachmentIds: f.attachmentIds, idemKey: idemKey }, extra || {});
-    }
-    function clientValidate(post) {
-      var e = [];
-      if (!f.date) e.push('Tanggal wajib diisi.');
-      if (f.type !== 'JOURNAL' && !(f.amount > 0)) e.push('Nominal harus lebih dari 0.');
-      if (post) {
-        if ((f.type === 'INCOME' || f.type === 'EXPENSE') && (!f.categoryAccount || !f.cashAccount)) e.push('Pilih kategori dan rekening kas/bank.');
-        if (f.type === 'TRANSFER' && (!f.cashAccount || !f.toCashAccount)) e.push('Pilih rekening asal dan tujuan.');
-        if (f.type === 'TRANSFER' && f.cashAccount && f.cashAccount === f.toCashAccount) e.push('Rekening asal dan tujuan tidak boleh sama.');
-        if (S.boot.lockedPeriods.indexOf(period(f.date || '')) !== -1) e.push('Periode ' + mlabel(period(f.date)) + ' sudah ditutup.');
-      }
-      return e;
-    }
-    var busy = false;
-    function setBusy(b) { busy = b; $('#overlay').dataset.busy = b ? '1' : ''; if (!b) delete $('#overlay').dataset.busy; $('#tfPost', d.parentNode).disabled = b; $('#tfDraft', d.parentNode).disabled = b; $('#tfPost', d.parentNode).textContent = b ? 'Memproses…' : 'Simpan & Posting'; }
-    function submit(post, extra) {
-      if (busy) return; // cegah double-click
-      collect();
-      var errs = clientValidate(post);
-      var errEl = $('#tfErr', d.parentNode);
-      errEl.textContent = errs.join(' ');
-      if (errs.length) return;
-      setBusy(true);
-      var p;
-      if (!post) p = call('trx.saveDraft', Object.assign(payload(), existing ? { trxId: existing.id, rowVersion: existing.rowVersion } : {}), { write: true });
-      else if (existing) p = call('trx.saveDraft', Object.assign(payload(), { trxId: existing.id, rowVersion: existing.rowVersion }), { write: true })
-        .then(function (r) { return call('trx.postDraft', Object.assign({ trxId: r.trxId, idemKey: idemKey }, extra || {}), { write: true }); });
-      else p = call('trx.post', payload(extra), { write: true });
-      p.then(function (r) {
-        setBusy(false);
-        closeDrawer();
-        toast(post ? (r.duplicateSubmission ? 'Transaksi sudah tercatat sebelumnya (' + (r.trxNo || '') + ').' : 'Transaksi ' + r.trxNo + ' berhasil diposting.') : 'Draft ' + r.trxNo + ' disimpan.', 'ok');
-        refreshView();
-      }).catch(function (e) {
-        setBusy(false);
-        if (e.code === 'CONFIRM_REQUIRED') {
-          ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap simpan' }).then(function (ok) { if (ok) submit(post, { confirmDuplicate: true }); });
-          return;
-        }
-        if (existing && e.code === 'CONFLICT') { errEl.textContent = e.message; return; }
-        errEl.textContent = e.message;
-        if (e.code === 'NETWORK') errEl.textContent += ' Kunci pengiriman yang sama akan dipakai saat mencoba lagi, sehingga tidak terjadi pencatatan ganda.';
-      });
-    }
-    $('#tfPost', d.parentNode).onclick = function () { submit(true); };
-    $('#tfDraft', d.parentNode).onclick = function () { submit(false); };
+    };
     draw();
   }
 
-  function journalTable(j) {
+  /* ---------- Rangka form dokumen: simpan draft / simpan & posting ---------- */
+  function docForm(type, existing, title, bodyHtml, api) {
+    var state = { id: existing ? existing.id : null, rowVersion: existing ? existing.rowVersion : null, idemKey: uuid(), busy: false };
+    var postBtn = canPost(type) ? '<button class="btn primary" id="dfPost">Simpan &amp; Posting</button>' : '';
+    var d = openDrawer(title, bodyHtml, '<div class="err-text" id="dfErr" style="flex-basis:100%"></div>' +
+      (canPost(type) ? '' : '<span class="muted small" style="margin-right:auto">Draft akan diposting oleh Admin / Staf Keuangan.</span>') +
+      '<button class="btn" id="dfDraft">Simpan Draft</button>' + postBtn);
+    var f = d.parentNode;
+    function setBusy(b) {
+      state.busy = b; var ov = $('#overlay'); if (b) ov.dataset.busy = '1'; else delete ov.dataset.busy;
+      ['#dfDraft', '#dfPost'].forEach(function (s) { var x = $(s, f); if (x) { x.disabled = b; x.classList.toggle('busy', b); } });
+    }
+    function submit(post, extra) {
+      if (state.busy) return;
+      var errEl = $('#dfErr', f); errEl.textContent = '';
+      var data;
+      try { data = api.collect(); } catch (e) { errEl.textContent = e.message; return; }
+      if (post && S.boot.lockedPeriods.indexOf(period(data.date || '')) !== -1) { errEl.textContent = 'Periode ' + mlabel(period(data.date)) + ' sudah ditutup.'; return; }
+      setBusy(true);
+      var saveP = (extra && state.savedOnce) ? Promise.resolve({ id: state.id, rowVersion: state.rowVersion })
+        : call('doc.save', { type: type, id: state.id || undefined, rowVersion: state.rowVersion, data: data }, { write: true });
+      saveP.then(function (s) {
+        state.id = s.id; state.rowVersion = s.rowVersion; state.savedOnce = true; state.no = s.no || state.no;
+        if (!post) return { draft: true, no: s.no };
+        return call('doc.post', Object.assign({ type: type, id: s.id, idemKey: state.idemKey }, extra || {}), { write: true });
+      }).then(function (r) {
+        setBusy(false); closeDrawer();
+        toast(r.draft ? 'Draft ' + r.no + ' disimpan.' : (r.duplicateSubmission ? 'Sudah tercatat sebelumnya.' : (r.no || state.no) + ' berhasil diposting.'), 'ok');
+        S.opts = null; refreshView();
+      }).catch(function (e) {
+        setBusy(false);
+        if (e.code === 'CONFIRM_REQUIRED') {
+          ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap posting' }).then(function (okk) { if (okk) submit(true, { confirmDuplicate: true }); });
+          return;
+        }
+        // Setelah draft tersimpan, percobaan berikutnya mengubah draft yang sama (bukan membuat baru).
+        if (state.savedOnce && e.code !== 'CONFLICT') { state.savedOnce = false; }
+        errEl.textContent = e.message + (state.id && post ? ' (Draft sudah tersimpan; perbaiki lalu posting lagi.)' : '');
+        if (e.code === 'CONFLICT' || e.code === 'NOT_DRAFT') errEl.textContent = e.message;
+      });
+    }
+    $('#dfDraft', f).onclick = function () { submit(false); };
+    if ($('#dfPost', f)) $('#dfPost', f).onclick = function () { submit(true); };
+    return d;
+  }
+
+  function previewHtml(L) {
+    var td = 0, tc = 0; L.forEach(function (l) { td += l[1]; tc += l[2]; });
+    return '<div style="font-weight:700;margin-bottom:6px">Pratinjau jurnal <span class="muted small" style="font-weight:600">· dihitung ulang server saat posting</span></div><table>' + L.map(function (l) {
+      return '<tr><td' + (l[2] ? ' style="padding-left:20px"' : '') + '>' + (l[0] ? esc(l[0] + ' · ' + accName(l[0])) : '<span class="muted">(akun belum dipilih)</span>') + '</td><td class="num">' + (l[1] ? rp(l[1]) : '') + '</td><td class="num">' + (l[2] ? rp(l[2]) : '') + '</td></tr>';
+    }).join('') + '<tr style="border-top:1px solid var(--line);font-weight:800"><td>Total</td><td class="num">' + rp(td) + '</td><td class="num">' + rp(tc) + '</td></tr></table>' +
+      (td !== tc ? '<div class="err-text">Debit dan kredit belum seimbang (selisih ' + rp(td - tc) + ').</div>' : '');
+  }
+  function sumRow(label, v, strong) { return '<div class="row" style="justify-content:space-between;padding:3px 0' + (strong ? ';font-weight:800;border-top:1px solid var(--line);margin-top:4px;padding-top:7px' : '') + '"><span class="muted">' + esc(label) + '</span><span class="num">' + rp(v) + '</span></div>'; }
+  function quickAdd(kind, then) {
+    var isCust = kind === 'customer';
+    ask({ title: isCust ? 'Pelanggan baru' : 'Pemasok baru', message: '', confirm: 'Simpan',
+      extraHtml: '<div class="stack"><label class="field"><span>Nama *</span><input class="input" id="qaN"></label><label class="field"><span>Telepon</span><input class="input" id="qaP"></label></div>',
+      collect: function (w) { var n = $('#qaN', w).value.trim(); if (!n) { $('#dlgErr', w).textContent = 'Nama wajib diisi.'; return false; } return { n: n, p: $('#qaP', w).value.trim() }; } }).then(function (r) {
+      if (!r) return;
+      var data = isCust ? { CUSTOMER_NAME: r.n, PHONE: r.p } : { SUPPLIER_NAME: r.n, PHONE: r.p };
+      call(isCust ? 'customer.save' : 'supplier.save', { data: data }, { write: true }).then(function (x) {
+        toast((isCust ? 'Pelanggan ' : 'Pemasok ') + r.n + ' ditambahkan.', 'ok');
+        loadOpts(true).then(function () { then(isCust ? x.CUSTOMER_ID : x.SUPPLIER_ID); });
+      }).catch(fail);
+    });
+  }
+
+  /* ---------- Form Penjualan ---------- */
+  function openSalesForm(existing, preset) {
+    loadOpts().then(function (o) {
+      var v = Object.assign({ date: today(), lines: [{}], paymentAccount: '1110' }, preset || {}, existing ? existing.input : {});
+      var att = existing ? existing.attachments.slice() : [];
+      var body = '<div class="form-grid" id="sf">' +
+        '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>' +
+        '<div class="field"><span>Pelanggan</span><div class="row" style="flex-wrap:nowrap"><select class="input" name="customerId">' + optList(o.customers, v.customerId, '— Umum / tanpa nama —') + '</select>' + (canInput() ? '<button class="btn" type="button" id="sfNewCust" title="Pelanggan baru">' + icon('plus') + '</button>' : '') + '</div></div>' +
+        '<label class="field"><span>Marketplace</span><select class="input" name="marketplaceId">' + optList(o.marketplaces, v.marketplaceId, '— Penjualan langsung —') + '</select></label>' +
+        '<label class="field" id="sfOrder"><span>No. order marketplace</span><input class="input" name="marketplaceOrderId" value="' + esc(v.marketplaceOrderId) + '"></label>' +
+        '<div class="full"><table class="t lines" id="sfLines"><thead><tr><th>Produk</th><th class="num" style="width:80px">Qty</th><th class="num" style="width:130px">Harga</th><th class="num hide-m" style="width:110px">Diskon</th><th class="num hide-m">Total</th><th></th></tr></thead><tbody></tbody></table>' +
+        '<button class="btn sm" type="button" id="sfAdd" style="margin-top:8px">' + icon('plus') + 'Tambah produk</button></div>' +
+        '<label class="field"><span>Diskon faktur</span><input class="input money" name="discount" value="' + (v.discount ? NF.format(v.discount) : '') + '" placeholder="0"></label>' +
+        '<label class="field"><span>Ongkir dibayar pembeli</span><input class="input money" name="shippingIncome" value="' + (v.shippingIncome ? NF.format(v.shippingIncome) : '') + '" placeholder="0"></label>' +
+        '<label class="field" id="sfFee"><span>Biaya marketplace</span><input class="input money" name="marketplaceFee" value="' + (v.marketplaceFee ? NF.format(v.marketplaceFee) : '') + '" placeholder="0"></label>' +
+        '<label class="field"><span>Biaya lain</span><input class="input money" name="otherFee" value="' + (v.otherFee ? NF.format(v.otherFee) : '') + '" placeholder="0"></label>' +
+        '<label class="field full"><span>Dana diterima di / dicatat sebagai *</span><select class="input" name="paymentAccount">' + options(settleAccounts(['RECEIVABLE']), v.paymentAccount) + '</select><span class="hint">Pilih kas/bank bila sudah dibayar; pilih Piutang bila belum (pelunasan dicatat di Kas &amp; Bank).</span></label>' +
+        '<div class="full card-b" style="background:#fcfbf8;border-radius:12px" id="sfSum"></div>' +
+        '<label class="field"><span>Referensi</span><input class="input" name="reference" value="' + esc(v.reference) + '"></label>' +
+        '<label class="field"><span>Catatan</span><input class="input" name="notes" value="' + esc(v.notes) + '"></label>' +
+        '<div class="field full"><span>Lampiran <span class="hint">PDF/JPG/PNG maks 5 MB</span></span><div id="sfAtt"></div></div>' +
+        '<div class="full preview" id="sfPrev"></div></div>';
+      var d = docForm('SALES', existing, existing ? 'Ubah Draft ' + existing.no : 'Penjualan Baru', body, { collect: collect });
+      var root = $('#sf', d);
+      var lines = (v.lines && v.lines.length ? v.lines : [{}]).map(function (l) { return Object.assign({}, l); });
+      function drawLines() {
+        $('#sfLines tbody', root).innerHTML = lines.map(function (l, i) {
+          return '<tr data-i="' + i + '"><td><select class="input" data-l="productId">' + optList(o.products, l.productId, 'Pilih produk…', function (p) { return p.SKU + ' · ' + p.name; }) + '</select></td>' +
+            '<td><input class="input money" data-l="qty" value="' + (l.qty || '') + '" placeholder="1"></td><td><input class="input money" data-l="unitPrice" value="' + (l.unitPrice ? NF.format(l.unitPrice) : '') + '"></td>' +
+            '<td class="hide-m"><input class="input money" data-l="discount" value="' + (l.discount ? NF.format(l.discount) : '') + '"></td><td class="num hide-m" data-tot></td>' +
+            '<td><button class="icon-btn" type="button" data-rm="' + i + '">' + icon('x') + '</button></td></tr>';
+        }).join('');
+        bindMoney(root);
+        $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { readLines(); lines.splice(+b.dataset.rm, 1); if (!lines.length) lines.push({}); drawLines(); update(); }; });
+        $$('[data-l=productId]', root).forEach(function (s) { s.onchange = function () {
+          readLines(); var i = +s.closest('tr').dataset.i; var p = o.products.filter(function (x) { return x.id === s.value; })[0];
+          if (p && !lines[i].unitPrice) lines[i].unitPrice = p.SELLING_PRICE || 0;
+          if (p && !lines[i].qty) lines[i].qty = 1;
+          drawLines(); update();
+        }; });
+      }
+      function readLines() {
+        lines = $$('#sfLines tbody tr', root).map(function (tr) {
+          return { productId: $('[data-l=productId]', tr).value, qty: parseMoney($('[data-l=qty]', tr).value), unitPrice: parseMoney($('[data-l=unitPrice]', tr).value), discount: parseMoney($('[data-l=discount]', tr).value) };
+        });
+      }
+      function collect() {
+        readLines();
+        return { date: val(root, 'date'), customerId: val(root, 'customerId'), marketplaceId: val(root, 'marketplaceId'), marketplaceOrderId: val(root, 'marketplaceOrderId'),
+          lines: lines.filter(function (l) { return l.productId || l.qty || l.unitPrice; }), discount: moneyVal(root, 'discount'), shippingIncome: moneyVal(root, 'shippingIncome'),
+          marketplaceFee: val(root, 'marketplaceId') ? moneyVal(root, 'marketplaceFee') : 0, otherFee: moneyVal(root, 'otherFee'), paymentAccount: val(root, 'paymentAccount'),
+          reference: val(root, 'reference'), notes: val(root, 'notes'), attachmentIds: att.map(function (a) { return a.id; }) };
+      }
+      function update() {
+        var x = collect();
+        $('#sfOrder', root).classList.toggle('hidden', !x.marketplaceId); $('#sfFee', root).classList.toggle('hidden', !x.marketplaceId);
+        var sub = 0, ld = 0, rev = {};
+        $$('#sfLines tbody tr', root).forEach(function (tr, i) { var l = lines[i] || {}; var t = (l.qty || 0) * (l.unitPrice || 0) - (l.discount || 0); $('[data-tot]', tr).textContent = l.productId ? rp(t) : ''; });
+        x.lines.forEach(function (l) { sub += (l.qty || 0) * (l.unitPrice || 0); ld += l.discount || 0; });
+        var total = sub - ld - x.discount + x.shippingIncome, net = total - x.marketplaceFee - x.otherFee;
+        $('#sfSum', root).innerHTML = sumRow('Subtotal', sub) + (ld + x.discount ? sumRow('Diskon', -(ld + x.discount)) : '') + (x.shippingIncome ? sumRow('Ongkir dari pembeli', x.shippingIncome) : '') +
+          sumRow('Total penjualan', total, true) + (x.marketplaceFee + x.otherFee ? sumRow('Biaya marketplace & lain', -(x.marketplaceFee + x.otherFee)) + sumRow('Dana diterima bersih', net, true) : '');
+        var A = S.boot.systemAccounts, L = [];
+        if (net > 0) L.push([x.paymentAccount, net, 0]);
+        if (ld + x.discount) L.push([A.ACC_SALES_DISCOUNT, ld + x.discount, 0]);
+        if (x.marketplaceFee) L.push([A.ACC_MARKETPLACE_FEE, x.marketplaceFee, 0]);
+        if (x.otherFee) L.push([A.ACC_OTHER_SALES_FEE, x.otherFee, 0]);
+        if (sub) L.push([A.ACC_SALES, 0, sub]);
+        if (x.shippingIncome) L.push([A.ACC_SHIPPING_INCOME, 0, x.shippingIncome]);
+        $('#sfPrev', root).innerHTML = previewHtml(L);
+      }
+      $('[name=marketplaceId]', root).onchange = function () {
+        var mk = (o.marketplaces || []).filter(function (m) { return m.id === val(root, 'marketplaceId'); })[0];
+        if (mk) $('[name=paymentAccount]', root).value = mk.RECEIVABLE_ACCOUNT;
+        update();
+      };
+      $('#sfAdd', root).onclick = function () { readLines(); lines.push({}); drawLines(); };
+      if ($('#sfNewCust', root)) $('#sfNewCust', root).onclick = function () { quickAdd('customer', function (id) { o = S.opts; $('[name=customerId]', root).innerHTML = optList(o.customers, id, '— Umum / tanpa nama —'); }); };
+      root.addEventListener('input', update); root.addEventListener('change', update);
+      drawLines(); bindMoney(root); attachWidget($('#sfAtt', root), att); update();
+    }).catch(fail);
+  }
+
+  /* ---------- Form Pembelian ---------- */
+  function openPurchaseForm(existing, preset) {
+    loadOpts().then(function (o) {
+      var v = Object.assign({ date: today(), lines: [{}], paymentAccount: '1120' }, preset || {}, existing ? existing.input : {});
+      var att = existing ? existing.attachments.slice() : [];
+      var itemOpts = function (sel) {
+        return '<option value="">Pilih barang / akun…</option><optgroup label="Produk (stok)">' + (o.products || []).filter(function (p) { return p.IS_STOCK_ITEM !== false; }).map(function (p) { return '<option value="P:' + esc(p.id) + '"' + (sel === 'P:' + p.id ? ' selected' : '') + '>' + esc(p.SKU + ' · ' + p.name) + '</option>'; }).join('') +
+          '</optgroup><optgroup label="Akun biaya / lainnya">' + accountsOf(['OPEX', 'OTHER_EXPENSE', 'PREPAID']).map(function (a) { return '<option value="A:' + a.code + '"' + (sel === 'A:' + a.code ? ' selected' : '') + '>' + esc(a.code + ' · ' + a.name) + '</option>'; }).join('') + '</optgroup>';
+      };
+      var body = '<div class="form-grid" id="pf">' +
+        '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>' +
+        '<div class="field"><span>Pemasok</span><div class="row" style="flex-wrap:nowrap"><select class="input" name="supplierId">' + optList(o.suppliers, v.supplierId, '— Pilih pemasok —') + '</select>' + (canInput() ? '<button class="btn" type="button" id="pfNewSup">' + icon('plus') + '</button>' : '') + '</div></div>' +
+        '<label class="field"><span>No. faktur pemasok</span><input class="input" name="supplierInvoice" value="' + esc(v.supplierInvoice) + '"></label>' +
+        '<label class="field"><span>Dibayar dari / dicatat sebagai *</span><select class="input" name="paymentAccount">' + options(settleAccounts(['PAYABLE']), v.paymentAccount) + '</select></label>' +
+        '<div class="full"><table class="t lines" id="pfLines"><thead><tr><th>Barang / akun</th><th class="num" style="width:80px">Qty</th><th class="num" style="width:130px">Harga</th><th class="num hide-m" style="width:110px">Diskon</th><th></th></tr></thead><tbody></tbody></table>' +
+        '<button class="btn sm" type="button" id="pfAdd" style="margin-top:8px">' + icon('plus') + 'Tambah baris</button></div>' +
+        '<label class="field"><span>Diskon faktur</span><input class="input money" name="discount" value="' + (v.discount ? NF.format(v.discount) : '') + '" placeholder="0"></label>' +
+        '<label class="field"><span>Ongkos kirim</span><input class="input money" name="shippingCost" value="' + (v.shippingCost ? NF.format(v.shippingCost) : '') + '" placeholder="0"></label>' +
+        '<label class="field"><span>PPN</span><input class="input money" name="tax" value="' + (v.tax ? NF.format(v.tax) : '') + '" placeholder="0"></label>' +
+        '<div class="field"><span>&nbsp;</span><div class="small muted">Ongkir &amp; diskon faktur dibebankan ke harga perolehan barang secara proporsional.</div></div>' +
+        '<div class="full card-b" style="background:#fcfbf8;border-radius:12px" id="pfSum"></div>' +
+        '<label class="field"><span>Referensi</span><input class="input" name="reference" value="' + esc(v.reference) + '"></label>' +
+        '<label class="field"><span>Catatan</span><input class="input" name="notes" value="' + esc(v.notes) + '"></label>' +
+        '<div class="field full"><span>Lampiran</span><div id="pfAtt"></div></div></div>';
+      var d = docForm('PURCHASE', existing, existing ? 'Ubah Draft ' + existing.no : 'Pembelian Baru', body, { collect: collect });
+      var root = $('#pf', d);
+      var lines = (v.lines && v.lines.length ? v.lines : [{}]).map(function (l) { return { item: l.productId ? 'P:' + l.productId : (l.expenseAccount ? 'A:' + l.expenseAccount : ''), qty: l.qty, unitCost: l.unitCost, discount: l.discount, description: l.description }; });
+      function drawLines() {
+        $('#pfLines tbody', root).innerHTML = lines.map(function (l, i) {
+          return '<tr data-i="' + i + '"><td><select class="input" data-l="item">' + itemOpts(l.item) + '</select></td><td><input class="input money" data-l="qty" value="' + (l.qty || '') + '" placeholder="1"></td>' +
+            '<td><input class="input money" data-l="unitCost" value="' + (l.unitCost ? NF.format(l.unitCost) : '') + '"></td><td class="hide-m"><input class="input money" data-l="discount" value="' + (l.discount ? NF.format(l.discount) : '') + '"></td>' +
+            '<td><button class="icon-btn" type="button" data-rm="' + i + '">' + icon('x') + '</button></td></tr>';
+        }).join('');
+        bindMoney(root);
+        $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { readLines(); lines.splice(+b.dataset.rm, 1); if (!lines.length) lines.push({}); drawLines(); update(); }; });
+        $$('[data-l=item]', root).forEach(function (s) { s.onchange = function () {
+          readLines(); var i = +s.closest('tr').dataset.i; var p = s.value.indexOf('P:') === 0 ? o.products.filter(function (x) { return 'P:' + x.id === s.value; })[0] : null;
+          if (p && !lines[i].unitCost) lines[i].unitCost = p.PURCHASE_PRICE || 0;
+          if (!lines[i].qty) lines[i].qty = 1;
+          drawLines(); update();
+        }; });
+      }
+      function readLines() { lines = $$('#pfLines tbody tr', root).map(function (tr) { return { item: $('[data-l=item]', tr).value, qty: parseMoney($('[data-l=qty]', tr).value), unitCost: parseMoney($('[data-l=unitCost]', tr).value), discount: parseMoney($('[data-l=discount]', tr).value) }; }); }
+      function collect() {
+        readLines();
+        return { date: val(root, 'date'), supplierId: val(root, 'supplierId'), supplierInvoice: val(root, 'supplierInvoice'), paymentAccount: val(root, 'paymentAccount'),
+          lines: lines.filter(function (l) { return l.item || l.qty || l.unitCost; }).map(function (l) {
+            return { productId: l.item.indexOf('P:') === 0 ? l.item.slice(2) : '', expenseAccount: l.item.indexOf('A:') === 0 ? l.item.slice(2) : '', qty: l.qty || 1, unitCost: l.unitCost, discount: l.discount };
+          }),
+          discount: moneyVal(root, 'discount'), shippingCost: moneyVal(root, 'shippingCost'), tax: moneyVal(root, 'tax'), reference: val(root, 'reference'), notes: val(root, 'notes'),
+          attachmentIds: att.map(function (a) { return a.id; }) };
+      }
+      function update() {
+        var x = collect(), sub = x.lines.reduce(function (s, l) { return s + l.qty * (l.unitCost || 0) - (l.discount || 0); }, 0);
+        $('#pfSum', root).innerHTML = sumRow('Subtotal', sub) + (x.discount ? sumRow('Diskon faktur', -x.discount) : '') + (x.shippingCost ? sumRow('Ongkos kirim', x.shippingCost) : '') + (x.tax ? sumRow('PPN', x.tax) : '') +
+          sumRow('Total pembelian', sub - x.discount + x.shippingCost + x.tax, true);
+      }
+      $('#pfAdd', root).onclick = function () { readLines(); lines.push({}); drawLines(); };
+      if ($('#pfNewSup', root)) $('#pfNewSup', root).onclick = function () { quickAdd('supplier', function (id) { o = S.opts; $('[name=supplierId]', root).innerHTML = optList(o.suppliers, id, '— Pilih pemasok —'); }); };
+      root.addEventListener('input', update); root.addEventListener('change', update);
+      drawLines(); bindMoney(root); attachWidget($('#pfAtt', root), att); update();
+    }).catch(fail);
+  }
+
+  /* ---------- Form Biaya ---------- */
+  function openExpenseForm(existing, preset) {
+    loadOpts().then(function (o) {
+      var v = Object.assign({ date: today(), paymentAccount: '1110', category: 'OTHER' }, preset || {}, existing ? existing.input : {});
+      var att = existing ? existing.attachments.slice() : [];
+      var cats = S.boot.expenseCategories;
+      var body = '<div class="form-grid" id="ef">' +
+        '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>' +
+        '<label class="field"><span>Kategori *</span><select class="input" name="category">' + cats.map(function (c) { return '<option value="' + c[0] + '"' + (v.category === c[0] ? ' selected' : '') + '>' + esc(c[1]) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="field"><span>Akun biaya</span><select class="input" name="expenseAccount">' + options(accountsOf(['OPEX', 'OTHER_EXPENSE', 'PREPAID']), v.expenseAccount || (cats.filter(function (c) { return c[0] === v.category; })[0] || [])[2]) + '</select></label>' +
+        '<label class="field"><span>Nominal *</span><input class="input money" name="amount" value="' + (v.amount ? NF.format(v.amount) : '') + '" placeholder="0"></label>' +
+        '<label class="field full"><span>Keterangan *</span><input class="input" name="description" value="' + esc(v.description) + '" placeholder="mis. Tagihan internet Oktober"></label>' +
+        '<label class="field"><span>Dibayar dari *</span><select class="input" name="paymentAccount">' + options(cashAccounts(), v.paymentAccount) + '<optgroup label="Belum dibayar">' + options(accountsOf(['OTHER_LIABILITY', 'PAYABLE']), v.paymentAccount) + '</optgroup></select></label>' +
+        '<label class="field"><span>Pemasok <span class="hint">wajib bila belum dibayar</span></span><select class="input" name="supplierId">' + optList(o.suppliers, v.supplierId, '— Tidak ada —') + '</select></label>' +
+        '<label class="field"><span>Referensi <span class="hint">no. nota' + (S.boot.requireReferenceMin ? '; wajib ≥ ' + rp(S.boot.requireReferenceMin) : '') + '</span></span><input class="input" name="reference" value="' + esc(v.reference) + '"></label>' +
+        '<div class="field"><span>Lampiran bukti</span><div id="efAtt"></div></div>' +
+        '<div class="full preview" id="efPrev"></div></div>';
+      var d = docForm('EXPENSE', existing, existing ? 'Ubah Draft ' + existing.no : 'Biaya Baru', body, { collect: collect });
+      var root = $('#ef', d);
+      function collect() {
+        return { date: val(root, 'date'), category: val(root, 'category'), expenseAccount: val(root, 'expenseAccount'), amount: moneyVal(root, 'amount'),
+          description: val(root, 'description'), paymentAccount: val(root, 'paymentAccount'), supplierId: val(root, 'supplierId'), reference: val(root, 'reference'),
+          attachmentIds: att.map(function (a) { return a.id; }) };
+      }
+      $('[name=category]', root).onchange = function () { var c = cats.filter(function (x) { return x[0] === val(root, 'category'); })[0]; if (c) $('[name=expenseAccount]', root).value = c[2]; update(); };
+      function update() { var x = collect(); $('#efPrev', root).innerHTML = previewHtml([[x.expenseAccount, x.amount, 0], [x.paymentAccount, 0, x.amount]]); }
+      root.addEventListener('input', update); root.addEventListener('change', update);
+      bindMoney(root); attachWidget($('#efAtt', root), att); update();
+    }).catch(fail);
+  }
+
+  /* ---------- Form Kas & Bank ---------- */
+  function openPaymentForm(existing, preset) {
+    loadOpts().then(function (o) {
+      var v = Object.assign({ date: today(), paymentType: 'CASH_IN', appliedDocs: [] }, preset || {}, existing ? existing.input : {});
+      var att = existing ? existing.attachments.slice() : [];
+      var types = S.boot.paymentTypes;
+      var d = docForm('PAYMENT', existing, existing ? 'Ubah Draft ' + existing.no : types[v.paymentType], '<div id="kf"></div>', { collect: collect });
+      var root = $('#kf', d);
+      var applied = {}; (v.appliedDocs || []).forEach(function (a) { applied[a.type + '|' + a.id] = a.amount; });
+      var outstanding = [];
+      function draw() {
+        var t = v.paymentType, cash = cashAccounts(), h = '';
+        if (t === 'MARKETPLACE_SETTLEMENT' && v.marketplaceId && !v.accountTo) {
+          var mk0 = (o.marketplaces || []).filter(function (m) { return m.id === v.marketplaceId; })[0];
+          if (mk0) v.accountTo = mk0.SETTLEMENT_ACCOUNT;
+        }
+        h += '<div class="seg" style="margin-bottom:14px">' + Object.keys(types).map(function (k) { return '<button type="button" data-pt="' + k + '" class="' + (k === t ? 'active' : '') + '">' + esc(types[k]) + '</button>'; }).join('') + '</div><div class="form-grid">';
+        h += '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>';
+        if (t === 'CASH_IN') {
+          h += '<label class="field"><span>Masuk ke *</span><select class="input" name="accountTo">' + options(cash, v.accountTo, 'Pilih rekening…') + '</select></label>';
+          h += '<label class="field"><span>Sumber dana *</span><select class="input" name="accountFrom">' + options(accountsOf(['OTHER_INCOME', 'SALES', 'CAPITAL', 'LOAN', 'OTHER_LIABILITY']), v.accountFrom, 'Pilih…') + '</select><span class="hint">mis. setoran modal, pinjaman, bunga bank</span></label>';
+          h += '<label class="field"><span>Nominal *</span><input class="input money" name="amount" value="' + (v.amount ? NF.format(v.amount) : '') + '"></label>';
+        } else if (t === 'CASH_OUT') {
+          h += '<label class="field"><span>Dari rekening *</span><select class="input" name="accountFrom">' + options(cash, v.accountFrom, 'Pilih rekening…') + '</select></label>';
+          h += '<label class="field"><span>Untuk *</span><select class="input" name="accountTo">' + options(accountsOf(['DRAWINGS', 'LOAN', 'OTHER_LIABILITY', 'PAYABLE', 'PREPAID', 'OPEX', 'OTHER_EXPENSE']), v.accountTo, 'Pilih…') + '</select><span class="hint">mis. prive, cicilan pinjaman, uang muka</span></label>';
+          h += '<label class="field"><span>Nominal *</span><input class="input money" name="amount" value="' + (v.amount ? NF.format(v.amount) : '') + '"></label>';
+        } else if (t === 'TRANSFER') {
+          h += '<label class="field"><span>Dari rekening *</span><select class="input" name="accountFrom">' + options(cash, v.accountFrom, 'Pilih…') + '</select></label>';
+          h += '<label class="field"><span>Ke rekening *</span><select class="input" name="accountTo">' + options(cash, v.accountTo, 'Pilih…') + '</select></label>';
+          h += '<label class="field"><span>Nominal *</span><input class="input money" name="amount" value="' + (v.amount ? NF.format(v.amount) : '') + '"></label>';
+          h += '<label class="field"><span>Biaya transfer</span><input class="input money" name="feeAmount" value="' + (v.feeAmount ? NF.format(v.feeAmount) : '') + '" placeholder="0"></label>';
+        } else {
+          var isRecv = t === 'RECEIVE_PAYMENT', isSet = t === 'MARKETPLACE_SETTLEMENT';
+          if (isSet) h += '<label class="field"><span>Marketplace *</span><select class="input" name="marketplaceId">' + optList(o.marketplaces, v.marketplaceId, 'Pilih marketplace…') + '</select></label>';
+          else h += '<label class="field"><span>' + (isRecv ? 'Pelanggan' : 'Pemasok') + ' *</span><select class="input" name="partyId">' + optList(isRecv ? o.customers : o.suppliers, v.partyId, 'Pilih…') + '</select></label>';
+          h += '<label class="field"><span>' + (t === 'PAY_SUPPLIER' ? 'Dari rekening' : 'Masuk ke') + ' *</span><select class="input" name="' + (t === 'PAY_SUPPLIER' ? 'accountFrom' : 'accountTo') + '">' + options(cash, t === 'PAY_SUPPLIER' ? v.accountFrom : v.accountTo, 'Pilih rekening…') + '</select></label>';
+          h += '<div class="full"><div style="font-weight:700;margin-bottom:6px">' + (isSet ? 'Penjualan yang dicairkan' : 'Faktur yang dilunasi') + '</div><div id="kfDocs" class="muted small">Pilih ' + (isSet ? 'marketplace' : (isRecv ? 'pelanggan' : 'pemasok')) + ' untuk melihat tagihan terbuka.</div></div>';
+          if (isSet) h += '<label class="field"><span>Dana yang diterima di rekening *</span><input class="input money" name="amount" value="' + (v.amount ? NF.format(v.amount) : '') + '"><span class="hint">Selisih dengan total yang dipilih dicatat sebagai potongan marketplace.</span></label>';
+        }
+        h += '<label class="field"><span>Keterangan</span><input class="input" name="description" value="' + esc(v.description) + '"></label>';
+        h += '<label class="field"><span>Referensi</span><input class="input" name="reference" value="' + esc(v.reference) + '"></label>';
+        h += '<div class="field full"><span>Lampiran</span><div id="kfAtt"></div></div><div class="full card-b" style="background:#fcfbf8;border-radius:12px" id="kfSum"></div></div>';
+        root.innerHTML = h;
+        bindMoney(root); attachWidget($('#kfAtt', root), att);
+        $$('[data-pt]', root).forEach(function (b) { b.onclick = function () { read(); v.paymentType = b.dataset.pt; applied = {}; outstanding = []; draw(); $('.drawer-h h2', d.parentNode).textContent = types[v.paymentType]; }; });
+        var partySel = $('[name=partyId]', root) || $('[name=marketplaceId]', root);
+        if (partySel) {
+          partySel.onchange = function () {
+            read(); applied = {};
+            if (v.marketplaceId) { var mk = o.marketplaces.filter(function (m) { return m.id === v.marketplaceId; })[0]; if (mk && $('[name=accountTo]', root)) $('[name=accountTo]', root).value = mk.SETTLEMENT_ACCOUNT; }
+            loadDocs();
+          };
+          if (partySel.value) loadDocs();
+        }
+        summary();
+      }
+      function loadDocs() {
+        var t = v.paymentType, box = $('#kfDocs', root);
+        var q = t === 'PAY_SUPPLIER' ? { type: 'PURCHASE', partyId: v.partyId } : (t === 'MARKETPLACE_SETTLEMENT' ? { type: 'SALES', marketplaceId: v.marketplaceId } : { type: 'SALES', partyId: v.partyId });
+        if (!q.partyId && !q.marketplaceId) return;
+        box.innerHTML = skeleton(2);
+        call('doc.outstanding', q).then(function (rows) {
+          // Saat mengubah draft: tampilkan juga dokumen yang sudah dipilih.
+          outstanding = rows;
+          if (!rows.length) { box.innerHTML = '<div class="empty">Tidak ada tagihan terbuka.</div>'; summary(); return; }
+          box.innerHTML = '<table class="t"><thead><tr><th></th><th>No.</th><th class="hide-m">Tanggal</th><th class="num">Sisa</th><th class="num" style="width:140px">Dibayar</th></tr></thead><tbody>' + rows.map(function (r) {
+            var k = r.type + '|' + r.id, a = applied[k];
+            return '<tr><td><input type="checkbox" data-k="' + esc(k) + '"' + (a ? ' checked' : '') + '></td><td style="font-weight:700">' + esc(r.no) + '<div class="muted small">' + esc(r.orderId || r.ref || '') + '</div></td><td class="hide-m">' + fdate(r.date) + '</td><td class="num">' + rp(r.outstanding) + '</td>' +
+              '<td><input class="input money" data-a="' + esc(k) + '" value="' + (a ? NF.format(a) : '') + '"></td></tr>';
+          }).join('') + '</tbody></table><button class="btn sm" type="button" id="kfAll" style="margin-top:8px">Pilih semua</button>';
+          bindMoney(box);
+          $$('[data-k]', box).forEach(function (c) { c.onchange = function () {
+            var r = rows.filter(function (x) { return x.type + '|' + x.id === c.dataset.k; })[0];
+            var inp = $('[data-a="' + c.dataset.k + '"]', box);
+            inp.value = c.checked ? NF.format(r.outstanding) : '';
+            readApplied(); summary();
+          }; });
+          $$('[data-a]', box).forEach(function (i) { i.addEventListener('input', function () { $('[data-k="' + i.dataset.a + '"]', box).checked = parseMoney(i.value) > 0; readApplied(); summary(); }); });
+          $('#kfAll', box).onclick = function () { rows.forEach(function (r) { applied[r.type + '|' + r.id] = r.outstanding; }); loadDocsRender(rows); };
+          summary();
+        }).catch(function (e) { box.innerHTML = errorBox(e); });
+      }
+      function loadDocsRender() { loadDocs(); }
+      function readApplied() { applied = {}; $$('[data-a]', root).forEach(function (i) { var a = parseMoney(i.value); if (a > 0) applied[i.dataset.a] = a; }); }
+      function read() {
+        ['date', 'accountFrom', 'accountTo', 'description', 'reference', 'partyId', 'marketplaceId'].forEach(function (k) { var el = $('[name=' + k + ']', root); if (el) v[k] = el.value.trim(); });
+        ['amount', 'feeAmount'].forEach(function (k) { var el = $('[name=' + k + ']', root); if (el) v[k] = parseMoney(el.value); });
+        if ($('[data-a]', root)) readApplied();
+      }
+      function summary() {
+        read();
+        var tot = Object.keys(applied).reduce(function (s, k) { return s + applied[k]; }, 0), box = $('#kfSum', root); if (!box) return;
+        if (v.paymentType === 'MARKETPLACE_SETTLEMENT') box.innerHTML = sumRow('Total piutang dipilih', tot) + sumRow('Dana diterima', v.amount || 0) + sumRow('Potongan marketplace', Math.max(tot - (v.amount || 0), 0), true);
+        else if (v.paymentType === 'RECEIVE_PAYMENT' || v.paymentType === 'PAY_SUPPLIER') box.innerHTML = sumRow('Total pembayaran', tot, true);
+        else box.innerHTML = sumRow('Nominal', (v.amount || 0) + (v.feeAmount || 0), true);
+      }
+      function collect() {
+        read();
+        return { paymentType: v.paymentType, date: v.date, accountFrom: v.accountFrom, accountTo: v.accountTo, amount: v.amount, feeAmount: v.feeAmount,
+          description: v.description, reference: v.reference, partyId: v.partyId, marketplaceId: v.marketplaceId,
+          appliedDocs: Object.keys(applied).map(function (k) { var p = k.split('|'); return { type: p[0], id: p[1], amount: applied[k] }; }),
+          attachmentIds: att.map(function (a) { return a.id; }) };
+      }
+      root.addEventListener('input', function (e) { if (!e.target.closest('#kfDocs')) summary(); });
+      draw();
+    }).catch(fail);
+  }
+
+  /* ---------- Form Jurnal Umum / Saldo Awal ---------- */
+  function openJournalForm(existing, preset) {
+    var v = Object.assign({ date: today(), kind: 'GENERAL', lines: [{}, {}] }, preset || {}, existing ? existing.input : {});
+    var att = existing ? existing.attachments.slice() : [];
+    var isOB = v.kind === 'OPENING_BALANCE';
+    var body = (isOB ? '<div class="banner info" style="margin-bottom:12px">Saldo awal: isi saldo setiap akun per tanggal mulai pembukuan (mis. sehari sebelum transaksi pertama). Selisih dapat diseimbangkan ke 3900 Ekuitas Saldo Awal.</div>' : '') +
+      '<div class="form-grid" id="jf"><label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>' +
+      '<label class="field"><span>Referensi</span><input class="input" name="reference" value="' + esc(v.reference) + '"></label>' +
+      '<label class="field full"><span>Keterangan *</span><input class="input" name="description" value="' + esc(v.description || (isOB ? 'Saldo awal' : '')) + '"></label>' +
+      '<div class="full"><table class="t lines" id="jl"><thead><tr><th>Akun</th><th class="num" style="width:140px">Debit</th><th class="num" style="width:140px">Kredit</th><th></th></tr></thead><tbody></tbody></table>' +
+      '<div class="row" style="margin-top:8px"><button class="btn sm" type="button" id="jlAdd">' + icon('plus') + 'Tambah baris</button>' + (isOB ? '<button class="btn sm" type="button" id="jlBal">Seimbangkan ke 3900</button>' : '') + '<div class="spacer"></div><div id="jlTot" class="small"></div></div></div>' +
+      '<div class="field full"><span>Lampiran</span><div id="jfAtt"></div></div></div>';
+    var d = docForm('JOURNAL', existing, existing ? 'Ubah Draft ' + existing.no : (isOB ? 'Saldo Awal' : 'Jurnal Umum'), body, { collect: collect });
+    var root = $('#jf', d), lines = v.lines.slice();
+    function draw() {
+      $('#jl tbody', root).innerHTML = lines.map(function (l, i) {
+        return '<tr data-i="' + i + '"><td><select class="input" data-l="account">' + options(postableAccounts(), l.account, 'Pilih akun…') + '</select></td>' +
+          '<td><input class="input money" data-l="debit" value="' + (l.debit ? NF.format(l.debit) : '') + '"></td><td><input class="input money" data-l="credit" value="' + (l.credit ? NF.format(l.credit) : '') + '"></td>' +
+          '<td><button class="icon-btn" type="button" data-rm="' + i + '">' + icon('x') + '</button></td></tr>';
+      }).join('');
+      bindMoney(root);
+      $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { read(); lines.splice(+b.dataset.rm, 1); while (lines.length < 2) lines.push({}); draw(); tot(); }; });
+    }
+    function read() { lines = $$('#jl tbody tr', root).map(function (tr) { return { account: $('[data-l=account]', tr).value, debit: parseMoney($('[data-l=debit]', tr).value), credit: parseMoney($('[data-l=credit]', tr).value) }; }); }
+    function tot() { read(); var td = 0, tc = 0; lines.forEach(function (l) { td += l.debit || 0; tc += l.credit || 0; }); $('#jlTot', root).innerHTML = 'Debit <b>' + rp(td) + '</b> · Kredit <b>' + rp(tc) + '</b> ' + (td === tc && td ? '<span class="badge POSTED">Seimbang</span>' : '<span class="badge FAILED">Selisih ' + rp(td - tc) + '</span>'); }
+    function collect() { read(); return { kind: v.kind, date: val(root, 'date'), description: val(root, 'description'), reference: val(root, 'reference'), lines: lines, attachmentIds: att.map(function (a) { return a.id; }) }; }
+    $('#jlAdd', root).onclick = function () { read(); lines.push({}); draw(); };
+    if ($('#jlBal', root)) $('#jlBal', root).onclick = function () {
+      read(); var td = 0, tc = 0; lines.forEach(function (l) { td += l.debit || 0; tc += l.credit || 0; });
+      lines = lines.filter(function (l) { return l.account !== '3900' && (l.account || l.debit || l.credit); });
+      td = 0; tc = 0; lines.forEach(function (l) { td += l.debit || 0; tc += l.credit || 0; });
+      if (td !== tc) lines.push(td > tc ? { account: '3900', credit: td - tc } : { account: '3900', debit: tc - td });
+      draw(); tot();
+    };
+    root.addEventListener('input', tot); root.addEventListener('change', tot);
+    draw(); attachWidget($('#jfAtt', root), att); tot();
+  }
+
+  var DOC_FORMS = { SALES: openSalesForm, PURCHASE: openPurchaseForm, EXPENSE: openExpenseForm, PAYMENT: openPaymentForm, JOURNAL: openJournalForm };
+
+  function journalTable(j, title) {
     if (!j) return '';
-    return '<div class="card" style="margin-top:14px"><div class="card-h"><h3>Jurnal ' + esc(j.no) + '</h3>' + badge(j.status) + '<div class="spacer"></div><span class="muted small">' + fdate(j.date) + '</span></div>' +
+    return '<div class="card" style="margin-top:14px"><div class="card-h"><h3>' + esc(title || 'Jurnal') + ' ' + esc(j.no) + '</h3>' + badge(j.status) + '<div class="spacer"></div><span class="muted small">' + fdate(j.date) + '</span></div>' +
       '<div class="table-wrap"><table class="t"><thead><tr><th>Akun</th><th class="num">Debit</th><th class="num">Kredit</th></tr></thead><tbody>' +
       j.lines.map(function (l) { return '<tr><td' + (l.credit ? ' class="indent"' : '') + '>' + esc(l.account + ' · ' + l.accountName) + (l.memo ? '<div class="muted small">' + esc(l.memo) + '</div>' : '') + '</td><td class="num">' + (l.debit ? rp(l.debit) : '') + '</td><td class="num">' + (l.credit ? rp(l.credit) : '') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>Total</td><td class="num">' + rp(j.total) + '</td><td class="num">' + rp(j.total) + '</td></tr></tbody></table></div></div>';
   }
 
-  function openTrxDetail(id) {
-    var d = openDrawer('Detail Transaksi', skeleton(6));
-    call('trx.get', { id: id }).then(function (t) {
-      var info = [['Nomor', t.no], ['Tanggal', fdate(t.date)], ['Jenis', t.typeLabel], ['Nominal', rp(t.amount)], ['Keterangan', t.form.description || '—'],
-        ['Referensi', t.form.reference || '—'], ['Pihak', t.form.party || '—'], ['Dibuat', (t.createdBy || '') + ' · ' + fts(t.createdAt)]];
-      if (t.postedAt) info.push(['Diposting', (t.postedBy || '') + ' · ' + fts(t.postedAt)]);
-      if (t.reversedAt) info.push(['Dibalik', (t.reversedBy || '') + ' · ' + fts(t.reversedAt)]);
+  /* ---------- Detail dokumen ---------- */
+  function openDocDetail(type, id) {
+    var d = openDrawer('Detail ' + DOC_UI[type].title, skeleton(8));
+    call('doc.get', { type: type, id: id }).then(function (t) {
+      var h = t.header, info = [['Nomor', t.no], ['Tanggal', fdate(h.TRANSACTION_DATE)]];
+      if (type === 'PAYMENT') info.push(['Jenis', S.boot.paymentTypes[h.PAYMENT_TYPE]]);
+      if (t.party) info.push([type === 'SALES' ? 'Pelanggan / marketplace' : 'Pihak', t.party]);
+      if (h.MARKETPLACE_ORDER_ID) info.push(['No. order', h.MARKETPLACE_ORDER_ID]);
+      if (h.SUPPLIER_INVOICE) info.push(['Faktur pemasok', h.SUPPLIER_INVOICE]);
+      if (h.DESCRIPTION) info.push(['Keterangan', h.DESCRIPTION]);
+      if (h.PAYMENT_ACCOUNT) info.push(['Akun penerimaan/pembayaran', h.PAYMENT_ACCOUNT + ' · ' + accName(h.PAYMENT_ACCOUNT)]);
+      if (h.ACCOUNT_FROM) info.push(['Dari', h.ACCOUNT_FROM + ' · ' + accName(h.ACCOUNT_FROM)]);
+      if (h.ACCOUNT_TO) info.push(['Ke', h.ACCOUNT_TO + ' · ' + accName(h.ACCOUNT_TO)]);
+      if (h.REFERENCE) info.push(['Referensi', h.REFERENCE]);
+      if (h.NOTES) info.push(['Catatan', h.NOTES]);
+      info.push(['Dibuat', (h.CREATED_BY || '') + ' · ' + fts(h.CREATED_AT)]);
+      if (h.POSTED_AT) info.push(['Diposting', (h.POSTED_BY || '') + ' · ' + fts(h.POSTED_AT)]);
+      if (h.CANCELLED_AT) info.push(['Dibatalkan', (h.CANCELLED_BY || '') + ' · ' + fts(h.CANCELLED_AT) + ' — ' + (h.CANCEL_REASON || '')]);
       if (t.statusReason) info.push(['Catatan status', t.statusReason]);
-      var body = '<div class="row" style="margin-bottom:12px">' + badge(t.status) + '</div><table class="t">' +
-        info.map(function (r) { return '<tr><td class="muted" style="width:130px">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>' +
+      var amountRows = '';
+      if (type === 'SALES') amountRows = sumRow('Subtotal', h.SUBTOTAL) + (h.LINE_DISCOUNT + h.DISCOUNT ? sumRow('Diskon', -(h.LINE_DISCOUNT + h.DISCOUNT)) : '') + (h.SHIPPING_INCOME ? sumRow('Ongkir dari pembeli', h.SHIPPING_INCOME) : '') +
+        sumRow('Total penjualan', h.TOTAL_SALES, true) + (h.MARKETPLACE_FEE + h.OTHER_FEE ? sumRow('Biaya marketplace & lain', -(h.MARKETPLACE_FEE + h.OTHER_FEE)) + sumRow('Diterima bersih', h.NET_RECEIVABLE, true) : '');
+      if (type === 'PURCHASE') amountRows = sumRow('Subtotal', h.SUBTOTAL) + (h.DISCOUNT ? sumRow('Diskon', -h.DISCOUNT) : '') + (h.SHIPPING_COST ? sumRow('Ongkos kirim', h.SHIPPING_COST) : '') + (h.TAX ? sumRow('PPN', h.TAX) : '') + sumRow('Total pembelian', h.TOTAL_PURCHASE, true);
+      if (type === 'EXPENSE') amountRows = sumRow('Nominal', h.AMOUNT, true);
+      if (type === 'PAYMENT') amountRows = sumRow('Nominal', h.AMOUNT, true) + (h.FEE_AMOUNT ? sumRow(h.PAYMENT_TYPE === 'MARKETPLACE_SETTLEMENT' ? 'Potongan marketplace' : 'Biaya transfer', h.FEE_AMOUNT) : '');
+      if (type === 'JOURNAL') amountRows = sumRow('Total debit', h.TOTAL, true);
+      var lines = '';
+      var src = t.details.length ? t.details : (t.input.lines || []);
+      if (type === 'SALES' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Produk</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Total</th></tr></thead><tbody>' + src.map(function (l) {
+        var p = (S.opts && S.opts.products || []).filter(function (x) { return x.id === (l.PRODUCT_ID || l.productId); })[0];
+        return '<tr><td>' + esc(l.SKU ? l.SKU + ' · ' + l.PRODUCT_NAME : (p ? p.SKU + ' · ' + p.name : l.productId)) + '</td><td class="num">' + (l.QTY || l.qty) + '</td><td class="num">' + rp(l.UNIT_PRICE || l.unitPrice) + '</td><td class="num">' + rp(l.SUBTOTAL || l.subtotal || ((l.qty || 0) * (l.unitPrice || 0) - (l.discount || 0))) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      if (type === 'PURCHASE' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Barang / akun</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Nilai perolehan</th></tr></thead><tbody>' + src.map(function (l) {
+        return '<tr><td>' + esc(l.SKU ? l.SKU + ' · ' + l.DESCRIPTION : (l.DESCRIPTION || l.description || l.productId || accName(l.expenseAccount || l.DEBIT_ACCOUNT))) + '</td><td class="num">' + (l.QTY || l.qty) + '</td><td class="num">' + rp(l.UNIT_COST || l.unitCost) + '</td><td class="num">' + rp(l.TOTAL_COST || l.totalCost || 0) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      if (type === 'PAYMENT' && (h.APPLIED_DOCS || []).length) lines = '<div class="muted small" style="margin-top:12px;font-weight:700">Faktur yang dilunasi</div><table class="t"><tbody>' + h.APPLIED_DOCS.map(function (a) {
+        return '<tr class="click" data-open="' + esc(a.type + '|' + a.id) + '"><td>' + esc(DOC_UI[a.type].title) + '</td><td class="num">' + rp(a.amount) + '</td></tr>'; }).join('') + '</tbody></table>';
+      var payBox = '';
+      if (t.payment && t.payment.due) payBox = '<div class="banner ' + (t.payment.status === 'PAID' ? 'ok' : 'warn') + '" style="margin-top:12px">' + PAY_LABEL[t.payment.status] + ' · tagihan ' + rp(t.payment.due) + ' · dibayar ' + rp(t.payment.paid) + (t.payment.outstanding ? ' · <b>sisa ' + rp(t.payment.outstanding) + '</b>' : '') + '</div>' +
+        (t.payments.length ? '<table class="t">' + t.payments.map(function (p) { return '<tr class="click" data-open="PAYMENT|' + esc(p.id) + '"><td>' + esc(p.no) + '</td><td>' + fdate(p.date) + '</td><td class="num">' + rp(p.amount) + '</td></tr>'; }).join('') + '</table>' : '');
+      var body = '<div class="row" style="margin-bottom:12px">' + badge(t.status) + ' ' + (t.payment && t.payment.due ? payBadge(t.payment.status) : '') + '</div><table class="t">' +
+        info.map(function (r) { return '<tr><td class="muted" style="width:150px">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>' +
+        lines + '<div class="card-b" style="background:#fcfbf8;border-radius:12px;margin-top:12px">' + amountRows + '</div>' + payBox +
         (t.attachments.length ? '<div style="margin-top:12px"><b class="small">Lampiran</b>' + t.attachments.map(function (a) { return '<div>📎 ' + (a.url ? '<a target="_blank" href="' + esc(a.url) + '">' + esc(a.name) + '</a>' : esc(a.name)) + '</div>'; }).join('') + '</div>' : '') +
-        journalTable(t.journal) + (t.reversalJournal ? journalTable(t.reversalJournal) : '');
+        journalTable(t.journal) + (t.cancelJournal ? journalTable(t.cancelJournal, 'Jurnal pembatalan') : '');
       var foot = '';
-      if (t.status === 'DRAFT') foot = '<button class="btn danger" data-a="del">Hapus Draft</button><button class="btn" data-a="edit">Ubah</button><button class="btn primary" data-a="post">Posting</button>';
-      if (t.status === 'FAILED') foot = '<button class="btn danger" data-a="del">Hapus</button>';
-      if (t.status === 'POSTED' && isAdmin()) foot = '<button class="btn danger" data-a="rev">Balik (Reversal)</button><button class="btn" data-a="fix">Koreksi</button>';
-      d = openDrawer('Transaksi ' + t.no, body, foot);
+      if (t.status === 'DRAFT') foot = (canInput() ? '<button class="btn danger" data-a="del">Hapus Draft</button><button class="btn" data-a="edit">Ubah</button>' : '') + (canPost(type) ? '<button class="btn primary" data-a="post">Posting</button>' : '');
+      if (t.status === 'POSTED') {
+        if (t.payment && t.payment.outstanding && canInput()) foot += '<button class="btn" data-a="pay">' + (type === 'SALES' ? 'Catat penerimaan' : 'Bayar') + '</button>';
+        if (isAdmin()) foot += '<button class="btn danger" data-a="cancel">Batalkan</button><button class="btn" data-a="fix">Batalkan &amp; Koreksi</button>';
+      }
+      d = openDrawer(DOC_UI[type].title + ' ' + t.no, body, foot);
       var f = d.parentNode;
+      $$('[data-open]', d).forEach(function (r) { r.onclick = function () { var p = r.dataset.open.split('|'); openDocDetail(p[0], p[1]); }; });
       var on = function (a, fn) { var b = $('[data-a=' + a + ']', f); if (b) b.onclick = fn; };
-      on('edit', function () { openTrxForm(t.type, { id: t.id, rowVersion: t.rowVersion, form: t.form, attachments: t.attachments }); });
+      on('edit', function () { DOC_FORMS[type]({ id: t.id, no: t.no, rowVersion: t.rowVersion, input: t.input, attachments: t.attachments }); });
       on('post', function () {
         var b = $('[data-a=post]', f); b.disabled = true;
-        var key = uuid();
+        var k = uuid();
         var go2 = function (extra) {
-          call('trx.postDraft', Object.assign({ trxId: t.id, rowVersion: t.rowVersion, idemKey: key }, extra || {}), { write: true }).then(function (r) {
-            closeDrawer(); toast('Transaksi ' + r.trxNo + ' berhasil diposting.', 'ok'); refreshView();
+          call('doc.post', Object.assign({ type: type, id: t.id, rowVersion: t.rowVersion, idemKey: k }, extra || {}), { write: true }).then(function () {
+            closeDrawer(); toast(t.no + ' berhasil diposting.', 'ok'); refreshView();
           }).catch(function (e) {
             b.disabled = false;
-            if (e.code === 'CONFIRM_REQUIRED') ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap posting' }).then(function (ok) { if (ok) go2({ confirmDuplicate: true }); });
+            if (e.code === 'CONFIRM_REQUIRED') ask({ title: 'Kemungkinan duplikat', message: e.message, confirm: 'Tetap posting' }).then(function (okk) { if (okk) go2({ confirmDuplicate: true }); });
             else fail(e);
           });
         };
         go2();
       });
       on('del', function () {
-        ask({ title: 'Hapus transaksi?', message: 'Transaksi ' + t.no + ' akan ditandai terhapus. Tindakan ini dicatat di audit log.', reason: 'Alasan', reasonRequired: true, confirm: 'Hapus', danger: true }).then(function (r) {
+        ask({ title: 'Hapus draft ' + t.no + '?', message: 'Draft ditandai terhapus dan tercatat di audit log.', reason: 'Alasan', reasonRequired: true, confirm: 'Hapus', danger: true }).then(function (r) {
           if (!r) return;
-          call('trx.deleteDraft', { trxId: t.id, reason: r.reason, rowVersion: t.rowVersion }, { write: true }).then(function () { closeDrawer(); toast('Transaksi dihapus.', 'ok'); refreshView(); }).catch(fail);
+          call('doc.deleteDraft', { type: type, id: t.id, reason: r.reason, rowVersion: t.rowVersion }, { write: true }).then(function () { closeDrawer(); toast('Draft dihapus.', 'ok'); refreshView(); }).catch(fail);
         });
       });
-      var reverse = function (thenFix) {
-        ask({ title: thenFix ? 'Koreksi transaksi' : 'Balik transaksi?', message: 'Jurnal asli tetap tersimpan. Sistem membuat jurnal pembalik' + (thenFix ? ', lalu membuka form pengganti dengan data yang sama untuk Anda perbaiki.' : '.'),
-          reason: 'Alasan', reasonRequired: true, confirm: thenFix ? 'Balik & buat pengganti' : 'Balik transaksi', danger: true,
-          extraHtml: '<label class="field" style="margin-top:10px"><span>Tanggal pembalikan <span class="hint">kosongkan = otomatis</span></span><input class="input" type="date" id="revDate"></label>',
-          collect: function (w) { return { date: $('#revDate', w).value }; } }).then(function (r) {
+      on('pay', function () {
+        if (type === 'SALES' && h.MARKETPLACE_ID && !h.CUSTOMER_ID) openPaymentForm(null, { paymentType: 'MARKETPLACE_SETTLEMENT', marketplaceId: h.MARKETPLACE_ID, appliedDocs: [{ type: 'SALES', id: t.id, amount: t.payment.outstanding }], amount: t.payment.outstanding });
+        else if (type === 'SALES') openPaymentForm(null, { paymentType: 'RECEIVE_PAYMENT', partyId: h.CUSTOMER_ID, appliedDocs: [{ type: 'SALES', id: t.id, amount: t.payment.outstanding }] });
+        else openPaymentForm(null, { paymentType: 'PAY_SUPPLIER', partyId: h.SUPPLIER_ID, appliedDocs: [{ type: type, id: t.id, amount: t.payment.outstanding }] });
+      });
+      var cancel = function (thenFix) {
+        ask({ title: thenFix ? 'Batalkan & buat koreksi' : 'Batalkan ' + t.no + '?', message: 'Transaksi asli tetap tersimpan. Sistem membuat jurnal pembalik' + (thenFix ? ', lalu membuka draft pengganti berisi data yang sama untuk diperbaiki.' : '.'),
+          reason: 'Alasan', reasonRequired: true, confirm: thenFix ? 'Batalkan & koreksi' : 'Batalkan transaksi', danger: true,
+          extraHtml: '<label class="field" style="margin-top:10px"><span>Tanggal pembatalan <span class="hint">kosongkan = otomatis</span></span><input class="input" type="date" id="cxDate"></label>',
+          collect: function (w) { return { date: $('#cxDate', w).value }; } }).then(function (r) {
           if (!r) return;
-          call('trx.reverse', { trxId: t.id, reason: r.reason, date: r.date || undefined, idemKey: uuid() }, { write: true }).then(function (res) {
-            toast('Transaksi ' + t.no + ' dibalik.', 'ok');
-            if (thenFix) { var form = res.original; form.reference = form.reference ? form.reference + '-REV' : ''; openTrxForm(form.type, null, form); }
+          call('doc.cancel', { type: type, id: t.id, reason: r.reason, date: r.date || undefined, idemKey: uuid() }, { write: true }).then(function (res) {
+            toast(t.no + ' dibatalkan.', 'ok');
+            if (thenFix) { var inp = res.input; if (inp.reference) inp.reference += '-KOR'; if (inp.marketplaceOrderId) inp.marketplaceOrderId += '-KOR'; DOC_FORMS[type](null, inp); }
             else closeDrawer();
             refreshView();
           }).catch(fail);
         });
       };
-      on('rev', function () { reverse(false); });
-      on('fix', function () { reverse(true); });
+      on('cancel', function () { cancel(false); });
+      on('fix', function () { cancel(true); });
     }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /** Menu cepat "Catat" (navigasi bawah HP & dashboard). */
+  function openQuickMenu() {
+    var items = [['SALES', 'Penjualan', 'receipt'], ['EXPENSE', 'Biaya', 'cf'], ['CASH_IN', 'Kas Masuk', 'down'], ['CASH_OUT', 'Kas Keluar', 'logout'], ['TRANSFER', 'Transfer', 'cf'], ['PURCHASE', 'Pembelian', 'asset']];
+    var d = openDrawer('Catat transaksi', '<div class="grid g2">' + items.map(function (x) {
+      return '<button class="btn" style="height:64px;justify-content:flex-start;gap:12px" data-q="' + x[0] + '">' + icon(x[2]) + esc(x[1]) + '</button>'; }).join('') + '</div>');
+    $$('[data-q]', d).forEach(function (b) { b.onclick = function () {
+      var q = b.dataset.q;
+      if (q === 'SALES') openSalesForm(); else if (q === 'EXPENSE') openExpenseForm(); else if (q === 'PURCHASE') openPurchaseForm();
+      else openPaymentForm(null, { paymentType: q });
+    }; });
   }
 
   /* ================= LABA RUGI ================= */
@@ -1217,10 +1535,10 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       var body = '<div class="muted small" style="margin-bottom:10px">' + esc(code) + ' · ' + fdate(from) + ' – ' + fdate(to) + '</div>' +
         '<div class="grid g2" style="margin-bottom:12px"><div class="card kpi"><div class="k-label">Saldo awal</div><div class="k-value">' + rp(pg.opening) + '</div></div><div class="card kpi"><div class="k-label">Saldo akhir</div><div class="k-value">' + rp(pg.closing) + '</div></div></div>' +
         (pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Tanggal</th><th>Keterangan</th><th class="num">Debit</th><th class="num">Kredit</th><th class="num">Saldo</th></tr></thead><tbody>' +
-          pg.rows.map(function (r) { return '<tr' + (r.sourceType === 'TRX' && canEntry() ? ' class="click" data-trx="' + esc(r.sourceId) + '"' : '') + '><td>' + fdate(r.date) + '</td><td>' + esc(r.description) + '<div class="muted small">' + esc(r.journalNo) + '</div></td><td class="num">' + (r.debit ? rp(r.debit) : '') + '</td><td class="num">' + (r.credit ? rp(r.credit) : '') + '</td><td class="num">' + rp(r.balance) + '</td></tr>'; }).join('') +
+          pg.rows.map(function (r) { return '<tr' + (SOURCE_TO_DOC[r.sourceType] ? ' class="click" data-src="' + esc(SOURCE_TO_DOC[r.sourceType] + '|' + r.sourceId) + '"' : '') + '><td>' + fdate(r.date) + '</td><td>' + esc(r.description) + '<div class="muted small">' + esc(r.journalNo) + '</div></td><td class="num">' + (r.debit ? rp(r.debit) : '') + '</td><td class="num">' + (r.credit ? rp(r.credit) : '') + '</td><td class="num">' + rp(r.balance) + '</td></tr>'; }).join('') +
           '</tbody></table></div>' + pager(pg, function (p) { openDrilldown(code, from, to, p); }) : '<div class="empty">Tidak ada mutasi pada periode ini.</div>');
       d = openDrawer('Rincian ' + accName(code), body);
-      $$('[data-trx]', d).forEach(function (tr) { tr.onclick = function () { openTrxDetail(tr.dataset.trx); }; });
+      $$('[data-src]', d).forEach(function (tr) { tr.onclick = function () { var p = tr.dataset.src.split('|'); openDocDetail(p[0], p[1]); }; });
     }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
   }
 
