@@ -139,7 +139,7 @@
   .kpi.dark { background: var(--ink); border-color: var(--ink); color: #fff; } .kpi.dark .top, .kpi.dark .k-sub, .kpi.dark .k-label { color: var(--sage); } .kpi.dark .chip { background: rgba(232,105,58,.2); }
   .kpi.ok .chip { background: var(--ok-soft); color: var(--ok); }
   .kpi .k-value.neg { color: var(--err); } .kpi.dark .k-value.neg { color: #f3a37f; }
-  .banner { padding: 11px 13px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; gap: 10px; align-items: flex-start; }
+  .banner { padding: 11px 13px; border-radius: 10px; font-size: 13px; font-weight: 600; display: block; line-height: 1.55; }
   .banner.warn { background: var(--warn-soft); color: #8a6312; }
   .banner.err { background: var(--err-soft); color: var(--err); }
   .banner.ok { background: var(--ok-soft); color: var(--ok); }
@@ -195,9 +195,9 @@
   .badge.REVERSED, .badge.DISPOSED, .badge.LOCKED { background: #f0efea; color: #8a918c; }
   .badge.FAILED, .badge.DISABLED { background: var(--err-soft); color: var(--err); }
   .badge.PENDING, .badge.FULLY_DEPRECIATED { background: var(--warn-soft); color: var(--warn); }
-  .badge.ADMIN { background: #ece9f8; color: #5b4fa8; } .badge.FINANCE { background: var(--acc-soft); color: var(--acc-ink); } .badge.VIEWER { background: var(--info-soft); color: var(--info); }
+  .badge.ADMIN { background: #ece9f8; color: #5b4fa8; } .badge.FINANCE { background: var(--acc-soft); color: var(--acc-ink); } .badge.VIEWER { background: var(--info-soft); color: var(--info); } .badge.OPERATOR { background: var(--warn-soft); color: var(--warn); }
   .pager { display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 10px 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
-  .empty { padding: 34px; text-align: center; color: var(--muted); }
+  .empty { padding: 34px; text-align: center; color: var(--muted); } .empty b { display: block; color: #4e5751; font-size: 14px; margin-bottom: 4px; }
   .mlist { display: none; }
   .mitem { padding: 12px 14px; border-bottom: 1px solid var(--line-2); display: flex; gap: 12px; cursor: pointer; }
   .mitem:last-child { border-bottom: 0; }
@@ -287,7 +287,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="cd9e5d8-4dfd70d6";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="fbb9dc3-15eede97";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
@@ -320,7 +320,7 @@
           <div class="auth-help" id="loginHelp"></div>
         </form>
       </div>
-      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.3.0</div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.4.0</div>
     </section>
   </div>
 
@@ -386,7 +386,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   };
   var isAdmin = function () { return S.user && S.user.role === 'ADMIN'; };
   var canEntry = function () { return S.user && (S.user.role === 'ADMIN' || S.user.role === 'FINANCE'); };
-  var ROLE_LABEL = { ADMIN: 'Admin', FINANCE: 'Staf Keuangan', VIEWER: 'Viewer' };
+  var ROLE_LABEL = { ADMIN: 'Admin', FINANCE: 'Staf Keuangan', OPERATOR: 'Operator', VIEWER: 'Viewer' };
   var STATUS_LABEL = { DRAFT: 'Draft', PENDING: 'Tertunda', POSTED: 'Terposting', REVERSED: 'Dibalik', FAILED: 'Gagal', DELETED: 'Dihapus',
     ACTIVE: 'Aktif', FULLY_DEPRECIATED: 'Tersusutkan penuh', DISPOSED: 'Dilepas', LOCKED: 'Ditutup', OPEN: 'Terbuka', DISABLED: 'Nonaktif' };
   var badge = function (s) { return '<span class="badge ' + esc(s) + '">' + esc(STATUS_LABEL[s] || s) + '</span>'; };
@@ -1402,70 +1402,269 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   var GROUP_LABEL = { CASH: 'Kas & Bank', RECEIVABLE: 'Piutang', INVENTORY: 'Persediaan', PREPAID: 'Dibayar di muka', FIXED_ASSET: 'Aset tetap', ACCUM_DEP: 'Akumulasi penyusutan', PAYABLE: 'Utang usaha', LOAN: 'Pinjaman',
     OTHER_LIABILITY: 'Liabilitas lain', CAPITAL: 'Modal', DRAWINGS: 'Prive', RETAINED: 'Laba ditahan', OPENING: 'Saldo awal', SALES: 'Penjualan', SALES_CONTRA: 'Retur & diskon', COGS: 'HPP', OPEX: 'Beban operasional',
     OTHER_INCOME: 'Pendapatan lain', OTHER_EXPENSE: 'Beban lain', OTHER_ASSET: 'Aset lain' };
+  var CATEGORY_LABEL = function (k) { return (S.boot && S.boot.accountCategories && S.boot.accountCategories[k]) || k || ''; };
+  function accountsOf(groups) { return postableAccounts().filter(function (a) { return groups.indexOf(a.group) !== -1; }); }
+
+  /* Konfigurasi layar master generik. */
+  var MASTER_UI = {
+    product: { action: 'product', title: 'Produk', key: 'PRODUCT_ID', name: 'PRODUCT_NAME', canSave: canEntry, canStatus: canEntry,
+      columns: [['SKU', 'SKU', 'mono'], ['PRODUCT_NAME', 'Nama produk'], ['BRAND', 'Brand', 'hide-m'], ['UNIT', 'Satuan', 'hide-m'],
+        ['SELLING_PRICE', 'Harga jual', 'money'], ['MASTER_SKU_PRODUCT_ID', 'Master SKU', 'link']],
+      fields: function () { return [
+        { k: 'SKU', label: 'SKU', req: true, identity: true }, { k: 'PRODUCT_NAME', label: 'Nama produk', req: true, identity: true },
+        { k: 'BRAND', label: 'Brand', identity: true }, { k: 'CATEGORY', label: 'Kategori', identity: true },
+        { k: 'UNIT', label: 'Satuan', identity: true, ph: 'pcs' }, { k: 'GTIN', label: 'GTIN / Barcode', identity: true },
+        { k: 'PURCHASE_PRICE', label: 'Harga beli acuan', money: true }, { k: 'SELLING_PRICE', label: 'Harga jual acuan', money: true },
+        { k: 'IS_STOCK_ITEM', label: 'Barang stok (dihitung persediaan & HPP)', check: true, def: true },
+        { k: 'INVENTORY_ACCOUNT', label: 'Akun persediaan', select: accountsOf(['INVENTORY']) },
+        { k: 'SALES_ACCOUNT', label: 'Akun penjualan', select: accountsOf(['SALES', 'OTHER_INCOME']) },
+        { k: 'COGS_ACCOUNT', label: 'Akun HPP', select: accountsOf(['COGS']) }]; } },
+    customer: { action: 'customer', title: 'Pelanggan', key: 'CUSTOMER_ID', name: 'CUSTOMER_NAME', canSave: canInput, canStatus: canEntry,
+      columns: [['CUSTOMER_ID', 'ID', 'mono'], ['CUSTOMER_NAME', 'Nama'], ['MARKETPLACE_ID', 'Marketplace', 'mkt'], ['MARKETPLACE_CUSTOMER_ID', 'ID pembeli', 'hide-m'], ['PHONE', 'Telepon', 'hide-m']],
+      fields: function () { return [
+        { k: 'CUSTOMER_NAME', label: 'Nama pelanggan', req: true, full: true },
+        { k: 'MARKETPLACE_ID', label: 'Marketplace', options: [['', '— Pelanggan langsung —']].concat(S.mkts.map(function (m) { return [m.MARKETPLACE_ID, m.MARKETPLACE_NAME]; })) },
+        { k: 'MARKETPLACE_CUSTOMER_ID', label: 'Username pembeli di marketplace' },
+        { k: 'PHONE', label: 'Telepon' }, { k: 'EMAIL', label: 'Email' },
+        { k: 'ADDRESS', label: 'Alamat', area: true }, { k: 'NOTES', label: 'Catatan', area: true }]; } },
+    supplier: { action: 'supplier', title: 'Pemasok', key: 'SUPPLIER_ID', name: 'SUPPLIER_NAME', canSave: canInput, canStatus: canEntry,
+      columns: [['SUPPLIER_ID', 'ID', 'mono'], ['SUPPLIER_NAME', 'Nama'], ['PHONE', 'Telepon', 'hide-m'], ['BANK_NAME', 'Bank', 'hide-m'], ['BANK_ACCOUNT', 'Rekening', 'hide-m']],
+      fields: function () { return [
+        { k: 'SUPPLIER_NAME', label: 'Nama pemasok', req: true, full: true }, { k: 'PHONE', label: 'Telepon' }, { k: 'EMAIL', label: 'Email' },
+        { k: 'BANK_NAME', label: 'Bank' }, { k: 'BANK_ACCOUNT', label: 'No. rekening' },
+        { k: 'ADDRESS', label: 'Alamat', area: true }, { k: 'NOTES', label: 'Catatan', area: true }]; } },
+    marketplace: { action: 'marketplace', title: 'Marketplace', key: 'MARKETPLACE_ID', name: 'MARKETPLACE_NAME', canSave: isAdmin, canStatus: isAdmin,
+      columns: [['MARKETPLACE_NAME', 'Marketplace'], ['MARKETPLACE_ACCOUNT', 'Nama toko', 'hide-m'], ['RECEIVABLE_ACCOUNT', 'Akun piutang', 'acc'], ['SETTLEMENT_ACCOUNT', 'Rekening pencairan', 'acc']],
+      fields: function () { return [
+        { k: 'MARKETPLACE_NAME', label: 'Nama marketplace', req: true, ph: 'mis. TikTok Shop' }, { k: 'MARKETPLACE_ACCOUNT', label: 'Nama toko', ph: 'mis. meirista.official' },
+        { k: 'SETTLEMENT_ACCOUNT', label: 'Rekening pencairan dana', req: true, select: cashAccounts() },
+        { k: 'RECEIVABLE_ACCOUNT', label: 'Akun piutang', select: accountsOf(['RECEIVABLE']), blank: '— Buat otomatis "Piutang <nama>" —' },
+        { k: 'SALES_ACCOUNT', label: 'Akun penjualan', select: accountsOf(['SALES']) },
+        { k: 'FEE_ACCOUNT', label: 'Akun biaya marketplace', select: accountsOf(['OPEX', 'OTHER_EXPENSE']) },
+        { k: 'SHIPPING_INCOME_ACCOUNT', label: 'Akun pendapatan ongkir', select: accountsOf(['SALES', 'OTHER_INCOME']) }]; } }
+  };
+  function canInput() { return S.user && ['ADMIN', 'FINANCE', 'OPERATOR'].indexOf(S.user.role) !== -1; }
+
   VIEWS.master = function (el) {
-    var st = S.state.md = S.state.md || { tab: 'coa' };
-    el.innerHTML = '<div class="tabs"><button data-t="coa">Akun (COA)</button><button data-t="cash">Kas &amp; Bank</button><button data-t="product">Produk (Master SKU)</button></div><div id="mdBody"></div>';
-    $$('.tabs button', el).forEach(function (b) { b.classList.toggle('active', b.dataset.t === st.tab); b.onclick = function () { st.tab = b.dataset.t; VIEWS.master(el); }; });
+    var tabs = [['product', 'Produk'], ['customer', 'Pelanggan'], ['supplier', 'Pemasok'], ['marketplace', 'Marketplace'], ['coa', 'Bagan Akun'], ['cash', 'Kas & Bank']];
+    var st = S.state.md = S.state.md || { tab: 'product' };
+    if (!tabs.some(function (t) { return t[0] === st.tab; })) st.tab = 'product';
+    el.innerHTML = '<div class="tabs">' + tabs.map(function (t) { return '<button data-t="' + t[0] + '" class="' + (st.tab === t[0] ? 'active' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="mdBody"></div>';
+    $$('.tabs button', el).forEach(function (b) { b.onclick = function () { st.tab = b.dataset.t; VIEWS.master(el); }; });
     var box = $('#mdBody', el);
-    if (st.tab === 'coa') {
-      box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addAcc">' + icon('plus') + 'Tambah Akun</button>' : '') + '<span class="muted small">Akun sistem dipakai jurnal otomatis; perubahan dicatat di audit log.</span></div><div class="card" id="coaT">' + skeleton(8) + '</div>';
-      if ($('#addAcc', box)) $('#addAcc', box).onclick = function () { openAccountForm(); };
-      call('master.coa').then(function (list) {
-        $('#coaT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama</th><th class="hide-m">Tipe</th><th class="hide-m">Grup laporan</th><th class="hide-m">Arus kas</th><th>Status</th></tr></thead><tbody>' +
-          list.map(function (a) {
-            return '<tr class="' + (a.isHeader ? 'sec' : (isAdmin() ? 'click' : '')) + '" data-code="' + esc(a.code) + '"><td style="font-family:var(--mono)">' + esc(a.code) + '</td><td' + (a.parent && !a.isHeader ? ' class="indent"' : '') + '>' + esc(a.name) + (a.isSystem ? ' <span class="badge">sistem</span>' : '') + '</td><td class="hide-m">' + esc(TYPE_LABEL[a.type] || a.type) + '</td><td class="hide-m">' + esc(GROUP_LABEL[a.group] || '') + '</td><td class="hide-m small">' + esc(a.cashFlow || '') + '</td><td>' + (a.isActive ? '' : badge('DISABLED')) + '</td></tr>';
-          }).join('') + '</tbody></table></div>';
-        if (isAdmin()) $$('tr.click', box).forEach(function (tr) { tr.onclick = function () { openAccountForm(list.filter(function (a) { return a.code === tr.dataset.code; })[0]); }; });
-      }).catch(function (e) { $('#coaT', box).innerHTML = errorBox(e); });
-    } else if (st.tab === 'cash') {
-      box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addCb">' + icon('plus') + 'Tambah Rekening</button>' : '') + '</div><div class="card" id="cbT">' + skeleton(4) + '</div>';
-      if ($('#addCb', box)) $('#addCb', box).onclick = function () {
-        ask({ title: 'Tambah rekening kas/bank', message: 'Akun COA baru akan dibuat otomatis di bawah Kas dan Bank.', confirm: 'Simpan',
-          extraHtml: '<div class="stack"><label class="field"><span>Nama *</span><input class="input" id="cbN" placeholder="mis. Bank BRI"></label><label class="field"><span>Jenis</span><select class="input" id="cbK"><option value="BANK">Bank</option><option value="CASH">Kas</option><option value="EWALLET">E-wallet</option></select></label><label class="field"><span>Nama bank</span><input class="input" id="cbB"></label><label class="field"><span>No. rekening <span class="hint">disimpan tersamar</span></span><input class="input" id="cbA"></label></div>',
-          collect: function (w) { return { name: $('#cbN', w).value, kind: $('#cbK', w).value, bankName: $('#cbB', w).value, accountNo: $('#cbA', w).value }; } }).then(function (r) {
-          if (!r) return;
-          call('master.cashBankCreate', r, { write: true }).then(function () { toast('Rekening ditambahkan.', 'ok'); reloadBoot().then(function () { VIEWS.master(el); }); }).catch(fail);
-        });
-      };
-      call('master.cashBank').then(function (list) {
-        $('#cbT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Akun</th><th>Jenis</th><th class="hide-m">Bank</th><th class="hide-m">No. rekening</th><th>Status</th></tr></thead><tbody>' +
-          list.map(function (c) { return '<tr><td>' + esc(c.name) + '</td><td style="font-family:var(--mono)">' + esc(c.accountCode) + '</td><td>' + esc({ CASH: 'Kas', BANK: 'Bank', EWALLET: 'E-wallet' }[c.kind] || c.kind) + '</td><td class="hide-m">' + esc(c.bankName) + '</td><td class="hide-m">' + esc(c.accountNo) + '</td><td>' + badge(c.isActive ? 'ACTIVE' : 'DISABLED') + '</td></tr>'; }).join('') + '</tbody></table></div>';
-      }).catch(function (e) { $('#cbT', box).innerHTML = errorBox(e); });
-    } else {
-      box.innerHTML = '<div class="banner ok" style="margin-bottom:12px">Master SKU tetap menjadi sumber kebenaran identitas produk. Meirista FAS hanya menyimpan referensi PRODUCT_ID dan data akuntansi (nilai persediaan, HPP).</div>' +
-        '<div class="card"><div class="card-h"><input class="input" style="max-width:320px" id="pq" placeholder="Cari SKU, GTIN, nama, brand…"><div class="spacer"></div>' + (isAdmin() ? '<button class="btn" id="pVal">Validasi mapping</button><button class="btn primary" id="pSync">Sinkronkan dari Master SKU</button>' : '') + '</div><div id="pBody">' + skeleton(4) + '</div></div>';
-      var loadMap = function (q) {
-        call('product.mappings', { search: q || '', pageSize: 50 }).then(function (pg) {
-          $('#pBody', box).innerHTML = (!pg.configured ? '<div class="card-b"><div class="banner warn">Master SKU belum dihubungkan. Admin perlu mengisi Script Property <b>MASTER_SKU_SPREADSHEET_ID</b> (dan opsional MASTER_SKU_SHEET_NAME / MASTER_SKU_COLUMN_MAP). Lihat docs/INTEGRATION.md.</div></div>' : '') +
-            (pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>SKU</th><th>Nama</th><th class="hide-m">Brand</th><th class="hide-m">GTIN</th><th class="hide-m">Unit</th><th>Sinkron</th></tr></thead><tbody>' +
-              pg.rows.map(function (r) { return '<tr><td style="font-family:var(--mono)">' + esc(r.sku) + '</td><td>' + esc(r.name) + '</td><td class="hide-m">' + esc(r.brand) + '</td><td class="hide-m">' + esc(r.gtin) + '</td><td class="hide-m">' + esc(r.unit) + '</td><td>' + badge(r.syncStatus === 'OK' ? 'ACTIVE' : 'FAILED').replace(/>[^<]+</, '>' + esc(r.syncStatus) + '<') + '</td></tr>'; }).join('') + '</tbody></table></div>' + pager(pg, function () {}) : '<div class="empty">Belum ada referensi produk tersinkron.</div>');
-        }).catch(function (e) { $('#pBody', box).innerHTML = errorBox(e); });
-      };
-      var tm; $('#pq', box).oninput = function (e) { clearTimeout(tm); tm = setTimeout(function () { loadMap(e.target.value); }, 350); };
-      if ($('#pSync', box)) $('#pSync', box).onclick = function () { call('product.sync', {}, { write: true }).then(function (r) { toast('Sinkron: ' + r.inserted + ' baru, ' + r.updated + ' diperbarui, ' + r.markedMissing + ' hilang dari master.', 'ok'); loadMap(); }).catch(fail); };
-      if ($('#pVal', box)) $('#pVal', box).onclick = function () { call('product.validate').then(function (r) { if (r.ok) toast('Mapping valid (' + r.count + ' produk).', 'ok'); else ask({ title: 'Masalah mapping produk', message: r.issues.slice(0, 15).join(' • '), confirm: 'Tutup' }); }).catch(fail); };
-      loadMap();
-    }
+    if (st.tab === 'coa') return renderCoaTree(box);
+    if (st.tab === 'cash') return renderCashBank(box, el);
+    loadMarketplaces().then(function () { renderMasterList(box, MASTER_UI[st.tab]); });
   };
 
-  function openAccountForm(a) {
-    var isNew = !a; a = a || { code: '', name: '', type: 'EXPENSE', normal: 'D', group: 'OPEX', cashFlow: 'OPERATING', isActive: true, isHeader: false, isContra: false, parent: '6000' };
-    var d = openDrawer(isNew ? 'Tambah Akun' : 'Ubah Akun ' + a.code, '<div class="form-grid" id="acf">' +
-      '<label class="field"><span>Kode *</span><input class="input" name="code" value="' + esc(a.code) + '"' + (isNew ? '' : ' disabled') + ' inputmode="numeric"></label>' +
+  function loadMarketplaces() {
+    if (S.mkts) return Promise.resolve(S.mkts);
+    return call('marketplace.list', { status: 'ALL', pageSize: 200 }).then(function (pg) { S.mkts = pg.rows; return S.mkts; }).catch(function () { S.mkts = []; return S.mkts; });
+  }
+
+  function renderMasterList(box, cfg) {
+    var st = { search: '', status: 'ACTIVE', page: 1 };
+    var isProduct = cfg.action === 'product';
+    box.innerHTML = (isProduct ? '<div class="banner info" style="margin-bottom:12px">Produk dapat ditautkan ke <b>Master Produk SKU</b>. Produk tertaut mengikuti SKU, nama, brand, dan satuan dari Master SKU (tidak bisa diubah di sini); harga & akun tetap diatur di FAS.</div>' : '') +
+      '<div class="card"><div class="card-h"><input class="input" style="max-width:300px" placeholder="Cari ' + esc(cfg.title.toLowerCase()) + '…" id="mq">' +
+      '<select class="input" style="max-width:150px" id="ms"><option value="ACTIVE">Aktif</option><option value="INACTIVE">Nonaktif</option><option value="ALL">Semua</option></select><div class="spacer"></div>' +
+      (isProduct && isAdmin() ? '<button class="btn" id="mVal">Validasi</button><button class="btn" id="mSync">Sinkron Master SKU</button>' : '') +
+      (isProduct && cfg.canSave() ? '<button class="btn" id="mLink">' + icon('down') + 'Ambil dari Master SKU</button>' : '') +
+      (cfg.canSave() ? '<button class="btn primary" id="mAdd">' + icon('plus') + 'Tambah ' + esc(cfg.title) + '</button>' : '') +
+      '</div><div id="mList">' + skeleton(5) + '</div></div>';
+    var load = function () {
+      call(cfg.action + '.list', { search: st.search, status: st.status, page: st.page, pageSize: 50 }).then(function (pg) {
+        var lb = $('#mList', box); if (!lb) return;
+        if (!pg.rows.length) { lb.innerHTML = '<div class="empty"><b>Belum ada ' + esc(cfg.title.toLowerCase()) + '</b>' + (cfg.canSave() ? 'Klik "Tambah ' + esc(cfg.title) + '" untuk menambahkan.' : '') + '</div>'; return; }
+        var cell = function (r, c) {
+          var v = r[c[0]];
+          if (c[2] === 'money') return '<td class="num">' + (v ? rp(v) : '—') + '</td>';
+          if (c[2] === 'mono') return '<td style="font-weight:700">' + esc(v) + '</td>';
+          if (c[2] === 'link') return '<td>' + (v ? '<span class="badge ' + (r.SYNC_STATUS === 'OK' ? 'POSTED' : 'FAILED') + '">' + (r.SYNC_STATUS === 'OK' ? 'Tertaut' : 'Hilang di master') + '</span>' : '<span class="badge">Lokal</span>') + '</td>';
+          if (c[2] === 'mkt') { var m = (S.mkts || []).filter(function (x) { return x.MARKETPLACE_ID === v; })[0]; return '<td>' + (m ? esc(m.MARKETPLACE_NAME) : '<span class="muted">Langsung</span>') + '</td>'; }
+          if (c[2] === 'acc') return '<td class="small">' + esc(v ? v + ' · ' + accName(v) : '') + '</td>';
+          return '<td class="' + (c[2] || '') + '">' + esc(v || '') + '</td>';
+        };
+        lb.innerHTML = '<div class="table-wrap"><table class="t"><thead><tr>' + cfg.columns.map(function (c) { return '<th class="' + (c[2] === 'money' ? 'num' : c[2] === 'hide-m' ? 'hide-m' : '') + '">' + esc(c[1]) + '</th>'; }).join('') + '<th>Status</th></tr></thead><tbody>' +
+          pg.rows.map(function (r) { return '<tr class="click" data-id="' + esc(r[cfg.key]) + '">' + cfg.columns.map(function (c) { return cell(r, c); }).join('') + '<td>' + badge(r.STATUS === 'ACTIVE' ? 'ACTIVE' : 'DISABLED') + '</td></tr>'; }).join('') +
+          '</tbody></table></div>' + pager(pg, function (p) { st.page = p; load(); });
+        $$('[data-id]', lb).forEach(function (tr) { tr.onclick = function () { openMasterForm(cfg, pg.rows.filter(function (r) { return r[cfg.key] === tr.dataset.id; })[0], load); }; });
+      }).catch(function (e) { var lb = $('#mList', box); if (lb) lb.innerHTML = errorBox(e, load); });
+    };
+    var tm;
+    $('#mq', box).oninput = function (e) { clearTimeout(tm); tm = setTimeout(function () { st.search = e.target.value; st.page = 1; load(); }, 350); };
+    $('#ms', box).onchange = function (e) { st.status = e.target.value; st.page = 1; load(); };
+    if ($('#mAdd', box)) $('#mAdd', box).onclick = function () { openMasterForm(cfg, null, load); };
+    if ($('#mLink', box)) $('#mLink', box).onclick = function () { openMasterSkuPicker(null, load); };
+    if ($('#mSync', box)) $('#mSync', box).onclick = function () {
+      ask({ title: 'Sinkron dari Master Produk SKU', message: 'Nama, SKU, brand, dan satuan produk yang tertaut akan diperbarui sesuai Master SKU.', confirm: 'Sinkronkan',
+        extraHtml: '<label class="row small" style="gap:8px;margin-top:6px"><input type="checkbox" id="syNew"> Buat juga produk FAS untuk semua produk Master SKU yang belum ada</label>',
+        collect: function (w) { return { createMissing: $('#syNew', w).checked }; } }).then(function (r) {
+        if (!r) return;
+        call('product.syncMaster', { createMissing: r.createMissing }, { write: true }).then(function (x) {
+          toast('Sinkron selesai: ' + x.updated + ' diperbarui, ' + x.created + ' baru, ' + x.missing + ' hilang dari master.', 'ok'); load();
+        }).catch(fail);
+      });
+    };
+    if ($('#mVal', box)) $('#mVal', box).onclick = function () {
+      call('product.validate').then(function (r) {
+        if (r.ok) toast('Data produk valid (' + r.count + ' produk, ' + r.linked + ' tertaut).', 'ok');
+        else ask({ title: 'Masalah data produk', message: r.issues.slice(0, 15).join(' • '), confirm: 'Tutup' });
+      }).catch(fail);
+    };
+    load();
+  }
+
+  function openMasterForm(cfg, rec, onDone) {
+    var isNew = !rec;
+    var linked = rec && rec.MASTER_SKU_PRODUCT_ID;
+    var editable = cfg.canSave();
+    var fields = cfg.fields();
+    var html = (linked ? '<div class="banner info" style="margin-bottom:14px">Tertaut ke Master SKU <b>' + esc(rec.MASTER_SKU_PRODUCT_ID) + '</b> — identitas produk mengikuti Master SKU.</div>' : '') +
+      (!isNew ? '<div class="row" style="margin-bottom:12px"><span class="badge">' + esc(rec[cfg.key]) + '</span>' + badge(rec.STATUS === 'ACTIVE' ? 'ACTIVE' : 'DISABLED') + '</div>' : '') +
+      '<div class="form-grid" id="mf">' + fields.map(function (f) {
+        var v = rec ? rec[f.k] : (f.def !== undefined ? f.def : '');
+        var dis = !editable || (linked && f.identity) ? ' disabled' : '';
+        var lab = '<span>' + esc(f.label) + (f.req ? ' *' : '') + '</span>';
+        if (f.check) return '<label class="row small full" style="gap:8px"><input type="checkbox" name="' + f.k + '"' + (v !== false ? ' checked' : '') + dis + '> ' + esc(f.label) + '</label>';
+        if (f.area) return '<label class="field full">' + lab + '<textarea class="input" name="' + f.k + '" rows="2"' + dis + '>' + esc(v) + '</textarea></label>';
+        if (f.money) return '<label class="field">' + lab + '<input class="input money" name="' + f.k + '" value="' + (v ? NF.format(v) : '') + '" placeholder="0"' + dis + '></label>';
+        if (f.options) return '<label class="field">' + lab + '<select class="input" name="' + f.k + '"' + dis + '>' + f.options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
+        if (f.select) return '<label class="field">' + lab + '<select class="input" name="' + f.k + '"' + dis + '>' + (f.blank || !f.req ? '<option value="">' + esc(f.blank || '— Default —') + '</option>' : '<option value="">Pilih…</option>') + options(f.select, v) + '</select></label>';
+        return '<label class="field' + (f.full ? ' full' : '') + '">' + lab + '<input class="input" name="' + f.k + '" value="' + esc(v) + '" placeholder="' + esc(f.ph || '') + '"' + dis + '></label>';
+      }).join('') + (!isNew && editable ? '<label class="field full"><span>Alasan perubahan <span class="hint">opsional, tercatat di audit</span></span><input class="input" name="__reason"></label>' : '') + '</div>';
+    var foot = '<div class="err-text" id="mErr" style="flex-basis:100%"></div>' +
+      (!isNew && cfg.canStatus() ? '<button class="btn ' + (rec.STATUS === 'ACTIVE' ? 'danger' : '') + '" id="mStatus">' + (rec.STATUS === 'ACTIVE' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' : '') +
+      (!isNew && cfg.action === 'product' && !linked && editable ? '<button class="btn" id="mLinkOne">Tautkan ke Master SKU</button>' : '') +
+      (editable ? '<button class="btn primary" id="mSave">Simpan</button>' : '');
+    var d = openDrawer((isNew ? 'Tambah ' : '') + cfg.title + (isNew ? '' : ' — ' + rec[cfg.name]), html, foot);
+    var root = $('#mf', d), f2 = d.parentNode;
+    bindMoney(root);
+    var sBtn = $('#mSave', f2);
+    if (sBtn) sBtn.onclick = function () {
+      var data = {};
+      fields.forEach(function (f) {
+        if (linked && f.identity) return;
+        var el = $('[name="' + f.k + '"]', root); if (!el) return;
+        data[f.k] = f.check ? el.checked : f.money ? parseMoney(el.value) : el.value.trim();
+      });
+      sBtn.disabled = true; $('#mErr', f2).textContent = '';
+      call(cfg.action + '.save', { id: isNew ? undefined : rec[cfg.key], rowVersion: isNew ? undefined : rec.ROW_VERSION, data: data, reason: val(root, '__reason') }, { write: true }).then(function (r) {
+        closeDrawer(); toast(cfg.title + ' ' + r[cfg.key] + ' disimpan.', 'ok');
+        if (cfg.action === 'marketplace') { S.mkts = null; reloadBoot(); }
+        onDone();
+      }).catch(function (e) { sBtn.disabled = false; $('#mErr', f2).textContent = e.message; });
+    };
+    var stBtn = $('#mStatus', f2);
+    if (stBtn) stBtn.onclick = function () {
+      var to = rec.STATUS === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      ask({ title: (to === 'ACTIVE' ? 'Aktifkan ' : 'Nonaktifkan ') + rec[cfg.name] + '?', message: 'Data tidak dihapus; ' + (to === 'ACTIVE' ? 'akan muncul lagi di pilihan transaksi.' : 'tidak muncul lagi di pilihan transaksi baru.'),
+        reason: 'Alasan', reasonRequired: true, confirm: to === 'ACTIVE' ? 'Aktifkan' : 'Nonaktifkan', danger: to !== 'ACTIVE' }).then(function (r) {
+        if (!r) return;
+        call(cfg.action + '.setStatus', { id: rec[cfg.key], status: to, reason: r.reason, rowVersion: rec.ROW_VERSION }, { write: true }).then(function () {
+          closeDrawer(); toast('Status diperbarui.', 'ok'); if (cfg.action === 'marketplace') S.mkts = null; onDone();
+        }).catch(fail);
+      });
+    };
+    var lBtn = $('#mLinkOne', f2);
+    if (lBtn) lBtn.onclick = function () { openMasterSkuPicker(rec, onDone); };
+  }
+
+  /** Cari produk di Master Produk SKU lalu tautkan / buat produk FAS. */
+  function openMasterSkuPicker(product, onDone) {
+    var d = openDrawer(product ? 'Tautkan ' + product.SKU + ' ke Master SKU' : 'Ambil produk dari Master SKU',
+      '<input class="input" id="msq" placeholder="Cari SKU, nama, brand, GTIN di Master SKU…"><div id="msr" style="margin-top:12px"><div class="muted small">Ketik minimal 2 huruf.</div></div>');
+    var tm;
+    var search = function (q) {
+      $('#msr', d).innerHTML = skeleton(3);
+      call('product.searchMaster', { q: q, limit: 30 }).then(function (r) {
+        if (!r.configured) { $('#msr', d).innerHTML = '<div class="banner warn">Master Produk SKU belum dihubungkan. Pemilik skrip perlu mengisi Script Property <b>MASTER_SKU_SPREADSHEET_ID</b> (lihat docs/INTEGRATION.md). Sementara itu produk dapat dibuat manual dan ditautkan nanti.</div>'; return; }
+        if (!r.rows.length) { $('#msr', d).innerHTML = '<div class="empty">Tidak ditemukan.</div>'; return; }
+        $('#msr', d).innerHTML = '<table class="t"><thead><tr><th>SKU</th><th>Nama</th><th class="hide-m">Brand</th><th></th></tr></thead><tbody>' + r.rows.map(function (m) {
+          return '<tr><td style="font-weight:700">' + esc(m.VARIANT_SKU) + '</td><td>' + esc(m.PRODUCT_NAME) + '<div class="muted small">' + esc(m.PRODUCT_ID) + (m.GTIN ? ' · ' + esc(m.GTIN) : '') + '</div></td><td class="hide-m">' + esc(m.BRAND) + '</td><td class="num"><button class="btn sm primary" data-mid="' + esc(m.PRODUCT_ID) + '">' + (product ? 'Tautkan' : 'Ambil') + '</button></td></tr>';
+        }).join('') + '</tbody></table>';
+        $$('[data-mid]', d).forEach(function (b) { b.onclick = function () {
+          b.disabled = true;
+          call('product.link', { masterProductId: b.dataset.mid, productId: product ? product.PRODUCT_ID : undefined }, { write: true }).then(function (p) {
+            closeDrawer(); toast('Produk ' + p.SKU + ' ' + (product ? 'ditautkan' : 'ditambahkan') + ' dari Master SKU.', 'ok'); onDone();
+          }).catch(function (e) { b.disabled = false; fail(e); });
+        }; });
+      }).catch(function (e) { $('#msr', d).innerHTML = errorBox(e); });
+    };
+    $('#msq', d).oninput = function (e) { clearTimeout(tm); var q = e.target.value.trim(); if (q.length < 2) return; tm = setTimeout(function () { search(q); }, 350); };
+    $('#msq', d).focus();
+  }
+
+  /** Bagan akun dalam bentuk pohon (induk → sub-akun). */
+  function renderCoaTree(box) {
+    box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addAcc">' + icon('plus') + 'Tambah Akun</button>' : '') +
+      '<span class="muted small">Akun bertanda <b>sistem</b> dipakai jurnal otomatis. Akun tidak dihapus — nonaktifkan bila tidak dipakai. Semua perubahan tercatat di audit.</span></div><div class="card" id="coaT">' + skeleton(10) + '</div>';
+    if ($('#addAcc', box)) $('#addAcc', box).onclick = function () { openAccountForm(); };
+    call('master.coa').then(function (list) {
+      var byParent = {}, codes = {};
+      list.forEach(function (a) { codes[a.code] = a; });
+      list.forEach(function (a) { var p = a.parent && codes[a.parent] ? a.parent : ''; (byParent[p] = byParent[p] || []).push(a); });
+      var rows = [];
+      var walk = function (p, depth) { (byParent[p] || []).sort(function (x, y) { return x.code < y.code ? -1 : 1; }).forEach(function (a) { rows.push({ a: a, d: depth }); walk(a.code, depth + 1); }); };
+      walk('', 0);
+      $('#coaT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama akun</th><th class="hide-m">Tipe</th><th class="hide-m">Kategori</th><th class="hide-m">Saldo normal</th><th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          var a = r.a;
+          return '<tr class="' + (a.isHeader ? 'sec ' : '') + (isAdmin() ? 'click' : '') + '" data-code="' + esc(a.code) + '"' + (a.isActive ? '' : ' style="opacity:.55"') + '>' +
+            '<td style="font-weight:700;white-space:nowrap">' + esc(a.code) + '</td>' +
+            '<td style="padding-left:' + (12 + r.d * 20) + 'px">' + esc(a.name) + (a.isSystem ? ' <span class="badge">sistem</span>' : '') + (a.isActive ? '' : ' ' + badge('DISABLED')) + '</td>' +
+            '<td class="hide-m small">' + esc(TYPE_LABEL[a.type] || a.type) + '</td><td class="hide-m small">' + esc(CATEGORY_LABEL(a.category)) + '</td>' +
+            '<td class="hide-m small">' + (a.normal === 'D' ? 'Debit' : 'Kredit') + '</td>' +
+            '<td class="num">' + (isAdmin() && a.isHeader ? '<button class="btn sm" data-sub="' + esc(a.code) + '">' + icon('plus') + 'Sub-akun</button>' : '') + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+      if (isAdmin()) {
+        $$('tr.click', box).forEach(function (tr) { tr.onclick = function (ev) { if (ev.target.closest('[data-sub]')) return; openAccountForm(codes[tr.dataset.code]); }; });
+        $$('[data-sub]', box).forEach(function (b) { b.onclick = function () { var p = codes[b.dataset.sub]; openAccountForm(null, p); }; });
+      }
+    }).catch(function (e) { $('#coaT', box).innerHTML = errorBox(e); });
+  }
+
+  function renderCashBank(box, el) {
+    box.innerHTML = '<div class="row" style="margin-bottom:12px">' + (isAdmin() ? '<button class="btn primary" id="addCb">' + icon('plus') + 'Tambah Rekening</button>' : '') + '</div><div class="card" id="cbT">' + skeleton(4) + '</div>';
+    if ($('#addCb', box)) $('#addCb', box).onclick = function () {
+      ask({ title: 'Tambah rekening kas/bank', message: 'Akun COA baru akan dibuat otomatis di bawah Kas dan Bank.', confirm: 'Simpan',
+        extraHtml: '<div class="stack"><label class="field"><span>Nama *</span><input class="input" id="cbN" placeholder="mis. Bank BRI"></label><label class="field"><span>Jenis</span><select class="input" id="cbK"><option value="BANK">Bank</option><option value="CASH">Kas</option><option value="EWALLET">E-wallet</option></select></label><label class="field"><span>Nama bank</span><input class="input" id="cbB"></label><label class="field"><span>No. rekening <span class="hint">disimpan tersamar</span></span><input class="input" id="cbA"></label></div>',
+        collect: function (w) { return { name: $('#cbN', w).value, kind: $('#cbK', w).value, bankName: $('#cbB', w).value, accountNo: $('#cbA', w).value }; } }).then(function (r) {
+        if (!r) return;
+        call('master.cashBankCreate', r, { write: true }).then(function () { toast('Rekening ditambahkan.', 'ok'); reloadBoot().then(function () { VIEWS.master(el); }); }).catch(fail);
+      });
+    };
+    call('master.cashBank').then(function (list) {
+      $('#cbT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Akun</th><th>Jenis</th><th class="hide-m">Bank</th><th class="hide-m">No. rekening</th><th>Status</th></tr></thead><tbody>' +
+        list.map(function (c) { return '<tr><td><b>' + esc(c.name) + '</b></td><td>' + esc(c.accountCode) + '</td><td>' + esc({ CASH: 'Kas', BANK: 'Bank', EWALLET: 'E-wallet' }[c.kind] || c.kind) + '</td><td class="hide-m">' + esc(c.bankName) + '</td><td class="hide-m">' + esc(c.accountNo) + '</td><td>' + badge(c.isActive ? 'ACTIVE' : 'DISABLED') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }).catch(function (e) { $('#cbT', box).innerHTML = errorBox(e); });
+  }
+
+  /** Form akun. parentPreset = akun induk saat menambah sub-akun. */
+  function openAccountForm(a, parentPreset) {
+    var isNew = !a;
+    a = a || { code: '', name: '', type: parentPreset ? parentPreset.type : 'EXPENSE', normal: parentPreset ? parentPreset.normal : 'D',
+      group: 'OPEX', cashFlow: 'OPERATING', isActive: true, isHeader: false, isContra: false, parent: parentPreset ? parentPreset.code : '6000', category: '' };
+    var d = openDrawer(isNew ? (parentPreset ? 'Sub-akun di bawah ' + parentPreset.code + ' · ' + parentPreset.name : 'Tambah Akun') : 'Ubah Akun ' + a.code, '<div class="form-grid" id="acf">' +
+      '<label class="field"><span>Kode *</span><input class="input" name="code" value="' + esc(a.code) + '"' + (isNew ? '' : ' disabled') + ' inputmode="numeric" placeholder="' + esc(parentPreset ? String(Number(parentPreset.code) + 1) : '6260') + '"></label>' +
       '<label class="field"><span>Nama *</span><input class="input" name="name" value="' + esc(a.name) + '"></label>' +
+      '<label class="field"><span>Induk</span><select class="input" name="parent"><option value="">— Akun utama —</option>' + coa().filter(function (x) { return x.isHeader && x.code !== a.code; }).map(function (x) { return '<option value="' + x.code + '"' + (a.parent === x.code ? ' selected' : '') + '>' + esc(x.code + ' · ' + x.name) + '</option>'; }).join('') + '</select></label>' +
       '<label class="field"><span>Tipe</span><select class="input" name="type">' + Object.keys(TYPE_LABEL).map(function (k) { return '<option value="' + k + '"' + (a.type === k ? ' selected' : '') + '>' + TYPE_LABEL[k] + '</option>'; }).join('') + '</select></label>' +
       '<label class="field"><span>Saldo normal</span><select class="input" name="normal"><option value="D"' + (a.normal === 'D' ? ' selected' : '') + '>Debit</option><option value="C"' + (a.normal === 'C' ? ' selected' : '') + '>Kredit</option></select></label>' +
-      '<label class="field"><span>Grup laporan</span><select class="input" name="group">' + Object.keys(GROUP_LABEL).map(function (k) { return '<option value="' + k + '"' + (a.group === k ? ' selected' : '') + '>' + GROUP_LABEL[k] + '</option>'; }).join('') + '</select></label>' +
-      '<label class="field"><span>Kategori arus kas</span><select class="input" name="cashFlow">' + ['OPERATING', 'INVESTING', 'FINANCING', 'OPENING'].map(function (k) { return '<option' + (a.cashFlow === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></label>' +
-      '<label class="field"><span>Induk</span><select class="input" name="parent"><option value="">—</option>' + coa().filter(function (x) { return x.isHeader; }).map(function (x) { return '<option value="' + x.code + '"' + (a.parent === x.code ? ' selected' : '') + '>' + esc(x.code + ' · ' + x.name) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="field"><span>Kategori laporan</span><select class="input" name="category"><option value="">Otomatis</option>' + Object.keys((S.boot && S.boot.accountCategories) || {}).map(function (k) { return '<option value="' + k + '"' + (a.category === k ? ' selected' : '') + '>' + esc(CATEGORY_LABEL(k)) + '</option>'; }).join('') + '</select></label>' +
+      (a.isHeader ? '' : '<label class="field"><span>Grup laporan</span><select class="input" name="group">' + Object.keys(GROUP_LABEL).map(function (k) { return '<option value="' + k + '"' + (a.group === k ? ' selected' : '') + '>' + GROUP_LABEL[k] + '</option>'; }).join('') + '</select></label>' +
+        '<label class="field"><span>Kategori arus kas</span><select class="input" name="cashFlow">' + [['OPERATING', 'Operasi'], ['INVESTING', 'Investasi'], ['FINANCING', 'Pendanaan'], ['OPENING', 'Saldo awal']].map(function (k) { return '<option value="' + k[0] + '"' + (a.cashFlow === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select></label>') +
       '<label class="row small" style="gap:6px"><input type="checkbox" name="isContra"' + (a.isContra ? ' checked' : '') + '> Akun kontra</label>' +
       '<label class="row small" style="gap:6px"><input type="checkbox" name="isActive"' + (a.isActive ? ' checked' : '') + '> Aktif</label>' +
+      (a.isSystem ? '<div class="banner warn full">Akun sistem: tipe, saldo normal, dan status kas tidak dapat diubah bila sudah dipakai jurnal.</div>' : '') +
       '<label class="field full"><span>Alasan perubahan *</span><input class="input" name="reason"></label></div>',
       '<div class="err-text" id="acErr" style="flex-basis:100%"></div><button class="btn primary" id="acSave">Simpan</button>');
     var root = $('#acf', d);
     $('#acSave', d.parentNode).onclick = function () {
-      call('master.coaSave', { code: val(root, 'code'), name: val(root, 'name'), type: val(root, 'type'), normal: val(root, 'normal'), group: val(root, 'group'), cashFlow: val(root, 'cashFlow'),
-        parent: val(root, 'parent'), isContra: $('[name=isContra]', root).checked, isActive: $('[name=isActive]', root).checked, isHeader: !!a.isHeader, reason: val(root, 'reason'), rowVersion: a.rowVersion }, { write: true })
+      call('master.coaSave', { code: val(root, 'code'), name: val(root, 'name'), type: val(root, 'type'), normal: val(root, 'normal'),
+        group: a.isHeader ? '' : val(root, 'group'), cashFlow: a.isHeader ? '' : val(root, 'cashFlow'), category: val(root, 'category'),
+        parent: val(root, 'parent'), isContra: $('[name=isContra]', root).checked, isActive: $('[name=isActive]', root).checked, isHeader: !!a.isHeader,
+        reason: val(root, 'reason'), rowVersion: a.rowVersion }, { write: true })
         .then(function () { closeDrawer(); toast('Akun disimpan.', 'ok'); reloadBoot().then(refreshView); })
         .catch(function (e) { $('#acErr', d.parentNode).textContent = e.message; });
     };
@@ -1474,7 +1673,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   /* ================= PENGATURAN ================= */
   VIEWS.settings = function (el) {
     var tabs = [['me', 'Akun Saya']];
-    if (isAdmin()) tabs = tabs.concat([['users', 'Pengguna'], ['periods', 'Periode'], ['system', 'Sistem'], ['backup', 'Backup'], ['diag', 'Diagnostik'], ['audit', 'Audit Log']]);
+    if (isAdmin()) tabs = tabs.concat([['company', 'Perusahaan'], ['users', 'Pengguna'], ['periods', 'Periode'], ['system', 'Sistem'], ['backup', 'Backup'], ['diag', 'Diagnostik'], ['audit', 'Audit Log']]);
     var st = S.state.set = S.state.set || { tab: 'me' };
     if (!tabs.some(function (t) { return t[0] === st.tab; })) st.tab = 'me';
     el.innerHTML = '<div class="tabs">' + tabs.map(function (t) { return '<button data-t="' + t[0] + '" class="' + (st.tab === t[0] ? 'active' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="stBody"></div>';
@@ -1484,7 +1683,41 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     T(box, function () { VIEWS.settings(el); });
   };
 
+  /** Ringkasan nilai lama → baru di audit log. */
+  function auditChange(r) {
+    if (!r.newValue || !Object.keys(r.newValue).length) return '';
+    var show = function (v) { return v === null || v === undefined || v === '' ? '∅' : esc(typeof v === 'object' ? JSON.stringify(v) : v); };
+    return '<div class="muted" style="margin-top:3px">' + Object.keys(r.newValue).slice(0, 4).map(function (k) {
+      return esc(k) + ': ' + (r.oldValue && k in r.oldValue ? show(r.oldValue[k]) + ' → ' : '') + show(r.newValue[k]);
+    }).join('<br>') + '</div>';
+  }
+
   var SETTINGS_TABS = {
+    company: function (box, reload) {
+      box.innerHTML = skeleton(5);
+      call('company.get').then(function (c) {
+        var months = MONTHS.map(function (m, i) { return '<option value="' + (i + 1) + '"' + (Number(c.FISCAL_YEAR_START) === i + 1 ? ' selected' : '') + '>' + m + '</option>'; }).join('');
+        box.innerHTML = '<div class="card card-b" style="max-width:720px"><div class="form-grid" id="cf">' +
+          '<label class="field full"><span>Nama perusahaan *</span><input class="input" name="COMPANY_NAME" value="' + esc(c.COMPANY_NAME) + '"></label>' +
+          '<label class="field full"><span>Alamat</span><textarea class="input" name="ADDRESS" rows="2">' + esc(c.ADDRESS) + '</textarea></label>' +
+          '<label class="field"><span>Telepon</span><input class="input" name="PHONE" value="' + esc(c.PHONE) + '"></label>' +
+          '<label class="field"><span>Email</span><input class="input" name="EMAIL" value="' + esc(c.EMAIL) + '"></label>' +
+          '<label class="field"><span>NPWP</span><input class="input" name="TAX_NUMBER" value="' + esc(c.TAX_NUMBER) + '"></label>' +
+          '<label class="field"><span>Mata uang</span><input class="input" value="' + esc(c.CURRENCY || 'IDR') + '" disabled></label>' +
+          '<label class="field"><span>Awal tahun buku</span><select class="input" name="FISCAL_YEAR_START">' + months + '</select></label>' +
+          '<label class="field"><span>Alasan perubahan *</span><input class="input" name="__reason"></label></div>' +
+          '<div class="row" style="margin-top:16px"><div class="err-text" id="cErr"></div><div class="spacer"></div><button class="btn primary" id="cSave">Simpan</button></div></div>';
+        var root = $('#cf', box);
+        $('#cSave', box).onclick = function () {
+          var data = {};
+          ['COMPANY_NAME', 'ADDRESS', 'PHONE', 'EMAIL', 'TAX_NUMBER', 'FISCAL_YEAR_START'].forEach(function (k) { data[k] = val(root, k); });
+          data.FISCAL_YEAR_START = Number(data.FISCAL_YEAR_START);
+          call('company.save', { data: data, reason: val(root, '__reason'), rowVersion: c.ROW_VERSION }, { write: true })
+            .then(function () { toast('Data perusahaan disimpan.', 'ok'); reloadBoot().then(reload); })
+            .catch(function (e) { $('#cErr', box).textContent = e.message; });
+        };
+      }).catch(function (e) { box.innerHTML = errorBox(e); });
+    },
     me: function (box) {
       box.innerHTML = '<div class="grid g2"><div class="card card-b"><h3 style="margin-bottom:12px">Profil</h3><table class="t"><tr><td class="muted">Nama</td><td>' + esc(S.user.name) + '</td></tr><tr><td class="muted">Username</td><td><b>' + esc(S.user.username) + '</b></td></tr><tr><td class="muted">Email</td><td>' + esc(S.user.email || '—') + '</td></tr><tr><td class="muted">Peran</td><td>' + esc(ROLE_LABEL[S.user.role]) + '</td></tr></table></div>' +
         '<div class="card card-b"><h3 style="margin-bottom:12px">Ganti kata sandi</h3><div id="pwf">' + passwordFormHtml() + '<button class="btn primary" style="margin-top:12px" id="pwGo">Simpan</button></div></div></div>';
@@ -1492,7 +1725,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     },
     users: function (box, reload) {
       box.innerHTML = '<div class="row" style="margin-bottom:12px"><button class="btn primary" id="uAdd">' + icon('plus') + 'Tambah Pengguna</button></div><div class="card" id="uT">' + skeleton(4) + '</div>';
-      var roleSel = function (id, cur) { return '<select class="input" id="' + id + '">' + ['ADMIN', 'FINANCE', 'VIEWER'].map(function (r) { return '<option value="' + r + '"' + (cur === r ? ' selected' : '') + '>' + ROLE_LABEL[r] + '</option>'; }).join('') + '</select>'; };
+      var roleSel = function (id, cur) { return '<select class="input" id="' + id + '">' + ['ADMIN', 'FINANCE', 'OPERATOR', 'VIEWER'].map(function (r) { return '<option value="' + r + '"' + (cur === r ? ' selected' : '') + '>' + ROLE_LABEL[r] + '</option>'; }).join('') + '</select>'; };
       var showPw = function (who, pw) { ask({ title: 'Kata sandi sementara', message: 'Berikan kata sandi ini secara langsung kepada ' + who + '. Kata sandi hanya ditampilkan sekali dan wajib diganti saat login pertama.', extraHtml: '<div class="input" style="display:flex;align-items:center;font-family:var(--mono);font-size:16px;user-select:all">' + esc(pw) + '</div>', confirm: 'Sudah dicatat' }); };
       $('#uAdd', box).onclick = function () {
         ask({ title: 'Tambah pengguna', message: 'Pengguna login dengan username dan kata sandi sementara.', confirm: 'Buat pengguna',
@@ -1598,7 +1831,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       var load = function () {
         call('audit.list', { page: st.page, pageSize: 50, search: st.search }).then(function (pg) {
           $('#aT', box).innerHTML = pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th class="hide-m">Entitas</th><th>Alasan</th></tr></thead><tbody>' +
-            pg.rows.map(function (r) { return '<tr><td class="small">' + fts(r.at) + '</td><td class="small">' + esc(r.user) + '</td><td><code class="small">' + esc(r.action) + '</code></td><td class="hide-m small muted">' + esc(r.entity + ' ' + (r.entityId || '').substring(0, 13)) + '</td><td class="small">' + esc(r.reason) + '</td></tr>'; }).join('') +
+            pg.rows.map(function (r) { return '<tr><td class="small">' + fts(r.at) + '</td><td class="small">' + esc(r.user) + '</td><td><code class="small">' + esc(r.action) + '</code></td><td class="hide-m small muted">' + esc(r.entity + ' ' + (r.entityId || '').substring(0, 13)) + '</td><td class="small">' + esc(r.reason) + auditChange(r) + '</td></tr>'; }).join('') +
             '</tbody></table></div>' + pager(pg, function (p) { st.page = p; load(); }) : '<div class="empty">Tidak ada data.</div>';
         }).catch(function (e) { $('#aT', box).innerHTML = errorBox(e); });
       };
