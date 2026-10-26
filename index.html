@@ -138,6 +138,7 @@
   .kpi .k-label { color: var(--muted); font-weight: 700; font-size: 13px; }
   .kpi.dark { background: var(--ink); border-color: var(--ink); color: #fff; } .kpi.dark .top, .kpi.dark .k-sub, .kpi.dark .k-label { color: var(--sage); } .kpi.dark .chip { background: rgba(232,105,58,.2); }
   .kpi.ok .chip { background: var(--ok-soft); color: var(--ok); }
+  .kpi.alert .chip { background: var(--err-soft); color: var(--err); }
   .kpi .k-value.neg { color: var(--err); } .kpi.dark .k-value.neg { color: #f3a37f; }
   .banner { padding: 11px 13px; border-radius: 10px; font-size: 13px; font-weight: 600; display: block; line-height: 1.55; }
   .banner.warn { background: var(--warn-soft); color: #8a6312; }
@@ -296,7 +297,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="62bdce2-8846be90";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="58879e5-3593adef";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
@@ -329,7 +330,7 @@
           <div class="auth-help" id="loginHelp"></div>
         </form>
       </div>
-      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.5.0</div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.6.0</div>
     </section>
   </div>
 
@@ -616,6 +617,8 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     { id: 'expenses', label: 'Biaya', icon: 'trx', level: 'VIEW', sec: 'Transaksi' },
     { id: 'cashbank', label: 'Kas & Bank', icon: 'wallet', level: 'VIEW', sec: 'Transaksi' },
     { id: 'journals', label: 'Jurnal Umum', icon: 'book', level: 'ADMIN', sec: 'Transaksi' },
+    { id: 'stock', label: 'Stok', icon: 'asset', level: 'VIEW', sec: 'Persediaan' },
+    { id: 'adjustments', label: 'Penyesuaian', icon: 'pen', level: 'VIEW', sec: 'Persediaan' },
     { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW', sec: 'Laporan' },
     { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW', sec: 'Laporan' },
     { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW', sec: 'Laporan' },
@@ -861,9 +864,10 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     PURCHASE: { view: 'purchases', title: 'Pembelian', newLabel: 'Pembelian Baru' },
     EXPENSE: { view: 'expenses', title: 'Biaya', newLabel: 'Biaya Baru' },
     PAYMENT: { view: 'cashbank', title: 'Kas & Bank', newLabel: 'Transaksi Kas & Bank' },
-    JOURNAL: { view: 'journals', title: 'Jurnal Umum', newLabel: 'Jurnal Umum' }
+    JOURNAL: { view: 'journals', title: 'Jurnal Umum', newLabel: 'Jurnal Umum' },
+    ADJUSTMENT: { view: 'adjustments', title: 'Penyesuaian Stok', newLabel: 'Penyesuaian' }
   };
-  var SOURCE_TO_DOC = { SALES: 'SALES', PURCHASE: 'PURCHASE', EXPENSE: 'EXPENSE', PAYMENT: 'PAYMENT', JOURNAL: 'JOURNAL', OPENING_BALANCE: 'JOURNAL' };
+  var SOURCE_TO_DOC = { STOCK_ADJ: 'ADJUSTMENT', SALES: 'SALES', PURCHASE: 'PURCHASE', EXPENSE: 'EXPENSE', PAYMENT: 'PAYMENT', JOURNAL: 'JOURNAL', OPENING_BALANCE: 'JOURNAL' };
   var PAY_LABEL = { PAID: 'Lunas', PARTIAL: 'Sebagian', UNPAID: 'Belum lunas' };
   var PAY_BADGE = { PAID: 'POSTED', PARTIAL: 'PENDING', UNPAID: 'FAILED' };
   STATUS_LABEL.CANCELLED = 'Dibatalkan';
@@ -892,6 +896,8 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
           buttons = [['CASH_IN', 'Kas Masuk', 'primary'], ['CASH_OUT', 'Kas Keluar', ''], ['TRANSFER', 'Transfer', ''], ['RECEIVE_PAYMENT', 'Terima Pembayaran', ''],
             ['PAY_SUPPLIER', 'Bayar Pemasok', ''], ['MARKETPLACE_SETTLEMENT', 'Pencairan Marketplace', '']].map(function (b) {
             return '<button class="btn ' + b[2] + '" data-new="' + b[0] + '">' + (b[2] ? icon('plus') : '') + b[1] + '</button>'; }).join('');
+        } else if (type === 'ADJUSTMENT') {
+          buttons = '<button class="btn primary" data-new="ADJUSTMENT">' + icon('plus') + 'Penyesuaian</button><button class="btn" data-new="OPNAME">Stok Opname</button><button class="btn" data-new="OPENING">Saldo Awal Stok</button>';
         } else if (type === 'JOURNAL') {
           buttons = '<button class="btn primary" data-new="GENERAL">' + icon('plus') + 'Jurnal Umum</button><button class="btn" data-new="OPENING_BALANCE">Saldo Awal</button>';
         } else buttons = '<button class="btn primary" data-new="1">' + icon('plus') + esc(ui.newLabel) + '</button>';
@@ -906,6 +912,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       $$('[data-new]', el).forEach(function (b) { b.onclick = function () {
         if (type === 'PAYMENT') openPaymentForm(null, { paymentType: b.dataset.new });
         else if (type === 'JOURNAL') openJournalForm(null, { kind: b.dataset.new });
+        else if (type === 'ADJUSTMENT') openAdjustmentForm(null, { kind: b.dataset.new });
         else DOC_FORMS[type](null, null);
       }; });
       var timer;
@@ -943,6 +950,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   VIEWS.expenses = docListView('EXPENSE');
   VIEWS.cashbank = docListView('PAYMENT');
   VIEWS.journals = docListView('JOURNAL');
+  VIEWS.adjustments = docListView('ADJUSTMENT');
 
   /* ---------- Lampiran ---------- */
   function attachWidget(box, list) {
@@ -1358,7 +1366,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     draw(); attachWidget($('#jfAtt', root), att); tot();
   }
 
-  var DOC_FORMS = { SALES: openSalesForm, PURCHASE: openPurchaseForm, EXPENSE: openExpenseForm, PAYMENT: openPaymentForm, JOURNAL: openJournalForm };
+  var DOC_FORMS = { SALES: openSalesForm, PURCHASE: openPurchaseForm, EXPENSE: openExpenseForm, PAYMENT: openPaymentForm, JOURNAL: openJournalForm, ADJUSTMENT: function (e, p) { openAdjustmentForm(e, p); } };
 
   function journalTable(j, title) {
     if (!j) return '';
@@ -1389,20 +1397,26 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       if (t.statusReason) info.push(['Catatan status', t.statusReason]);
       var amountRows = '';
       if (type === 'SALES') amountRows = sumRow('Subtotal', h.SUBTOTAL) + (h.LINE_DISCOUNT + h.DISCOUNT ? sumRow('Diskon', -(h.LINE_DISCOUNT + h.DISCOUNT)) : '') + (h.SHIPPING_INCOME ? sumRow('Ongkir dari pembeli', h.SHIPPING_INCOME) : '') +
-        sumRow('Total penjualan', h.TOTAL_SALES, true) + (h.MARKETPLACE_FEE + h.OTHER_FEE ? sumRow('Biaya marketplace & lain', -(h.MARKETPLACE_FEE + h.OTHER_FEE)) + sumRow('Diterima bersih', h.NET_RECEIVABLE, true) : '');
+        sumRow('Total penjualan', h.TOTAL_SALES, true) + (h.MARKETPLACE_FEE + h.OTHER_FEE ? sumRow('Biaya marketplace & lain', -(h.MARKETPLACE_FEE + h.OTHER_FEE)) + sumRow('Diterima bersih', h.NET_RECEIVABLE, true) : '') +
+        (t.status !== 'DRAFT' ? sumRow('HPP (otomatis)', -h.TOTAL_COGS) + sumRow('Laba kotor (penjualan − HPP)', h.TOTAL_SALES - h.TOTAL_COGS, true) : '');
       if (type === 'PURCHASE') amountRows = sumRow('Subtotal', h.SUBTOTAL) + (h.DISCOUNT ? sumRow('Diskon', -h.DISCOUNT) : '') + (h.SHIPPING_COST ? sumRow('Ongkos kirim', h.SHIPPING_COST) : '') + (h.TAX ? sumRow('PPN', h.TAX) : '') + sumRow('Total pembelian', h.TOTAL_PURCHASE, true);
       if (type === 'EXPENSE') amountRows = sumRow('Nominal', h.AMOUNT, true);
       if (type === 'PAYMENT') amountRows = sumRow('Nominal', h.AMOUNT, true) + (h.FEE_AMOUNT ? sumRow(h.PAYMENT_TYPE === 'MARKETPLACE_SETTLEMENT' ? 'Potongan marketplace' : 'Biaya transfer', h.FEE_AMOUNT) : '');
       if (type === 'JOURNAL') amountRows = sumRow('Total debit', h.TOTAL, true);
       var lines = '';
       var src = t.details.length ? t.details : (t.input.lines || []);
-      if (type === 'SALES' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Produk</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Total</th></tr></thead><tbody>' + src.map(function (l) {
+      if (type === 'SALES' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Produk</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Total</th>' + (t.details.length ? '<th class="num hide-m">HPP</th>' : '') + '</tr></thead><tbody>' + src.map(function (l) {
         var p = (S.opts && S.opts.products || []).filter(function (x) { return x.id === (l.PRODUCT_ID || l.productId); })[0];
-        return '<tr><td>' + esc(l.SKU ? l.SKU + ' · ' + l.PRODUCT_NAME : (p ? p.SKU + ' · ' + p.name : l.productId)) + '</td><td class="num">' + (l.QTY || l.qty) + '</td><td class="num">' + rp(l.UNIT_PRICE || l.unitPrice) + '</td><td class="num">' + rp(l.SUBTOTAL || l.subtotal || ((l.qty || 0) * (l.unitPrice || 0) - (l.discount || 0))) + '</td></tr>';
+        return '<tr><td>' + esc(l.SKU ? l.SKU + ' · ' + l.PRODUCT_NAME : (p ? p.SKU + ' · ' + p.name : l.productId)) + '</td><td class="num">' + (l.QTY || l.qty) + '</td><td class="num">' + rp(l.UNIT_PRICE || l.unitPrice) + '</td><td class="num">' + rp(l.SUBTOTAL || l.subtotal || ((l.qty || 0) * (l.unitPrice || 0) - (l.discount || 0))) + '</td>' + (t.details.length ? '<td class="num hide-m">' + rp(l.COGS || 0) + '</td>' : '') + '</tr>';
       }).join('') + '</tbody></table>';
       if (type === 'PURCHASE' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Barang / akun</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Nilai perolehan</th></tr></thead><tbody>' + src.map(function (l) {
         return '<tr><td>' + esc(l.SKU ? l.SKU + ' · ' + l.DESCRIPTION : (l.DESCRIPTION || l.description || l.productId || accName(l.expenseAccount || l.DEBIT_ACCOUNT))) + '</td><td class="num">' + (l.QTY || l.qty) + '</td><td class="num">' + rp(l.UNIT_COST || l.unitCost) + '</td><td class="num">' + rp(l.TOTAL_COST || l.totalCost || 0) + '</td></tr>';
       }).join('') + '</tbody></table>';
+      if (type === 'ADJUSTMENT' && src.length) lines = '<table class="t" style="margin-top:12px"><thead><tr><th>Produk</th><th class="num">Stok buku</th><th class="num">Selisih</th><th class="num">Nilai</th></tr></thead><tbody>' + src.map(function (l) {
+        var p = (S.opts && S.opts.products || []).filter(function (x) { return x.id === l.productId; })[0];
+        return '<tr><td>' + esc(p ? p.SKU + ' · ' + p.name : l.productId) + '</td><td class="num">' + (l.systemQty !== undefined ? NF.format(l.systemQty) : '—') + '</td><td class="num">' + (l.delta !== undefined ? NF.format(l.delta) : (l.qty !== undefined ? NF.format(l.qty) : '→ ' + l.counted)) + '</td><td class="num">' + (l.value !== undefined ? rpCell(l.value) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      if (type === 'ADJUSTMENT') amountRows = sumRow('Nilai penyesuaian', h.TOTAL_VALUE, true);
       if (type === 'PAYMENT' && (h.APPLIED_DOCS || []).length) lines = '<div class="muted small" style="margin-top:12px;font-weight:700">Faktur yang dilunasi</div><table class="t"><tbody>' + h.APPLIED_DOCS.map(function (a) {
         return '<tr class="click" data-open="' + esc(a.type + '|' + a.id) + '"><td>' + esc(DOC_UI[a.type].title) + '</td><td class="num">' + rp(a.amount) + '</td></tr>'; }).join('') + '</tbody></table>';
       var payBox = '';
@@ -1466,6 +1480,114 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
       on('cancel', function () { cancel(false); });
       on('fix', function () { cancel(true); });
     }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /* ================= PERSEDIAAN ================= */
+  VIEWS.stock = function (el) {
+    var st = S.state.stock = S.state.stock || { search: '', onlyNegative: false, hideZero: false, page: 1 };
+    el.innerHTML = '<div class="stack"><div id="stKpi"></div><div class="card"><div class="card-h">' +
+      '<input class="input" style="max-width:300px" name="search" placeholder="Cari SKU / nama produk…" value="' + esc(st.search) + '">' +
+      '<label class="row small" style="gap:6px"><input type="checkbox" name="onlyNegative"' + (st.onlyNegative ? ' checked' : '') + '> Hanya stok minus</label>' +
+      '<label class="row small" style="gap:6px"><input type="checkbox" name="hideZero"' + (st.hideZero ? ' checked' : '') + '> Sembunyikan stok 0</label><div class="spacer"></div>' +
+      (canInput() ? '<button class="btn" id="stAdj">Penyesuaian / Opname</button>' : '') + '</div><div id="stList">' + skeleton(6) + '</div></div></div>';
+    if ($('#stAdj', el)) $('#stAdj', el).onclick = function () { go('adjustments'); };
+    var tm;
+    $$('.card-h [name]', el).forEach(function (i) {
+      i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', function () {
+        clearTimeout(tm); tm = setTimeout(function () { st[i.name] = i.type === 'checkbox' ? i.checked : i.value; st.page = 1; load(); }, i.type === 'checkbox' ? 0 : 300);
+      });
+    });
+    function load() {
+      call('inventory.balance', { search: st.search, onlyNegative: st.onlyNegative, hideZero: st.hideZero, page: st.page, pageSize: 100 }).then(function (pg) {
+        $('#stKpi', el).innerHTML = '<div class="grid g3">' + kpiCard('Nilai Persediaan', pg.totals.value, 'Rata-rata bergerak', 'asset', 'dark') +
+          '<div class="kpi"><div class="top"><span class="chip">' + icon('receipt') + '</span><span>Total unit</span></div><div class="k-value">' + NF.format(pg.totals.qty) + '</div><div class="k-sub">' + pg.total + ' produk stok</div></div>' +
+          '<div class="kpi' + (pg.totals.negative ? ' alert' : '') + '"><div class="top"><span class="chip">' + icon('shield') + '</span><span>Stok minus</span></div><div class="k-value' + (pg.totals.negative ? ' neg' : '') + '">' + pg.totals.negative + '</div><div class="k-sub">' + (pg.totals.negative ? 'Catat pembelian / opname untuk memperbaiki' : 'Semua stok normal') + '</div></div></div>';
+        var box = $('#stList', el); if (!box) return;
+        if (!pg.rows.length) { box.innerHTML = '<div class="empty"><b>Belum ada produk stok</b>Tambahkan produk di Master Data, lalu catat pembelian atau saldo awal stok.</div>'; return; }
+        box.innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>SKU</th><th>Produk</th><th class="num">Stok</th><th class="num hide-m">Rata-rata</th><th class="num">Nilai</th><th class="hide-m">Mutasi terakhir</th></tr></thead><tbody>' +
+          pg.rows.map(function (r) {
+            return '<tr class="click" data-id="' + esc(r.productId) + '"><td style="font-weight:700">' + esc(r.sku) + '</td><td>' + esc(r.name) + (r.status !== 'ACTIVE' ? ' ' + badge('DISABLED') : '') + '</td>' +
+              '<td class="num' + (r.negative ? ' neg' : '') + '" style="font-weight:800">' + NF.format(r.qty) + ' <span class="muted small">' + esc(r.unit || '') + '</span></td>' +
+              '<td class="num hide-m">' + rp(r.avgCost) + '</td><td class="num">' + rpCell(r.value) + '</td><td class="hide-m small">' + fdate(r.lastDate) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' + pager(pg, function (p) { st.page = p; load(); });
+        $$('[data-id]', box).forEach(function (tr) { tr.onclick = function () { openStockCard(tr.dataset.id); }; });
+      }).catch(function (e) { $('#stList', el).innerHTML = errorBox(e, load); });
+    }
+    load();
+  };
+
+  var MOVE_LABEL = { PURCHASE: 'Pembelian', SALE: 'Penjualan', ADJ_IN: 'Penyesuaian +', ADJ_OUT: 'Penyesuaian −', OPENING: 'Saldo awal', CANCEL: 'Pembatalan' };
+  function openStockCard(productId, range) {
+    range = range || { from: today().substring(0, 4) + '-01-01', to: today() };
+    var d = openDrawer('Kartu Stok', skeleton(8));
+    call('inventory.card', { productId: productId, from: range.from, to: range.to }).then(function (c) {
+      var body = '<div class="row" style="margin-bottom:12px"><b>' + esc(c.product.sku + ' · ' + c.product.name) + '</b></div>' +
+        '<div class="row" style="margin-bottom:12px"><input class="input" style="width:160px" type="date" id="scFrom" value="' + esc(range.from) + '"><span class="muted">s.d.</span><input class="input" style="width:160px" type="date" id="scTo" value="' + esc(range.to) + '"><button class="btn sm" id="scGo">Tampilkan</button></div>' +
+        '<div class="grid g2" style="margin-bottom:12px"><div class="kpi"><div class="k-label">Saldo awal</div><div class="k-value">' + NF.format(c.opening.qty) + '</div><div class="k-sub">' + rp(c.opening.value) + '</div></div>' +
+        '<div class="kpi dark"><div class="k-label">Saldo akhir</div><div class="k-value">' + NF.format(c.closing.qty) + '</div><div class="k-sub">' + rp(c.closing.value) + '</div></div></div>' +
+        (c.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Tanggal</th><th>Mutasi</th><th class="num">Masuk</th><th class="num">Keluar</th><th class="num hide-m">Harga/unit</th><th class="num">Saldo</th><th class="num hide-m">Nilai</th></tr></thead><tbody>' +
+          c.rows.map(function (r) {
+            var doc = SOURCE_TO_DOC[r.sourceType];
+            return '<tr' + (doc ? ' class="click" data-src="' + esc(doc + '|' + r.sourceId) + '"' : '') + '><td class="nowrap">' + fdate(r.date) + '</td><td>' + esc(MOVE_LABEL[r.type] || r.type) + '<div class="muted small">' + esc(r.journalNo) + '</div></td>' +
+              '<td class="num">' + (r.qtyIn ? NF.format(r.qtyIn) : '') + '</td><td class="num">' + (r.qtyOut ? NF.format(r.qtyOut) : '') + '</td><td class="num hide-m">' + rp(r.unitCost) + '</td>' +
+              '<td class="num' + (r.qty < 0 ? ' neg' : '') + '" style="font-weight:700">' + NF.format(r.qty) + '</td><td class="num hide-m">' + rpCell(r.balance) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : '<div class="empty">Tidak ada mutasi pada periode ini.</div>');
+      d = openDrawer('Kartu Stok', body);
+      $('#scGo', d).onclick = function () { openStockCard(productId, { from: $('#scFrom', d).value, to: $('#scTo', d).value }); };
+      $$('[data-src]', d).forEach(function (tr) { tr.onclick = function () { var p = tr.dataset.src.split('|'); openDocDetail(p[0], p[1]); }; });
+    }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
+
+  /* ---------- Form Penyesuaian / Opname / Saldo Awal Stok ---------- */
+  function openAdjustmentForm(existing, preset) {
+    Promise.all([loadOpts(), call('inventory.balance', { pageSize: 200 }, { silent: true })]).then(function (res) {
+      var o = res[0], bal = {}; res[1].rows.forEach(function (r) { bal[r.productId] = r; });
+      var v = Object.assign({ date: today(), kind: 'ADJUSTMENT', lines: [{}] }, preset || {}, existing ? existing.input : {});
+      var kinds = S.boot.adjustmentKinds, k = v.kind;
+      var stockProducts = (o.products || []).filter(function (p) { return p.IS_STOCK_ITEM !== false; });
+      var accDefault = k === 'OPENING' ? S.boot.systemAccounts.ACC_OPENING_EQUITY : S.boot.systemAccounts.ACC_INVENTORY_ADJ;
+      var help = { ADJUSTMENT: 'Tambah (+) atau kurangi (−) stok, mis. barang rusak, hilang, sampel. Barang keluar dinilai dengan rata-rata saat ini.',
+        OPNAME: 'Isi jumlah fisik hasil hitung. Sistem menghitung selisih terhadap stok buku saat diposting.',
+        OPENING: 'Stok awal saat mulai memakai aplikasi. Isi jumlah dan harga pokok per unit; lawannya Ekuitas Saldo Awal.' }[k];
+      var body = '<div class="banner info" style="margin-bottom:12px">' + esc(help) + '</div><div class="form-grid" id="af">' +
+        '<label class="field"><span>Tanggal *</span><input class="input" type="date" name="date" value="' + esc(v.date) + '"></label>' +
+        '<label class="field"><span>Akun lawan</span><select class="input" name="adjustmentAccount">' + options(accountsOf(k === 'OPENING' ? ['OPENING', 'CAPITAL'] : ['COGS', 'OPEX', 'OTHER_EXPENSE', 'OTHER_INCOME']), v.adjustmentAccount || accDefault) + '</select></label>' +
+        '<label class="field full"><span>Alasan / keterangan *</span><input class="input" name="reason" value="' + esc(v.reason || (k === 'OPENING' ? 'Saldo awal stok' : '')) + '" placeholder="' + (k === 'OPNAME' ? 'mis. Stok opname akhir bulan' : 'mis. Barang rusak') + '"></label>' +
+        '<div class="full"><table class="t lines" id="al"><thead><tr><th>Produk</th><th class="num hide-m">Stok buku</th><th class="num">' + (k === 'OPNAME' ? 'Jumlah fisik' : 'Qty ' + (k === 'ADJUSTMENT' ? '(+/−)' : '')) + '</th>' + (k !== 'OPNAME' ? '<th class="num">Harga pokok/unit</th>' : '') + '<th></th></tr></thead><tbody></tbody></table>' +
+        '<button class="btn sm" type="button" id="alAdd" style="margin-top:8px">' + icon('plus') + 'Tambah produk</button>' + (k === 'OPNAME' ? ' <button class="btn sm" type="button" id="alAll">Isi semua produk</button>' : '') + '</div></div>';
+      var d = docForm('ADJUSTMENT', existing, (existing ? 'Ubah Draft ' + existing.no : kinds[k]), body, { collect: collect });
+      var root = $('#af', d), lines = v.lines.map(function (l) { return Object.assign({}, l); });
+      function draw() {
+        $('#al tbody', root).innerHTML = lines.map(function (l, i) {
+          var b = bal[l.productId];
+          return '<tr data-i="' + i + '"><td><select class="input" data-l="productId">' + optList(stockProducts, l.productId, 'Pilih produk…', function (p) { return p.SKU + ' · ' + p.name; }) + '</select></td>' +
+            '<td class="num hide-m">' + (b ? NF.format(b.qty) : '') + '</td>' +
+            (k === 'OPNAME' ? '<td><input class="input money" data-l="counted" value="' + (l.counted !== undefined && l.counted !== '' ? l.counted : '') + '" placeholder="' + (b ? b.qty : 0) + '"></td>'
+              : '<td><input class="input" inputmode="numeric" data-l="qty" value="' + (l.qty || '') + '" placeholder="' + (k === 'ADJUSTMENT' ? '-1' : '10') + '" style="text-align:right"></td><td><input class="input money" data-l="unitCost" value="' + (l.unitCost ? NF.format(l.unitCost) : '') + '" placeholder="' + (k === 'OPENING' ? 'wajib' : 'otomatis') + '"></td>') +
+            '<td><button class="icon-btn" type="button" data-rm="' + i + '">' + icon('x') + '</button></td></tr>';
+        }).join('');
+        bindMoney(root);
+        $$('[data-rm]', root).forEach(function (b) { b.onclick = function () { read(); lines.splice(+b.dataset.rm, 1); if (!lines.length) lines.push({}); draw(); }; });
+        $$('[data-l=productId]', root).forEach(function (s) { s.onchange = function () { read(); draw(); }; });
+      }
+      function read() {
+        lines = $$('#al tbody tr', root).map(function (tr) {
+          var o2 = { productId: $('[data-l=productId]', tr).value };
+          if (k === 'OPNAME') { var c = $('[data-l=counted]', tr).value; o2.counted = c === '' ? '' : parseMoney(c); }
+          else { o2.qty = Number(String($('[data-l=qty]', tr).value).replace(/[^\d-]/g, '')) || 0; o2.unitCost = parseMoney($('[data-l=unitCost]', tr).value); }
+          return o2;
+        });
+      }
+      function collect() {
+        read();
+        return { kind: k, date: val(root, 'date'), reason: val(root, 'reason'), adjustmentAccount: val(root, 'adjustmentAccount'),
+          lines: lines.filter(function (l) { return l.productId; }) };
+      }
+      $('#alAdd', root).onclick = function () { read(); lines.push({}); draw(); };
+      if ($('#alAll', root)) $('#alAll', root).onclick = function () { read(); var have = {}; lines.forEach(function (l) { if (l.productId) have[l.productId] = 1; });
+        lines = lines.filter(function (l) { return l.productId; }).concat(stockProducts.filter(function (p) { return !have[p.id]; }).map(function (p) { return { productId: p.id, counted: '' }; })); draw(); };
+      draw();
+    }).catch(fail);
   }
 
   /** Menu cepat "Catat" (navigasi bawah HP & dashboard). */
