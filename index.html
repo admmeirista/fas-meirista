@@ -3,205 +3,276 @@
 <head>
   
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#28302b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400..900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<style>
+  /* Sistem desain Meirista (sama dengan FMS & Master Produk SKU) */
   :root {
-    --green-900: #0F3D2E; --green-800: #14513C; --green-700: #1A6B4F; --green-600: #208562; --green-100: #E3F1EA; --green-50: #F2F8F5;
-    --orange-600: #D9731A; --orange-100: #FDEBD9;
-    --red-600: #C2410C; --red-700: #B42318; --red-100: #FDE8E6;
-    --ink-900: #18211D; --ink-700: #3B4741; --ink-500: #66736C; --ink-300: #A9B3AE;
-    --line: #E3E8E5; --surface: #FFFFFF; --bg: #F6F8F7; --hover: #F0F4F2;
-    --radius: 10px; --radius-sm: 6px;
-    --shadow: 0 1px 2px rgba(16, 40, 30, .06), 0 1px 3px rgba(16, 40, 30, .05);
-    --sidebar: 236px;
-    --font: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
-    --mono: ui-monospace, "SF Mono", Consolas, monospace;
+    --ink: #28302b; --ink-2: #323b35; --ink-3: #3c463f; --ink-line: rgba(255,255,255,.09); --sage: #a7b5a9; --sage-2: #7d8c80;
+    --bg: #f7f6f1; --card: #fff; --line: #e8e5dc; --line-2: #f1efe8; --fg: #1d2420; --muted: #78807a;
+    --acc: #e8693a; --acc-2: #d4572a; --acc-soft: #fcece3; --acc-ink: #b0461d;
+    --ok: #3b8a58; --ok-soft: #e6f2ea; --warn: #b7821c; --warn-soft: #fbf2dd; --err: #c9443a; --err-soft: #fbe7e4; --info: #3c6fa8; --info-soft: #e7eff8;
+    --r: 14px; --shadow: 0 1px 2px rgba(29,36,32,.04), 0 6px 20px rgba(29,36,32,.05);
+    --font: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --mono: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink-900); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
   button, input, select, textarea { font: inherit; color: inherit; }
-  a { color: var(--green-700); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
-  h1 { font-size: 20px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
-  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-  .neg { color: var(--red-700); }
-  .muted { color: var(--ink-500); }
-  .small { font-size: 12px; }
+  a { color: var(--acc-ink); text-decoration: none; } a:hover { text-decoration: underline; }
+  h1, h2, h3, h4 { letter-spacing: -.025em; margin: 0; }
+  h2 { font-size: 16px; font-weight: 700; } h3 { font-size: 14.5px; font-weight: 700; }
   .hidden { display: none !important; }
-  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .muted { color: var(--muted); } .small { font-size: 12.5px; }
+  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .neg { color: var(--err); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .spacer { flex: 1; }
   .stack > * + * { margin-top: 16px; }
-  .grid { display: grid; gap: 16px; }
+  .grid { display: grid; gap: 14px; }
   .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  svg.ic, .ic { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes tin { from { transform: translateY(-8px); opacity: 0; } }
+  @keyframes pop { from { transform: translateY(8px) scale(.98); opacity: .6; } }
+  @keyframes fade { from { opacity: 0; } }
 
-  /* Layout */
-  .shell { display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar); background: var(--green-900); color: #DCEBE3; position: fixed; inset: 0 auto 0 0; display: flex; flex-direction: column; z-index: 30; transition: width .15s, transform .2s; }
-  .brand { padding: 18px 18px 14px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid rgba(255,255,255,.08); }
-  .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--green-600); display: grid; place-items: center; color: #fff; font-weight: 700; flex: none; }
-  .brand-name { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.1; }
-  .brand-sub { font-size: 11px; color: #9CC2B0; }
-  .nav { padding: 10px 8px; flex: 1; overflow-y: auto; }
-  .nav button { width: 100%; display: flex; gap: 12px; align-items: center; padding: 10px 12px; border: 0; background: none; color: inherit; border-radius: 8px; cursor: pointer; text-align: left; min-height: 42px; }
-  .nav button:hover { background: rgba(255,255,255,.06); }
-  .nav button.active { background: var(--green-700); color: #fff; font-weight: 600; }
-  .nav svg { width: 18px; height: 18px; flex: none; opacity: .9; }
-  .sidebar-foot { padding: 12px 18px; font-size: 11px; color: #8FB5A3; border-top: 1px solid rgba(255,255,255,.08); }
-  .collapsed .sidebar { width: 64px; }
-  .collapsed .sidebar .label, .collapsed .brand-text, .collapsed .sidebar-foot { display: none; }
-  .collapsed .main { margin-left: 64px; }
-  .main { flex: 1; margin-left: var(--sidebar); min-width: 0; transition: margin .15s; }
-  .topbar { position: sticky; top: 0; z-index: 20; background: rgba(246,248,247,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 10px 24px; min-height: 56px; }
-  .topbar h1 { font-size: 17px; }
-  .content { padding: 20px 24px 64px; max-width: 1280px; }
-  .icon-btn { border: 0; background: none; width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--ink-700); }
-  .icon-btn:hover { background: var(--hover); }
-  .icon-btn svg { width: 20px; height: 20px; }
-  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--green-100); color: var(--green-800); display: grid; place-items: center; font-weight: 600; font-size: 12px; }
-  .env-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--orange-100); color: var(--orange-600); font-weight: 600; }
+  /* ───────── Brand ───────── */
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .mark { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; display: block; object-fit: cover; box-shadow: 0 6px 16px rgba(0,0,0,.22); }
+  .brand .word { font-weight: 800; font-size: 18px; letter-spacing: -.03em; color: #fff; line-height: 1.1; }
+  .brand .tag { font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); font-weight: 700; margin-top: 3px; }
+  .brand.dark .word { color: var(--fg); } .brand.dark .tag { color: var(--muted); }
+  .brand.sm .mark { width: 32px; height: 32px; border-radius: 9px; } .brand.sm .word { font-size: 15px; } .brand.sm .tag { font-size: 8.5px; }
 
-  /* Cards & panels */
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-  .card-h { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .card-b { padding: 16px; }
-  .kpi { padding: 14px 16px; }
-  .kpi .k-label { font-size: 12px; color: var(--ink-500); }
-  .kpi .k-value { font-size: 20px; font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .kpi .k-sub { font-size: 11px; color: var(--ink-500); margin-top: 2px; }
-  .banner { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
-  .banner.warn { background: var(--orange-100); color: #7A3E06; }
-  .banner.err { background: var(--red-100); color: var(--red-700); }
-  .banner.ok { background: var(--green-100); color: var(--green-800); }
+  /* ───────── Login (split, sama dengan FMS) ───────── */
+  .auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100vh; }
+  .auth-art { background: var(--ink); color: #eef1ec; padding: 40px 64px 30px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+  .auth-art::before { content: ''; position: absolute; inset: 0; background: radial-gradient(1200px 600px at 110% -10%, rgba(232,105,58,.14), transparent 55%), radial-gradient(900px 500px at -20% 120%, rgba(167,181,169,.08), transparent 60%); pointer-events: none; }
+  .auth-art::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); pointer-events: none; }
+  .auth-art > * { position: relative; z-index: 1; }
+  .art-mid { margin: auto 0; padding: 48px 0; max-width: 520px; }
+  .auth-art .eb { color: #f3a37f; display: inline-flex; align-items: center; gap: 8px; background: rgba(232,105,58,.1); border: 1px solid rgba(232,105,58,.25); padding: 6px 12px; border-radius: 999px; font-size: 10.5px; }
+  .auth-art h1 { font-size: clamp(34px, 3.6vw, 50px); line-height: 1.1; letter-spacing: -.04em; font-weight: 700; margin: 22px 0 0; }
+  .auth-art h1 em { font-style: normal; background: linear-gradient(90deg, #f39066, #e8693a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .auth-art p.lead { color: var(--sage); font-size: 15.5px; line-height: 1.75; margin: 18px 0 0; }
+  .flow { list-style: none; padding: 0; margin: 38px 0 0; position: relative; }
+  .flow::before { content: ''; position: absolute; left: 21px; top: 22px; bottom: 22px; width: 1px; background: linear-gradient(var(--ink-line), rgba(232,105,58,.45), var(--ink-line)); }
+  .flow li { display: flex; gap: 16px; align-items: flex-start; padding: 10px 0; }
+  .flow .node { width: 44px; height: 44px; border-radius: 12px; background: #2f3832; border: 1px solid var(--ink-line); display: flex; align-items: center; justify-content: center; color: #dfe5df; flex-shrink: 0; position: relative; }
+  .flow li:nth-child(3) .node { color: #f3a37f; border-color: rgba(232,105,58,.35); }
+  .flow .node .ic { width: 19px; height: 19px; }
+  .flow .k { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--sage-2); font-weight: 700; margin-top: 2px; }
+  .flow .v { font-weight: 700; font-size: 14.5px; color: #f3f5f2; }
+  .flow .d { font-size: 12.5px; color: var(--sage); margin-top: 1px; }
+  .auth-art .foot { display: flex; align-items: center; gap: 10px; color: var(--sage-2); font-size: 12px; }
+  .auth-art .foot .sep { width: 4px; height: 4px; border-radius: 50%; background: var(--sage-2); opacity: .5; }
+  .auth-art .foot .ic { width: 14px; height: 14px; }
+  .auth-form { display: flex; flex-direction: column; justify-content: center; padding: calc(48px + env(safe-area-inset-top)) clamp(24px, 6vw, 88px) 48px; position: relative; background: var(--bg); }
+  .auth-form .box { width: 100%; max-width: 420px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 36px 34px; box-shadow: 0 1px 2px rgba(29,36,32,.04), 0 24px 48px -12px rgba(29,36,32,.12); }
+  .auth-logo { text-align: center; margin: -6px 0 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line-2); }
+  .auth-logo .brand-logo { width: min(240px, 80%); height: auto; display: inline-block; }
+  .auth-form h2 { font-size: 27px; font-weight: 700; letter-spacing: -.035em; margin: 10px 0 8px; }
+  .auth-form .sub { color: var(--muted); margin-bottom: 6px; font-size: 13.5px; }
+  .auth-form label.f { display: block; margin: 18px 0 6px; font-weight: 600; font-size: 13px; }
+  .auth-form input.in { height: 50px; width: 100%; font-size: 15px; padding: 0 15px; border-radius: 12px; background: #fcfbf8; border: 1px solid var(--line); outline: none; transition: border-color .12s, box-shadow .12s; }
+  .auth-form input.in:focus { background: #fff; border-color: var(--acc); box-shadow: 0 0 0 4px rgba(232,105,58,.12); }
+  .pw { position: relative; } .pw input.in { padding-right: 52px; }
+  .pw .eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; background: transparent; color: var(--muted); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .pw .eye:hover { background: var(--line-2); color: var(--fg); }
+  .cta { width: 100%; height: 52px; margin-top: 26px; border: 0; border-radius: 12px; background: var(--acc); color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 22px; cursor: pointer; box-shadow: 0 8px 20px -6px rgba(232,105,58,.55); transition: background .12s, transform .06s; position: relative; }
+  .cta:hover { background: var(--acc-2); } .cta:active { transform: scale(.985); } .cta:disabled { opacity: .7; }
+  .cta.busy span, .cta.busy .ic { visibility: hidden; }
+  .cta.busy::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin .6s linear infinite; }
+  .auth-help { border-top: 1px solid var(--line-2); margin-top: 26px; padding-top: 20px; display: flex; gap: 12px; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+  .auth-help .ic { color: var(--ok); margin-top: 1px; }
+  .auth-help b { display: block; color: #3d4640; font-weight: 600; }
+  .auth-tag { position: absolute; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 10px; letter-spacing: .24em; color: #b2b6af; font-weight: 700; }
 
-  /* Buttons */
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 550; white-space: nowrap; }
-  .btn:hover { background: var(--hover); }
-  .btn:disabled { opacity: .55; cursor: not-allowed; }
-  .btn.primary { background: var(--green-700); border-color: var(--green-700); color: #fff; }
-  .btn.primary:hover { background: var(--green-800); }
-  .btn.accent { background: var(--orange-600); border-color: var(--orange-600); color: #fff; }
-  .btn.danger { color: var(--red-700); border-color: #F3C7C1; }
-  .btn.danger:hover { background: var(--red-100); }
-  .btn.ghost { border-color: transparent; background: none; }
-  .btn.sm { height: 30px; padding: 0 10px; font-size: 13px; }
+  /* ───────── Shell admin ───────── */
+  .adm { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns .15s; }
+  .side { background: var(--ink); color: var(--sage); padding: 22px 14px; position: sticky; top: 0; height: 100vh; overflow: auto; display: flex; flex-direction: column; }
+  .side .brand { padding: 0 8px 26px; }
+  .side .sec { font-size: 10px; letter-spacing: .18em; font-weight: 700; color: var(--sage-2); padding: 14px 12px 8px; text-transform: uppercase; }
+  .side a.nv { display: flex; align-items: center; gap: 11px; color: var(--sage); padding: 9px 12px; border-radius: 10px; margin: 1px 0; font-weight: 600; font-size: 13.5px; cursor: pointer; text-decoration: none; transition: background .12s, color .12s; }
+  .side a.nv:hover { background: rgba(255,255,255,.05); color: #eef1ec; }
+  .side a.nv.on { background: rgba(232,105,58,.15); color: #fff; } .side a.nv.on .ic { color: var(--acc); }
+  .side .me { margin-top: auto; border-top: 1px solid var(--ink-line); padding: 16px 6px 0; display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12.5px; flex-shrink: 0; background: var(--acc-soft); color: var(--acc-ink); }
+  .side .me .avatar { background: rgba(232,105,58,.18); color: #f3a37f; }
+  .side .me .n { color: #eef1ec; font-weight: 700; font-size: 13px; line-height: 1.2; } .side .me .r { font-size: 11px; color: var(--sage-2); }
+  .side .me button { margin-left: auto; background: transparent; border: 0; color: var(--sage); cursor: pointer; padding: 8px; border-radius: 8px; }
+  .side .me button:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .side .collapse { margin-top: 10px; background: transparent; border: 1px solid var(--ink-line); color: var(--sage); border-radius: 8px; padding: 6px; cursor: pointer; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .side .collapse:hover { color: #fff; background: rgba(255,255,255,.05); }
+  .collapsed .adm { grid-template-columns: 76px minmax(0, 1fr); }
+  .collapsed .side .bt, .collapsed .side .label, .collapsed .side .sec, .collapsed .side .me .who, .collapsed .side .collapse span { display: none; }
+  .collapsed .side a.nv { justify-content: center; }
+  .collapsed .side .me { flex-direction: column; }
+  .collapsed .side .me button { margin-left: 0; }
+  .main { min-width: 0; padding: 30px 34px 50px; }
+  .ph { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+  .ph h1 { font-size: 26px; font-weight: 700; letter-spacing: -.035em; margin-top: 6px; }
+  .env-badge { font-size: 10.5px; padding: 4px 10px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 800; letter-spacing: .08em; }
+  .content { max-width: 1280px; }
+  .mtop { display: none; }
+  .icon-btn { border: 0; background: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; cursor: pointer; color: var(--muted); }
+  .icon-btn:hover { background: var(--line-2); color: var(--fg); }
+
+  /* ───────── Komponen ───────── */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
+  .card-h { padding: 14px 18px; border-bottom: 1px solid var(--line-2); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .card-b { padding: 18px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 16px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .kpi .top { display: flex; align-items: center; gap: 10px; color: var(--muted); font-weight: 700; font-size: 13px; }
+  .kpi .chip { width: 32px; height: 32px; border-radius: 10px; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kpi .chip .ic { width: 16px; height: 16px; }
+  .kpi .k-value { font-size: 26px; font-weight: 900; letter-spacing: -.04em; line-height: 1.05; margin-top: 14px; font-variant-numeric: tabular-nums; }
+  .kpi .k-sub { font-size: 12.5px; color: var(--muted); margin-top: 8px; font-weight: 600; }
+  .kpi .k-label { color: var(--muted); font-weight: 700; font-size: 13px; }
+  .kpi.dark { background: var(--ink); border-color: var(--ink); color: #fff; } .kpi.dark .top, .kpi.dark .k-sub, .kpi.dark .k-label { color: var(--sage); } .kpi.dark .chip { background: rgba(232,105,58,.2); }
+  .kpi.ok .chip { background: var(--ok-soft); color: var(--ok); }
+  .kpi .k-value.neg { color: var(--err); } .kpi.dark .k-value.neg { color: #f3a37f; }
+  .banner { padding: 11px 13px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; gap: 10px; align-items: flex-start; }
+  .banner.warn { background: var(--warn-soft); color: #8a6312; }
+  .banner.err { background: var(--err-soft); color: var(--err); }
+  .banner.ok { background: var(--ok-soft); color: var(--ok); }
+  .banner.info { background: var(--info-soft); color: var(--info); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; font-weight: 600; font-size: 13.5px; white-space: nowrap; transition: background .12s, border-color .12s, transform .06s, box-shadow .12s; position: relative; user-select: none; }
+  .btn:hover { background: #faf9f5; border-color: #dcd8cc; }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn.primary, .btn.accent { background: var(--acc); border-color: var(--acc); color: #fff; box-shadow: 0 2px 8px rgba(232,105,58,.25); }
+  .btn.primary:hover, .btn.accent:hover { background: var(--acc-2); border-color: var(--acc-2); }
+  .btn.danger { color: var(--err); border-color: #f0cdc8; } .btn.danger:hover { background: var(--err-soft); }
+  .btn.ghost { background: transparent; border-color: transparent; } .btn.ghost:hover { background: rgba(0,0,0,.04); }
+  .btn.sm { height: 30px; padding: 0 10px; font-size: 12.5px; border-radius: 8px; }
   .btn svg { width: 16px; height: 16px; }
-  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
-  .chip.active { background: var(--green-700); color: #fff; border-color: var(--green-700); }
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
-  .tabs button { border: 0; background: none; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--ink-500); white-space: nowrap; }
-  .tabs button.active { color: var(--green-800); border-bottom-color: var(--green-700); font-weight: 600; }
 
-  /* Forms */
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field > span { font-size: 12px; font-weight: 600; color: var(--ink-700); }
-  .field .hint { font-size: 11px; color: var(--ink-500); font-weight: 400; }
-  .input, select.input, textarea.input { height: 40px; padding: 0 12px; border: 1px solid #D3DBD7; border-radius: 8px; background: #fff; width: 100%; min-width: 0; }
+  .chips, .tabs { display: inline-flex; gap: 3px; background: #efede5; border-radius: 11px; padding: 3px; flex-wrap: wrap; }
+  .tabs { margin-bottom: 16px; }
+  .chip, .tabs button { padding: 7px 14px; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 13px; color: var(--muted); border: 0; background: transparent; white-space: nowrap; }
+  .chip:hover, .tabs button:hover { color: var(--fg); }
+  .chip.active, .tabs button.active { background: #fff; color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field > span { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .field .hint { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+  .input, select.input, textarea.input { height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; background: #fff; min-width: 0; width: 100%; outline: none; transition: border-color .12s, box-shadow .12s; }
   textarea.input { height: auto; padding: 10px 12px; min-height: 64px; resize: vertical; }
-  .input:focus { outline: 2px solid rgba(32,133,98,.25); border-color: var(--green-600); }
-  .input.invalid { border-color: var(--red-600); background: #FFF8F7; }
-  .input.money { text-align: right; font-variant-numeric: tabular-nums; }
-  .err-text { color: var(--red-700); font-size: 12px; }
-  .seg { display: inline-flex; border: 1px solid #D3DBD7; border-radius: 8px; overflow: hidden; }
-  .seg button { border: 0; background: #fff; padding: 0 12px; height: 38px; cursor: pointer; border-right: 1px solid #D3DBD7; }
-  .seg button:last-child { border-right: 0; }
-  .seg button.active { background: var(--green-700); color: #fff; }
+  .input:focus { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(232,105,58,.12); }
+  .input:disabled { background: var(--line-2); color: var(--muted); }
+  .input.money { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .err-text { color: var(--err); font-size: 13px; font-weight: 600; }
+  .seg { display: inline-flex; background: #efede5; border-radius: 11px; padding: 3px; gap: 3px; flex-wrap: wrap; }
+  .seg button { border: 0; background: transparent; padding: 0 12px; height: 34px; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 13px; color: var(--muted); }
+  .seg button.active { background: #fff; color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .form-grid .full { grid-column: 1 / -1; }
 
-  /* Tables */
   .table-wrap { overflow-x: auto; }
-  table.t { width: 100%; border-collapse: collapse; }
-  table.t th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ink-500); padding: 10px 12px; border-bottom: 1px solid var(--line); background: #FAFBFA; white-space: nowrap; }
-  table.t td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  table.t tr.click { cursor: pointer; }
-  table.t tr.click:hover td { background: var(--hover); }
-  table.t tr.sec td { background: #FAFBFA; font-weight: 600; }
-  table.t tr.total td { font-weight: 700; border-top: 2px solid var(--line); }
-  table.t tr.grand td { font-weight: 700; background: var(--green-50); }
-  table.t td.indent { padding-left: 28px; }
-  table.t td.indent2 { padding-left: 44px; }
-  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: #EEF1EF; color: var(--ink-700); white-space: nowrap; }
-  .badge.POSTED, .badge.ACTIVE, .badge.OPEN { background: var(--green-100); color: var(--green-800); }
-  .badge.DRAFT { background: #EAF0FB; color: #2B4C8C; }
-  .badge.REVERSED, .badge.DISPOSED, .badge.LOCKED { background: #EEF1EF; color: var(--ink-500); }
-  .badge.FAILED, .badge.DISABLED { background: var(--red-100); color: var(--red-700); }
-  .badge.PENDING, .badge.FULLY_DEPRECIATED { background: var(--orange-100); color: #8A4A0B; }
-  .pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; padding: 10px 12px; font-size: 13px; color: var(--ink-500); }
-  .empty { padding: 36px 16px; text-align: center; color: var(--ink-500); }
+  table.t { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  table.t th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--line); padding: 11px 12px; background: #fbfaf6; white-space: nowrap; }
+  table.t th.num { text-align: right; }
+  table.t td { border-bottom: 1px solid var(--line-2); padding: 10px 12px; vertical-align: top; }
+  table.t tr:last-child td { border-bottom: 0; }
+  table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: #fcfbf8; }
+  table.t tr.sec td { background: #fbfaf6; font-weight: 700; }
+  table.t tr.total td { font-weight: 800; border-top: 1px solid var(--line); }
+  table.t tr.grand td { font-weight: 900; background: var(--acc-soft); color: var(--acc-ink); }
+  table.t td.indent { padding-left: 28px; } table.t td.indent2 { padding-left: 44px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px 3px 8px; font-size: 11px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; background: #efede6; color: #4e5751; }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .75; }
+  .badge.POSTED, .badge.ACTIVE, .badge.OPEN { background: var(--ok-soft); color: var(--ok); }
+  .badge.DRAFT { background: var(--info-soft); color: var(--info); }
+  .badge.REVERSED, .badge.DISPOSED, .badge.LOCKED { background: #f0efea; color: #8a918c; }
+  .badge.FAILED, .badge.DISABLED { background: var(--err-soft); color: var(--err); }
+  .badge.PENDING, .badge.FULLY_DEPRECIATED { background: var(--warn-soft); color: var(--warn); }
+  .badge.ADMIN { background: #ece9f8; color: #5b4fa8; } .badge.FINANCE { background: var(--acc-soft); color: var(--acc-ink); } .badge.VIEWER { background: var(--info-soft); color: var(--info); }
+  .pager { display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 10px 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+  .empty { padding: 34px; text-align: center; color: var(--muted); }
   .mlist { display: none; }
-  .mitem { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; cursor: pointer; }
+  .mitem { padding: 12px 14px; border-bottom: 1px solid var(--line-2); display: flex; gap: 12px; cursor: pointer; }
   .mitem:last-child { border-bottom: 0; }
 
-  /* Drawer & dialog */
-  .scrim { position: fixed; inset: 0; background: rgba(15, 30, 23, .35); z-index: 40; }
-  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--surface); z-index: 41; display: flex; flex-direction: column; box-shadow: -8px 0 24px rgba(0,0,0,.08); }
-  .drawer-h { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
-  .drawer-b { padding: 18px; overflow-y: auto; flex: 1; }
-  .drawer-f { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; background: #FAFBFA; }
-  .dialog { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 12px 40px rgba(0,0,0,.18); }
+  /* Drawer, dialog, toast, loader */
+  .scrim { position: fixed; inset: 0; background: rgba(29,36,32,.5); backdrop-filter: blur(2px); z-index: 40; animation: fade .12s; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100%); background: #fff; z-index: 41; display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(0,0,0,.15); animation: fade .15s; }
+  .drawer-h { padding: 16px 20px; border-bottom: 1px solid var(--line-2); display: flex; align-items: center; gap: 10px; }
+  .drawer-h h2 { font-size: 18px; }
+  .drawer-b { padding: 20px; overflow-y: auto; flex: 1; }
+  .drawer-f { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; background: #fcfbf8; }
+  .dialog { position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100% - 24px)); max-height: 90vh; overflow: auto; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+  .dialog h2 { font-size: 18px; }
   .dialog-scrim { z-index: 50; }
-  .preview { background: var(--green-50); border: 1px dashed #BFD9CC; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
-  .preview table { width: 100%; border-collapse: collapse; }
-  .preview td { padding: 3px 4px; }
-
-  /* Toast & loader */
-  #toasts { position: fixed; z-index: 60; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; max-width: calc(100% - 32px); }
-  .toast { background: var(--ink-900); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; box-shadow: var(--shadow); max-width: 420px; }
-  .toast.err { background: var(--red-700); }
-  .toast.ok { background: var(--green-800); }
-  .bar-loader { position: fixed; top: 0; left: 0; height: 3px; background: var(--orange-600); z-index: 70; width: 0; transition: width .3s; }
-  .bar-loader.on { width: 70%; transition: width 4s cubic-bezier(.1,.6,.2,1); }
-  .skeleton { background: linear-gradient(90deg, #EEF1EF 25%, #F6F8F7 50%, #EEF1EF 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 6px; height: 14px; }
+  .preview { background: #fcfbf8; border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; font-size: 13px; }
+  .preview table { width: 100%; border-collapse: collapse; } .preview td { padding: 3px 4px; }
+  #toasts { position: fixed; z-index: 60; top: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; width: min(92vw, 440px); }
+  .toast { padding: 12px 14px; border-radius: 12px; color: #fff; font-weight: 600; font-size: 13.5px; box-shadow: 0 12px 32px rgba(0,0,0,.18); background: var(--ink); animation: tin .18s ease-out; }
+  .toast.ok { background: #2f6e47; } .toast.err { background: #a8352c; } .toast.warn { background: #8f6614; }
+  .bar-loader { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--acc), #f3a37f); z-index: 70; opacity: 0; transition: width .25s ease, opacity .3s; box-shadow: 0 0 8px rgba(232,105,58,.5); }
+  .bar-loader.on { opacity: 1; width: 80%; transition: width 8s cubic-bezier(.1,.7,.2,1), opacity .1s; }
+  .skeleton { background: linear-gradient(90deg, #efede6 25%, #f7f6f1 50%, #efede6 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 6px; height: 14px; }
   @keyframes sk { to { background-position: -200% 0; } }
 
-  /* Login */
-  .login { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: linear-gradient(180deg, var(--green-50), var(--bg)); }
-  .login-card { width: min(380px, 100%); padding: 28px; }
-  .login-card .brand-mark { width: 44px; height: 44px; font-size: 18px; }
-
-  /* Charts */
   .chart { width: 100%; height: auto; display: block; }
-  .chart text { font-size: 10px; fill: var(--ink-500); }
-  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--ink-500); flex-wrap: wrap; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .chart text { font-size: 10px; fill: var(--muted); font-family: var(--font); font-weight: 600; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); font-weight: 600; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 
-  .fab { display: none; }
+  /* Navigasi bawah HP (sama dengan FMS/SKU) */
+  .tabbar { display: none; }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) {
     .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
+  @media (max-width: 900px) {
+    .auth { grid-template-columns: 1fr; }
+    .auth-art { display: none; }
+    .auth-form { padding: calc(28px + env(safe-area-inset-top)) 16px 70px; justify-content: flex-start; min-height: 100vh; }
+    .auth-form .box { padding: 28px 22px; border-radius: 18px; }
+  }
   @media (max-width: 760px) {
-    .sidebar { transform: translateX(-100%); width: 260px; }
-    .nav-open .sidebar { transform: none; }
-    .collapsed .sidebar .label, .collapsed .brand-text { display: initial; }
-    .main, .collapsed .main { margin-left: 0; }
-    .topbar { padding: 8px 16px; }
-    .content { padding: 16px 16px 96px; }
-    .g2, .g3 { grid-template-columns: 1fr; }
-    .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .adm, .collapsed .adm { grid-template-columns: 1fr; }
+    .side { display: none; }
+    .nav-open .side { display: flex; position: fixed; inset: 0 auto 0 0; width: 270px; z-index: 45; box-shadow: 8px 0 30px rgba(0,0,0,.25); }
+    .nav-open .side .bt, .nav-open .side .label, .nav-open .side .sec, .nav-open .side .me .who { display: block !important; }
+    .mtop { display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 20; background: rgba(247,246,241,.94); backdrop-filter: blur(6px); padding: calc(10px + env(safe-area-inset-top)) 14px 10px; border-bottom: 1px solid var(--line); }
+    .mtop .t { font-weight: 800; font-size: 16px; letter-spacing: -.02em; }
+    .main { padding: 0 0 100px; }
+    .ph { display: none; }
+    .content { padding: 14px 12px; }
+    .g2 { grid-template-columns: 1fr; }
+    .g3, .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .grid.g3 > :not(.kpi), .grid.g4 > :not(.kpi) { grid-column: 1 / -1; }
     .form-grid { grid-template-columns: 1fr; }
-    .kpi .k-value { font-size: 17px; }
+    .kpi { padding: 14px; } .kpi .k-value { font-size: 19px; margin-top: 10px; } .kpi .top { font-size: 12px; } .kpi .k-sub { font-size: 11.5px; }
     .hide-m { display: none !important; }
-    .mlist { display: block; }
-    .tlist { display: none; }
+    .mlist { display: block; } .tlist { display: none; }
     .drawer { width: 100%; }
-    .btn { height: 42px; }
-    .input { height: 44px; }
-    .fab { display: grid; position: fixed; right: 16px; bottom: 20px; z-index: 25; width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--orange-600); color: #fff; place-items: center; box-shadow: 0 6px 16px rgba(217,115,26,.4); cursor: pointer; }
-    .fab svg { width: 26px; height: 26px; }
-    .user-chip .uname { display: none; }
-    #toasts { left: 16px; right: 16px; bottom: 88px; }
+    .btn { min-height: 42px; } .btn.sm { min-height: 36px; }
+    .input, select.input { min-height: 44px; font-size: 16px; }
+    .card-b { padding: 14px; }
+    #toasts { top: auto; bottom: calc(84px + env(safe-area-inset-bottom)); }
+    .tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #fff; border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(0,0,0,.06); }
+    .tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; font: inherit; font-size: 10.5px; font-weight: 800; color: var(--muted); padding: 2px 0; cursor: pointer; }
+    .tabbar .ti { display: flex; align-items: center; justify-content: center; height: 24px; }
+    .tabbar .ti svg { width: 22px; height: 22px; }
+    .tabbar button.on { color: var(--acc); }
+    .tabbar button.fab .ti { width: 46px; height: 46px; border-radius: 15px; background: var(--acc); color: #fff; margin-top: -20px; box-shadow: 0 6px 14px rgba(232,108,58,.35); }
   }
   @media print {
-    .sidebar, .topbar, .no-print, .fab { display: none !important; }
-    .main { margin: 0 !important; }
-    .card { box-shadow: none; border: 0; }
+    .side, .mtop, .tabbar, .no-print { display: none !important; }
+    .adm { display: block; } .main { padding: 0; }
+    .card { box-shadow: none; }
   }
 </style>
 
@@ -216,60 +287,70 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="39d7bb2-d7e556e4";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="cd9e5d8-4dfd70d6";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
 
-  <section id="login" class="login hidden">
-    <form class="card login-card" id="loginForm" autocomplete="on">
-      <div class="row" style="margin-bottom:20px">
-        <div class="brand-mark">M</div>
-        <div>
-          <div style="font-weight:700;font-size:17px">Meirista FAS</div>
-          <div class="muted small">Meirista Financial & Accounting System</div>
-        </div>
+  <!-- Login: tata letak terbagi, sama dengan FMS & Master Produk SKU -->
+  <div id="login" class="auth hidden">
+    <section class="auth-art">
+      <div class="art-top" id="artBrand"></div>
+      <div class="art-mid">
+        <div class="eyebrow eb">Keuangan &amp; akuntansi Meirista</div>
+        <h1>Catat sekali,<br>laporan <em>beres.</em></h1>
+        <p class="lead">Isi transaksi semudah mengisi form — jurnal, laba rugi, arus kas, dan neraca tersusun otomatis dari data yang sama.</p>
+        <ol class="flow" id="artFlow"></ol>
       </div>
-      <div class="stack">
-        <label class="field"><span>Email</span><input class="input" type="email" name="email" autocomplete="username" required></label>
-        <label class="field"><span>Kata sandi</span><input class="input" type="password" name="password" autocomplete="current-password" required></label>
-        <div class="err-text" id="loginErr"></div>
-        <button class="btn primary" style="width:100%" type="submit" id="loginBtn">Masuk</button>
+      <div class="foot" id="artFoot"></div>
+    </section>
+    <section class="auth-form">
+      <div class="box">
+        <div class="auth-logo"><img class="brand-logo" src="https://admmeirista.github.io/fms-meirista/logo-full.webp" alt="Meirista Cosmetics" onerror="this.style.display='none'"></div>
+        <form id="loginForm" autocomplete="on">
+          <div class="eyebrow">Selamat datang</div>
+          <h2>Masuk ke akun Anda</h2>
+          <div class="sub">Gunakan username dan password yang diberikan administrator.</div>
+          <label class="f" for="lgUser">Username</label>
+          <input class="in" id="lgUser" name="username" type="text" placeholder="mis. adm.meirista" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+          <label class="f" for="lgPass">Password</label>
+          <div class="pw"><input class="in" id="lgPass" type="password" name="password" placeholder="Masukkan password" autocomplete="current-password" required><button type="button" class="eye" id="lgEye" tabindex="-1" aria-label="Tampilkan password"></button></div>
+          <div id="loginErr"></div>
+          <button class="cta" type="submit" id="loginBtn"><span>Masuk</span></button>
+          <div class="auth-help" id="loginHelp"></div>
+        </form>
       </div>
-      <p class="muted small" style="margin:18px 0 0;text-align:center">Manage Finance. Simplify Accounting. · v0.2.0</p>
-    </form>
-  </section>
-
-  <div id="shell" class="shell hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">M</div>
-        <div class="brand-text">
-          <div class="brand-name">Meirista FAS</div>
-          <div class="brand-sub">Financial &amp; Accounting System</div>
-        </div>
-      </div>
-      <nav class="nav" id="nav"></nav>
-      <div class="sidebar-foot">v0.2.0 · <span id="envName"></span></div>
-    </aside>
-    <div class="main">
-      <header class="topbar">
-        <button class="icon-btn" id="navToggle" aria-label="Menu"></button>
-        <h1 id="viewTitle">Dashboard</h1>
-        <span class="env-badge hidden" id="envBadge"></span>
-        <div class="spacer"></div>
-        <div class="user-chip">
-          <div class="avatar" id="avatar"></div>
-          <div class="uname"><div id="uname" style="font-weight:600"></div><div class="muted small" id="urole"></div></div>
-          <button class="icon-btn" id="logoutBtn" title="Keluar" aria-label="Keluar"></button>
-        </div>
-      </header>
-      <main class="content" id="view"></main>
-    </div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.3.0</div>
+    </section>
   </div>
-  <button class="fab hidden" id="fab" aria-label="Tambah transaksi"></button>
+
+  <div id="shell" class="adm hidden">
+    <aside class="side" id="side"></aside>
+    <div class="main">
+      <header class="mtop">
+        <button class="icon-btn" id="navToggle" aria-label="Menu"></button>
+        <div class="t" id="mTitle">Dashboard</div>
+        <div class="spacer"></div>
+        <span class="env-badge hidden" id="envBadgeM"></span>
+        <div class="avatar" id="mAvatar"></div>
+      </header>
+      <div class="content">
+        <div class="ph">
+          <div><div class="eyebrow" id="viewEyebrow">Utama</div><h1 id="viewTitle">Dashboard</h1></div>
+          <span class="env-badge hidden" id="envBadge"></span>
+        </div>
+        <main id="view"></main>
+      </div>
+    </div>
+    <nav class="tabbar" id="tabbar"></nav>
+  </div>
   <div id="overlay"></div>
   <div id="toasts"></div>
+
+  <script>
+/* Logo Meirista (sama dengan FMS) */
+var BRAND_MARK = 'data:image/webp;base64,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';
+</script>
 
   <script>
 (function () {
@@ -322,16 +403,22 @@
     settings: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7.3 7.3 0 0 0-2-1.2L14.5 3h-4l-.4 2.6a7.3 7.3 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7.3 7.3 0 0 0 2 1.2l.4 2.6h4l.4-2.6a7.3 7.3 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z',
     menu: 'M4 6h16M4 12h16M4 18h16', plus: 'M12 5v14M5 12h14', x: 'M6 6l12 12M18 6 6 18',
     logout: 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3',
-    down: 'M12 4v12m0 0-5-5m5 5 5-5M5 20h14', clip: 'M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10.2 17.7a1.7 1.7 0 0 1-2.4-2.4L15.5 7.6'
+    down: 'M12 4v12m0 0-5-5m5 5 5-5M5 20h14', clip: 'M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10.2 17.7a1.7 1.7 0 0 1-2.4-2.4L15.5 7.6',
+    eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    eyeOff: 'M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6',
+    arrowRight: 'M5 12h14m-6-6 6 6-6 6', shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z M9 12l2 2 4-4', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
+    wallet: 'M3 7h18v13H3zM3 7l3-4h12l3 4M16 13.5h.01', coins: 'M8 6c0-1.7 2.7-3 6-3s6 1.3 6 3-2.7 3-6 3-6-1.3-6-3zm0 0v4c0 1.7 2.7 3 6 3s6-1.3 6-3V6M4 12c0-1.7 2.7-3 6-3M4 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-1M4 12c0 1.7 2.7 3 6 3',
+    receipt: 'M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', building: 'M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h.01M12 9h.01M16 9h.01M8 13h.01M12 13h.01M16 13h.01',
+    more: 'M5 12h.01M12 12h.01M19 12h.01', pen: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4', book: 'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3zM18 20h2V7'
   };
-  var icon = function (n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + P[n] + '"/></svg>'; };
+  var icon = function (n) { return '<svg class="ic" viewBox="0 0 24 24"><path d="' + P[n] + '"/></svg>'; };
 
   /* ================= API ================= */
   var loaderCount = 0;
   function loading(on) {
     loaderCount += on ? 1 : -1;
     var el = $('#loader');
-    if (loaderCount > 0) { el.classList.add('on'); } else { loaderCount = 0; el.classList.remove('on'); el.style.width = '100%'; setTimeout(function () { el.style.width = ''; }, 250); }
+    if (loaderCount > 0) { el.classList.add('on'); } else { loaderCount = 0; el.classList.remove('on'); }
   }
   function transport(req) {
     return new Promise(function (resolve, reject) {
@@ -449,22 +536,43 @@
   function postableAccounts() { return coa().filter(function (a) { return a.isActive && !a.isHeader; }); }
 
   /* ================= Login & sesi ================= */
-  function showLogin(msg) {
-    $('#shell').classList.add('hidden'); $('#fab').classList.add('hidden');
-    $('#login').classList.remove('hidden');
-    $('#loginErr').textContent = msg || '';
+  function brandHtml(cls) {
+    var mark = window.BRAND_MARK ? '<img class="mark" src="' + BRAND_MARK + '" alt="">' : '<div class="mark" style="background:var(--acc)"></div>';
+    return '<div class="brand ' + (cls || '') + '">' + mark + '<div class="bt"><div class="word">Meirista</div><div class="tag">Finance &amp; Accounting</div></div></div>';
   }
-  function logoutLocal(msg) { S.token = null; S.user = null; S.boot = null; store.del('mfas_token'); closeDrawer(); showLogin(msg); }
+  var loginBuilt = false;
+  function buildLogin() {
+    if (loginBuilt) return; loginBuilt = true;
+    $('#artBrand').innerHTML = brandHtml();
+    var flow = [['pen', 'Catat transaksi', 'Pemasukan, pengeluaran, penjualan, pembelian'], ['book', 'Jurnal otomatis', 'Double-entry seimbang, tanpa perlu paham akuntansi'],
+      ['trend', 'Laporan keuangan', 'Laba rugi, arus kas, dan neraca real-time'], ['shield', 'Kontrol & audit', 'Tutup buku, pembalikan, dan jejak audit']];
+    $('#artFlow').innerHTML = flow.map(function (f, i) { return '<li><div class="node">' + icon(f[0]) + '</div><div><div class="k">Tahap ' + (i + 1) + '</div><div class="v">' + f[1] + '</div><div class="d">' + f[2] + '</div></div></li>'; }).join('');
+    $('#artFoot').innerHTML = '<span>© ' + new Date().getFullYear() + ' Meirista</span><span class="sep"></span>' + icon('lock') + '<span>Akses individual · tercatat di audit trail</span>';
+    $('#loginHelp').innerHTML = icon('shield') + '<div>Lupa password?<b>Hubungi Admin untuk reset password akun Anda.</b></div>';
+    $('#loginBtn').insertAdjacentHTML('beforeend', icon('arrowRight'));
+    var eye = $('#lgEye'); eye.innerHTML = icon('eye');
+    eye.onclick = function () { var p = $('#lgPass'); var show = p.type === 'password'; p.type = show ? 'text' : 'password'; eye.innerHTML = icon(show ? 'eyeOff' : 'eye'); };
+  }
+  function showLogin(msg) {
+    buildLogin();
+    $('#shell').classList.add('hidden');
+    $('#login').classList.remove('hidden');
+    $('#loginErr').innerHTML = msg ? '<div class="banner ' + (/keluar/.test(msg) ? 'ok' : 'err') + '" style="margin-top:14px">' + esc(msg) + '</div>' : '';
+    setTimeout(function () { var u = $('#lgUser'); if (u && !u.value) u.focus(); }, 50);
+  }
+  function logoutLocal(msg) { S.token = null; S.user = null; S.boot = null; store.del('mfas_token'); closeDrawer(); document.body.classList.remove('nav-open'); showLogin(msg); }
 
   $('#loginForm').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var f = ev.target, btn = $('#loginBtn');
-    btn.disabled = true; btn.textContent = 'Memeriksa…'; $('#loginErr').textContent = '';
-    call('auth.login', { email: f.email.value, password: f.password.value }, { write: true }).then(function (d) {
+    btn.disabled = true; btn.classList.add('busy'); $('#loginErr').innerHTML = '';
+    call('auth.login', { username: f.username.value.trim(), password: f.password.value }, { write: true, silent: true }).then(function (d) {
       S.token = d.token; store.set('mfas_token', d.token); f.password.value = '';
       return start();
-    }).catch(function (e) { $('#loginErr').textContent = e.message; })
-      .then(function () { btn.disabled = false; btn.textContent = 'Masuk'; });
+    }).catch(function (e) {
+      $('#loginErr').innerHTML = '<div class="banner err" style="margin-top:14px">' + esc(e.message) + '</div>';
+      f.password.value = ''; f.password.focus();
+    }).then(function () { btn.disabled = false; btn.classList.remove('busy'); });
   });
 
   function forcePasswordChange() {
@@ -486,58 +594,79 @@
       .catch(function (e) { $('#pwErr', root).textContent = e.message; });
   }
 
-  $('#logoutBtn').innerHTML = icon('logout');
-  $('#logoutBtn').onclick = function () {
+  function doLogout() {
     call('auth.logout', {}, { write: true, silent: true }).catch(function () {});
     logoutLocal('Anda telah keluar.');
-  };
+  }
 
-  /* ================= Shell & navigasi ================= */
+  /* ================= Shell & navigasi (gaya FMS / Master SKU) ================= */
   var NAV = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', level: 'VIEW' },
-    { id: 'transactions', label: 'Transaksi', icon: 'trx', level: 'ENTRY' },
-    { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW' },
-    { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW' },
-    { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW' },
-    { id: 'assets', label: 'Aset', icon: 'asset', level: 'VIEW' },
-    { id: 'master', label: 'Master Data', icon: 'master', level: 'VIEW' },
-    { id: 'settings', label: 'Pengaturan', icon: 'settings', level: 'VIEW' }
+    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', level: 'VIEW', sec: 'Utama' },
+    { id: 'transactions', label: 'Transaksi', icon: 'trx', level: 'ENTRY', sec: 'Utama' },
+    { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW', sec: 'Laporan' },
+    { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW', sec: 'Laporan' },
+    { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW', sec: 'Laporan' },
+    { id: 'assets', label: 'Aset', icon: 'asset', level: 'VIEW', sec: 'Data' },
+    { id: 'master', label: 'Master Data', icon: 'master', level: 'VIEW', sec: 'Data' },
+    { id: 'settings', label: 'Pengaturan', icon: 'settings', level: 'VIEW', sec: 'Sistem' }
   ];
   function allowed(level) { return level === 'VIEW' || (level === 'ENTRY' && canEntry()) || (level === 'ADMIN' && isAdmin()); }
+  function initials() { return (S.user.name || S.user.username || '?').split(/\s+/).map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase(); }
 
+  var shellBound = false;
   function renderShell() {
     $('#login').classList.add('hidden'); $('#shell').classList.remove('hidden');
-    $('#nav').innerHTML = NAV.filter(function (n) { return allowed(n.level); }).map(function (n) {
-      return '<button data-view="' + n.id + '" title="' + esc(n.label) + '">' + icon(n.icon) + '<span class="label">' + esc(n.label) + '</span></button>';
-    }).join('');
-    $$('#nav button').forEach(function (b) { b.onclick = function () { go(b.dataset.view); document.body.classList.remove('nav-open'); }; });
-    $('#navToggle').innerHTML = icon('menu');
-    $('#navToggle').onclick = function () {
-      if (window.innerWidth <= 760) document.body.classList.toggle('nav-open');
-      else { document.body.classList.toggle('collapsed'); store.set('mfas_collapsed', document.body.classList.contains('collapsed') ? '1' : ''); }
-    };
+    var items = NAV.filter(function (n) { return allowed(n.level); });
+    var html = brandHtml(), lastSec = '';
+    items.forEach(function (n) {
+      if (n.sec !== lastSec) { html += '<div class="sec">' + esc(n.sec) + '</div>'; lastSec = n.sec; }
+      html += '<a class="nv" data-view="' + n.id + '" title="' + esc(n.label) + '">' + icon(n.icon) + '<span class="label">' + esc(n.label) + '</span></a>';
+    });
+    html += '<div class="me"><div class="avatar">' + esc(initials()) + '</div><div class="who"><div class="n">' + esc(S.user.name) + '</div><div class="r">' + esc((S.user.username ? '@' + S.user.username + ' · ' : '') + (ROLE_LABEL[S.user.role] || S.user.role)) + '</div></div>' +
+      '<button id="logoutBtn" title="Keluar" aria-label="Keluar">' + icon('logout') + '</button></div>' +
+      '<button class="collapse hide-m" id="sideMini" title="Ciutkan / lebarkan menu">' + icon('menu') + '<span>Ciutkan menu</span></button>';
+    $('#side').innerHTML = html;
+    $$('#side a.nv').forEach(function (a) { a.onclick = function () { go(a.dataset.view); document.body.classList.remove('nav-open'); }; });
+    $('#logoutBtn').onclick = doLogout;
+    $('#sideMini').onclick = function () { document.body.classList.toggle('collapsed'); store.set('mfas_collapsed', document.body.classList.contains('collapsed') ? '1' : ''); };
     if (store.get('mfas_collapsed')) document.body.classList.add('collapsed');
-    $('#avatar').textContent = (S.user.name || S.user.email).split(' ').map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
-    $('#uname').textContent = S.user.name; $('#urole').textContent = ROLE_LABEL[S.user.role] || S.user.role;
+
+    // Navigasi bawah HP: Dashboard · Transaksi · [+] · Laporan · Lainnya
+    var tabs = [['dashboard', 'Beranda', 'dashboard'], canEntry() ? ['transactions', 'Transaksi', 'trx'] : ['assets', 'Aset', 'asset'],
+      canEntry() ? ['__add', 'Catat', 'plus'] : null, ['pl', 'Laporan', 'pl'], ['__more', 'Lainnya', 'more']].filter(Boolean);
+    $('#tabbar').innerHTML = tabs.map(function (t) {
+      return '<button data-tab="' + t[0] + '" class="' + (t[0] === '__add' ? 'fab' : '') + '"><span class="ti">' + icon(t[2]) + '</span>' + esc(t[1]) + '</button>';
+    }).join('');
+    $$('#tabbar button').forEach(function (b) { b.onclick = function () {
+      if (b.dataset.tab === '__add') openTrxForm('EXPENSE');
+      else if (b.dataset.tab === '__more') document.body.classList.add('nav-open');
+      else go(b.dataset.tab);
+    }; });
+    $('#navToggle').innerHTML = icon('menu');
+    $('#navToggle').onclick = function () { document.body.classList.toggle('nav-open'); };
+    $('#mAvatar').textContent = initials();
     var env = S.boot.app.environment;
-    $('#envName').textContent = env;
-    if (env !== 'PRODUCTION') { $('#envBadge').textContent = env; $('#envBadge').classList.remove('hidden'); }
-    var fab = $('#fab');
-    fab.innerHTML = icon('plus');
-    fab.classList.toggle('hidden', !canEntry());
-    fab.onclick = function () { openTrxForm('EXPENSE'); };
-    document.addEventListener('click', function (ev) { if (document.body.classList.contains('nav-open') && !ev.target.closest('.sidebar') && !ev.target.closest('#navToggle')) document.body.classList.remove('nav-open'); });
+    ['#envBadge', '#envBadgeM'].forEach(function (id) { $(id).textContent = env; $(id).classList.toggle('hidden', env === 'PRODUCTION'); });
+    if (!shellBound) {
+      shellBound = true;
+      document.addEventListener('click', function (ev) {
+        if (document.body.classList.contains('nav-open') && !ev.target.closest('.side') && !ev.target.closest('#navToggle') && !ev.target.closest('#tabbar')) document.body.classList.remove('nav-open');
+      });
+    }
   }
 
   var VIEWS = {};
   function go(view, params) {
     var n = NAV.filter(function (x) { return x.id === view; })[0];
-    if (!n || !allowed(n.level)) view = 'dashboard';
+    if (!n || !allowed(n.level)) { view = 'dashboard'; n = NAV[0]; }
     S.view = view;
     try { history.replaceState(null, '', '#' + view); } catch (e) { /* abaikan */ }
-    $$('#nav button').forEach(function (b) { b.classList.toggle('active', b.dataset.view === view); });
-    $('#viewTitle').textContent = NAV.filter(function (x) { return x.id === view; })[0].label;
+    $$('#side a.nv').forEach(function (a) { a.classList.toggle('on', a.dataset.view === view); });
+    var group = { pl: 'pl', cf: 'pl', bs: 'pl' }[view] || view;
+    $$('#tabbar button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === group); });
+    $('#viewTitle').textContent = n.label; $('#viewEyebrow').textContent = n.sec; $('#mTitle').textContent = n.label;
     $('#view').innerHTML = '';
+    window.scrollTo(0, 0);
     VIEWS[view]($('#view'), params || {});
   }
   function refreshView() { if (S.view && VIEWS[S.view]) go(S.view); }
@@ -690,26 +819,27 @@
           (canEntry() ? '<div class="row no-print" style="margin-bottom:12px;display:none" id="qm"></div>' : '') +
           (d.cogsMissing ? '<div class="banner warn" style="margin-bottom:16px">HPP belum tercatat untuk penjualan periode ini — laba kotor & laba bersih mungkin belum lengkap.</div>' : '') +
           '<div class="grid g3">' +
-          kpiCard('Total Penjualan', k.sales, 'Penjualan bersih ' + rp(k.netSales)) +
-          kpiCard('Laba Kotor', k.grossProfit, 'Penjualan bersih − HPP') +
-          kpiCard('Laba Bersih', k.netProfit, 'Setelah seluruh beban') +
-          kpiCard('Saldo Kas & Bank', k.cashBalance, 'Per ' + fdate(d.to)) +
-          kpiCard('Total Pengeluaran', k.totalExpenses, 'HPP + beban operasional + beban lain') +
-          kpiCard('Total Aset', k.totalAssets, 'Per ' + fdate(d.to)) + '</div>' +
+          kpiCard('Total Penjualan', k.sales, 'Penjualan bersih ' + rp(k.netSales), 'receipt', 'dark') +
+          kpiCard('Laba Kotor', k.grossProfit, 'Penjualan bersih − HPP', 'trend') +
+          kpiCard('Laba Bersih', k.netProfit, 'Setelah seluruh beban', 'coins', 'ok') +
+          kpiCard('Saldo Kas & Bank', k.cashBalance, 'Per ' + fdate(d.to), 'wallet') +
+          kpiCard('Total Pengeluaran', k.totalExpenses, 'HPP + beban operasional + beban lain', 'cf') +
+          kpiCard('Total Aset', k.totalAssets, 'Per ' + fdate(d.to), 'building') + '</div>' +
           (hasData ? '<div class="grid g2" style="margin-top:16px">' +
-            '<div class="card"><div class="card-h"><h3>Pendapatan vs Beban Bulanan</h3><div class="spacer"></div><div class="legend"><span><i style="background:#1A6B4F"></i>Pendapatan</span><span><i style="background:#D9731A"></i>Beban</span></div></div><div class="card-b">' +
-            barChart(labels, [{ name: 'Pendapatan', color: '#1A6B4F', values: d.trend.map(function (t) { return t.revenue; }) }, { name: 'Beban', color: '#D9731A', values: d.trend.map(function (t) { return t.expenses; }) }]) + '</div></div>' +
+            '<div class="card"><div class="card-h"><h3>Pendapatan vs Beban Bulanan</h3><div class="spacer"></div><div class="legend"><span><i style="background:#3b8a58"></i>Pendapatan</span><span><i style="background:#e8693a"></i>Beban</span></div></div><div class="card-b">' +
+            barChart(labels, [{ name: 'Pendapatan', color: '#3b8a58', values: d.trend.map(function (t) { return t.revenue; }) }, { name: 'Beban', color: '#e8693a', values: d.trend.map(function (t) { return t.expenses; }) }]) + '</div></div>' +
             '<div class="card"><div class="card-h"><h3>Laba Bersih Bulanan</h3></div><div class="card-b">' +
-            barChart(labels, [{ name: 'Laba', color: '#208562', negColor: '#C2410C', values: d.trend.map(function (t) { return t.profit; }) }]) + '</div></div>' +
+            barChart(labels, [{ name: 'Laba', color: '#28302b', negColor: '#c9443a', values: d.trend.map(function (t) { return t.profit; }) }]) + '</div></div>' +
             '<div class="card" style="grid-column:1/-1"><div class="card-h"><h3>Tren Saldo Kas & Bank</h3><span class="muted small">akhir bulan</span></div><div class="card-b">' +
-            lineChart(labels, d.trend.map(function (t) { return t.cash; }), '#14513C') + '</div></div></div>'
+            lineChart(labels, d.trend.map(function (t) { return t.cash; }), '#e8693a') + '</div></div></div>'
             : '<div class="card empty" style="margin-top:16px">Belum ada transaksi terposting. Mulai dengan mencatat saldo awal kas & bank (Admin: Transaksi → Jurnal Umum) lalu transaksi harian.</div>');
       }).catch(function (e) { $('#dashBody', el).innerHTML = errorBox(e, render); });
     }
     render();
   };
-  function kpiCard(label, value, sub) {
-    return '<div class="card kpi"><div class="k-label">' + esc(label) + '</div><div class="k-value' + (value < 0 ? ' neg' : '') + '">' + rp(value) + '</div><div class="k-sub">' + esc(sub || '') + '</div></div>';
+  function kpiCard(label, value, sub, ic, variant) {
+    return '<div class="kpi ' + (variant || '') + '"><div class="top"><span class="chip">' + icon(ic || 'coins') + '</span><span>' + esc(label) + '</span></div>' +
+      '<div class="k-value' + (value < 0 ? ' neg' : '') + '">' + rp(value) + '</div><div class="k-sub">' + esc(sub || '') + '</div></div>';
   }
 
   /* ================= TRANSAKSI ================= */
@@ -1176,8 +1306,8 @@
     function load() {
       call('asset.list').then(function (d) {
         var s = d.summary;
-        $('#asBody', el).innerHTML = '<div class="grid g4">' + kpiCard('Total Harga Perolehan', s.totalCost, 'Aset aktif') + kpiCard('Akumulasi Penyusutan', s.accumulated, '') + kpiCard('Total Nilai Buku', s.bookValue, '') +
-          '<div class="card kpi"><div class="k-label">Aset Aktif</div><div class="k-value">' + s.activeCount + '</div></div></div>' +
+        $('#asBody', el).innerHTML = '<div class="grid g4">' + kpiCard('Total Harga Perolehan', s.totalCost, 'Aset aktif', 'asset', 'dark') + kpiCard('Akumulasi Penyusutan', s.accumulated, 'Sampai hari ini', 'trend') + kpiCard('Total Nilai Buku', s.bookValue, 'Harga − akumulasi', 'coins', 'ok') +
+          '<div class="kpi"><div class="top"><span class="chip">' + icon('asset') + '</span><span class="k-label">Aset Aktif</span></div><div class="k-value">' + s.activeCount + '</div><div class="k-sub">unit tercatat</div></div></div>' +
           '<div class="card" style="margin-top:16px">' + (d.assets.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama</th><th class="hide-m">Kategori</th><th class="hide-m">Perolehan</th><th class="num">Harga</th><th class="num hide-m">Akumulasi</th><th class="num">Nilai Buku</th><th>Status</th></tr></thead><tbody>' +
             d.assets.map(function (a) { return '<tr class="click" data-id="' + esc(a.id) + '"><td class="small" style="font-family:var(--mono)">' + esc(a.code) + '</td><td>' + esc(a.name) + '</td><td class="hide-m">' + esc(a.categoryLabel) + '</td><td class="hide-m">' + fdate(a.acquisitionDate) + '</td><td class="num">' + rp(a.cost) + '</td><td class="num hide-m">' + rp(a.accumulated) + '</td><td class="num">' + rp(a.bookValue) + '</td><td>' + badge(a.status) + '</td></tr>'; }).join('') +
             '</tbody></table></div>' : '<div class="empty">Belum ada aset tetap. Catat laptop, peralatan, furnitur, atau kendaraan usaha di sini — bukan stok barang dagang.</div>') + '</div>';
@@ -1356,28 +1486,28 @@
 
   var SETTINGS_TABS = {
     me: function (box) {
-      box.innerHTML = '<div class="grid g2"><div class="card card-b"><h3 style="margin-bottom:12px">Profil</h3><table class="t"><tr><td class="muted">Nama</td><td>' + esc(S.user.name) + '</td></tr><tr><td class="muted">Email</td><td>' + esc(S.user.email) + '</td></tr><tr><td class="muted">Peran</td><td>' + esc(ROLE_LABEL[S.user.role]) + '</td></tr></table></div>' +
+      box.innerHTML = '<div class="grid g2"><div class="card card-b"><h3 style="margin-bottom:12px">Profil</h3><table class="t"><tr><td class="muted">Nama</td><td>' + esc(S.user.name) + '</td></tr><tr><td class="muted">Username</td><td><b>' + esc(S.user.username) + '</b></td></tr><tr><td class="muted">Email</td><td>' + esc(S.user.email || '—') + '</td></tr><tr><td class="muted">Peran</td><td>' + esc(ROLE_LABEL[S.user.role]) + '</td></tr></table></div>' +
         '<div class="card card-b"><h3 style="margin-bottom:12px">Ganti kata sandi</h3><div id="pwf">' + passwordFormHtml() + '<button class="btn primary" style="margin-top:12px" id="pwGo">Simpan</button></div></div></div>';
       $('#pwGo', box).onclick = function () { savePassword($('#pwf', box), function () { $$('#pwf input', box).forEach(function (i) { i.value = ''; }); }); };
     },
     users: function (box, reload) {
       box.innerHTML = '<div class="row" style="margin-bottom:12px"><button class="btn primary" id="uAdd">' + icon('plus') + 'Tambah Pengguna</button></div><div class="card" id="uT">' + skeleton(4) + '</div>';
       var roleSel = function (id, cur) { return '<select class="input" id="' + id + '">' + ['ADMIN', 'FINANCE', 'VIEWER'].map(function (r) { return '<option value="' + r + '"' + (cur === r ? ' selected' : '') + '>' + ROLE_LABEL[r] + '</option>'; }).join('') + '</select>'; };
-      var showPw = function (email, pw) { ask({ title: 'Kata sandi sementara', message: 'Berikan kata sandi ini secara langsung kepada ' + email + '. Kata sandi hanya ditampilkan sekali dan wajib diganti saat login pertama.', extraHtml: '<div class="input" style="display:flex;align-items:center;font-family:var(--mono);font-size:16px;user-select:all">' + esc(pw) + '</div>', confirm: 'Sudah dicatat' }); };
+      var showPw = function (who, pw) { ask({ title: 'Kata sandi sementara', message: 'Berikan kata sandi ini secara langsung kepada ' + who + '. Kata sandi hanya ditampilkan sekali dan wajib diganti saat login pertama.', extraHtml: '<div class="input" style="display:flex;align-items:center;font-family:var(--mono);font-size:16px;user-select:all">' + esc(pw) + '</div>', confirm: 'Sudah dicatat' }); };
       $('#uAdd', box).onclick = function () {
-        ask({ title: 'Tambah pengguna', message: 'Pengguna login dengan email dan kata sandi sementara.', confirm: 'Buat pengguna',
-          extraHtml: '<div class="stack"><label class="field"><span>Nama</span><input class="input" id="uN"></label><label class="field"><span>Email</span><input class="input" type="email" id="uE"></label><label class="field"><span>Peran</span>' + roleSel('uR', 'FINANCE') + '</label></div>',
-          collect: function (w) { return { name: $('#uN', w).value, email: $('#uE', w).value, role: $('#uR', w).value }; } }).then(function (r) {
+        ask({ title: 'Tambah pengguna', message: 'Pengguna login dengan username dan kata sandi sementara.', confirm: 'Buat pengguna',
+          extraHtml: '<div class="stack"><label class="field"><span>Nama</span><input class="input" id="uN"></label><label class="field"><span>Username <span class="hint">huruf kecil, mis. kasir.toko</span></span><input class="input" id="uU" autocapitalize="off" spellcheck="false"></label><label class="field"><span>Email <span class="hint">opsional</span></span><input class="input" type="email" id="uE"></label><label class="field"><span>Peran</span>' + roleSel('uR', 'FINANCE') + '</label></div>',
+          collect: function (w) { return { name: $('#uN', w).value, username: $('#uU', w).value.trim().toLowerCase(), email: $('#uE', w).value.trim(), role: $('#uR', w).value }; } }).then(function (r) {
           if (!r) return;
-          call('user.create', r, { write: true }).then(function (x) { showPw(x.email, x.temporaryPassword); reload(); }).catch(fail);
+          call('user.create', r, { write: true }).then(function (x) { showPw(x.username, x.temporaryPassword); reload(); }).catch(fail);
         });
       };
       call('user.list').then(function (list) {
-        $('#uT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Email</th><th>Peran</th><th>Status</th><th class="hide-m">Login terakhir</th><th></th></tr></thead><tbody>' +
-          list.map(function (u) { return '<tr><td>' + esc(u.name) + '</td><td>' + esc(u.email) + '</td><td>' + esc(ROLE_LABEL[u.role]) + '</td><td>' + badge(u.status) + '</td><td class="hide-m small">' + fts(u.lastLoginAt) + '</td><td class="num"><button class="btn sm" data-e="' + esc(u.userId) + '">Ubah</button> <button class="btn sm" data-r="' + esc(u.userId) + '">Reset sandi</button></td></tr>'; }).join('') + '</tbody></table></div>';
+        $('#uT', box).innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Nama</th><th>Username</th><th class="hide-m">Email</th><th>Peran</th><th>Status</th><th class="hide-m">Login terakhir</th><th></th></tr></thead><tbody>' +
+          list.map(function (u) { return '<tr><td><b>' + esc(u.name) + '</b></td><td>@' + esc(u.username) + '</td><td class="hide-m small">' + esc(u.email || '—') + '</td><td><span class="badge ' + esc(u.role) + '">' + esc(ROLE_LABEL[u.role]) + '</span></td><td>' + badge(u.status) + '</td><td class="hide-m small">' + fts(u.lastLoginAt) + '</td><td class="num"><button class="btn sm" data-e="' + esc(u.userId) + '">Ubah</button> <button class="btn sm" data-r="' + esc(u.userId) + '">Reset sandi</button></td></tr>'; }).join('') + '</tbody></table></div>';
         $$('[data-e]', box).forEach(function (b) { b.onclick = function () {
           var u = list.filter(function (x) { return x.userId === b.dataset.e; })[0];
-          ask({ title: 'Ubah ' + u.email, message: '', reason: 'Alasan perubahan', reasonRequired: true, confirm: 'Simpan',
+          ask({ title: 'Ubah @' + u.username, message: '', reason: 'Alasan perubahan', reasonRequired: true, confirm: 'Simpan',
             extraHtml: '<div class="form-grid" style="margin-top:10px"><label class="field"><span>Peran</span>' + roleSel('eR', u.role) + '</label><label class="field"><span>Status</span><select class="input" id="eS"><option value="ACTIVE"' + (u.status === 'ACTIVE' ? ' selected' : '') + '>Aktif</option><option value="DISABLED"' + (u.status === 'DISABLED' ? ' selected' : '') + '>Nonaktif</option></select></label></div>',
             collect: function (w) { return { role: $('#eR', w).value, status: $('#eS', w).value }; } }).then(function (r) {
             if (!r) return;
@@ -1386,9 +1516,9 @@
         }; });
         $$('[data-r]', box).forEach(function (b) { b.onclick = function () {
           var u = list.filter(function (x) { return x.userId === b.dataset.r; })[0];
-          ask({ title: 'Reset kata sandi ' + u.email + '?', message: 'Kata sandi lama tidak berlaku lagi.', reason: 'Alasan', reasonRequired: true, confirm: 'Reset', danger: true }).then(function (r) {
+          ask({ title: 'Reset kata sandi @' + u.username + '?', message: 'Kata sandi lama tidak berlaku lagi.', reason: 'Alasan', reasonRequired: true, confirm: 'Reset', danger: true }).then(function (r) {
             if (!r) return;
-            call('user.resetPassword', { userId: u.userId, reason: r.reason }, { write: true }).then(function (x) { showPw(u.email, x.temporaryPassword); }).catch(fail);
+            call('user.resetPassword', { userId: u.userId, reason: r.reason }, { write: true }).then(function (x) { showPw(u.username, x.temporaryPassword); }).catch(fail);
           });
         }; });
       }).catch(function (e) { $('#uT', box).innerHTML = errorBox(e); });
