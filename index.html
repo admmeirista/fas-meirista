@@ -297,7 +297,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="58879e5-3593adef";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="1eb23f6-a58ffc9a";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
@@ -330,7 +330,7 @@
           <div class="auth-help" id="loginHelp"></div>
         </form>
       </div>
-      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.6.0</div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.7.0</div>
     </section>
   </div>
 
@@ -616,12 +616,15 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     { id: 'purchases', label: 'Pembelian', icon: 'asset', level: 'VIEW', sec: 'Transaksi' },
     { id: 'expenses', label: 'Biaya', icon: 'trx', level: 'VIEW', sec: 'Transaksi' },
     { id: 'cashbank', label: 'Kas & Bank', icon: 'wallet', level: 'VIEW', sec: 'Transaksi' },
-    { id: 'journals', label: 'Jurnal Umum', icon: 'book', level: 'ADMIN', sec: 'Transaksi' },
     { id: 'stock', label: 'Stok', icon: 'asset', level: 'VIEW', sec: 'Persediaan' },
     { id: 'adjustments', label: 'Penyesuaian', icon: 'pen', level: 'VIEW', sec: 'Persediaan' },
     { id: 'pl', label: 'Laba Rugi', icon: 'pl', level: 'VIEW', sec: 'Laporan' },
     { id: 'cf', label: 'Arus Kas', icon: 'cf', level: 'VIEW', sec: 'Laporan' },
     { id: 'bs', label: 'Neraca', icon: 'bs', level: 'VIEW', sec: 'Laporan' },
+    { id: 'journals', label: 'Jurnal Umum', icon: 'pen', level: 'ADMIN', sec: 'Akuntansi' },
+    { id: 'journallist', label: 'Daftar Jurnal', icon: 'book', level: 'VIEW', sec: 'Akuntansi' },
+    { id: 'ledger', label: 'Buku Besar', icon: 'trx', level: 'VIEW', sec: 'Akuntansi' },
+    { id: 'tb', label: 'Neraca Saldo', icon: 'bs', level: 'VIEW', sec: 'Akuntansi' },
     { id: 'assets', label: 'Aset', icon: 'asset', level: 'VIEW', sec: 'Data' },
     { id: 'master', label: 'Master Data', icon: 'master', level: 'VIEW', sec: 'Data' },
     { id: 'settings', label: 'Pengaturan', icon: 'settings', level: 'VIEW', sec: 'Sistem' }
@@ -678,7 +681,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     S.view = view;
     try { history.replaceState(null, '', '#' + view); } catch (e) { /* abaikan */ }
     $$('#side a.nv').forEach(function (a) { a.classList.toggle('on', a.dataset.view === view); });
-    var group = { pl: 'pl', cf: 'pl', bs: 'pl' }[view] || view;
+    var group = { pl: 'pl', cf: 'pl', bs: 'pl', ledger: 'pl', journallist: 'pl', tb: 'pl' }[view] || view;
     $$('#tabbar button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === group); });
     $('#viewTitle').textContent = n.label; $('#viewEyebrow').textContent = n.sec; $('#mTitle').textContent = n.label;
     $('#view').innerHTML = '';
@@ -1677,8 +1680,10 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
           var s = d.sections[k];
           if (!s.inflows.length && !s.outflows.length) return;
           rows += '<tr class="sec"><td>' + LBL[k] + '</td><td></td></tr>' +
-            s.inflows.map(function (x) { return '<tr><td class="indent">Penerimaan — ' + esc(x.name) + '</td><td class="num">' + rp(x.amount) + '</td></tr>'; }).join('') +
-            s.outflows.map(function (x) { return '<tr><td class="indent">Pengeluaran — ' + esc(x.name) + '</td><td class="num">' + rpCell(-x.amount) + '</td></tr>'; }).join('') +
+            s.lines.map(function (x) {
+              var accs = x.accounts.filter(function (a, i, arr) { return arr.indexOf(a) === i; });
+              return '<tr><td class="indent">' + esc(x.label) + '<div class="muted small">' + esc(accs.slice(0, 4).join(', ')) + '</div></td><td class="num">' + rpCell(x.amount) + '</td></tr>';
+            }).join('') +
             '<tr class="total"><td>Arus kas bersih ' + LBL[k].toLowerCase() + '</td><td class="num">' + rpCell(s.net) + '</td></tr>';
         });
         rows += '<tr class="total"><td>Total penerimaan</td><td class="num">' + rp(d.totalIn) + '</td></tr><tr><td>Total pengeluaran</td><td class="num">' + rpCell(-d.totalOut) + '</td></tr>' +
@@ -1698,44 +1703,138 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
     render();
   };
 
-  /* ================= NERACA ================= */
+  /* ================= NERACA (berkategori) ================= */
   VIEWS.bs = function (el) {
-    var st = S.state.bs = S.state.bs || { asOf: today(), tab: 'bs' };
+    var st = S.state.bs = S.state.bs || { asOf: today() };
     function render() {
-      el.innerHTML = '<div class="stack"><div class="row"><label class="row small" style="gap:8px">Per tanggal <input class="input" style="width:170px" type="date" id="asOf" value="' + esc(st.asOf) + '"></label>' +
-        '<div class="chips"><button class="chip' + (st.tab === 'bs' ? ' active' : '') + '" data-t="bs">Neraca</button><button class="chip' + (st.tab === 'tb' ? ' active' : '') + '" data-t="tb">Neraca Saldo</button></div><div class="spacer"></div>' +
-        (st.tab === 'bs' ? exportButtons('BS', function () { return { asOf: st.asOf }; }) : '') + '</div><div id="bsBody">' + skeleton(10) + '</div></div>';
+      el.innerHTML = '<div class="stack"><div class="row"><label class="row small" style="gap:8px">Per tanggal <input class="input" style="width:170px" type="date" id="asOf" value="' + esc(st.asOf) + '"></label><div class="spacer"></div>' +
+        exportButtons('BS', function () { return { asOf: st.asOf }; }) + '</div><div id="bsBody">' + skeleton(10) + '</div></div>';
       $('#asOf', el).onchange = function (e) { if (e.target.value) { st.asOf = e.target.value; render(); } };
-      $$('[data-t]', el).forEach(function (b) { b.onclick = function () { st.tab = b.dataset.t; render(); }; });
-      if (st.tab === 'tb') {
-        call('report.tb', { asOf: st.asOf }).then(function (d) {
-          $('#bsBody', el).innerHTML = '<div class="banner ' + (d.balanced ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.balanced ? '✓ Total debit = total kredit' : 'Neraca saldo tidak seimbang!') + '</div>' +
-            '<div class="card"><div class="table-wrap"><table class="t"><thead><tr><th>Akun</th><th class="num">Mutasi Debit</th><th class="num">Mutasi Kredit</th><th class="num">Saldo Debit</th><th class="num">Saldo Kredit</th></tr></thead><tbody>' +
-            d.rows.map(function (r) { return '<tr><td>' + esc(r.code + ' · ' + r.name) + '</td><td class="num">' + rp(r.debit) + '</td><td class="num">' + rp(r.credit) + '</td><td class="num">' + (r.balanceDebit ? rp(r.balanceDebit) : '') + '</td><td class="num">' + (r.balanceCredit ? rp(r.balanceCredit) : '') + '</td></tr>'; }).join('') +
-            '<tr class="grand"><td>Total</td><td class="num">' + rp(d.totals.debit) + '</td><td class="num">' + rp(d.totals.credit) + '</td><td class="num">' + rp(d.totals.bd) + '</td><td class="num">' + rp(d.totals.bc) + '</td></tr></tbody></table></div></div>';
-        }).catch(function (e) { $('#bsBody', el).innerHTML = errorBox(e, render); });
-        return;
-      }
       call('report.bs', { asOf: st.asOf }).then(function (d) {
-        var side = function (title, s) {
-          return '<div class="card"><div class="card-h"><h3>' + title + '</h3></div><div class="table-wrap"><table class="t"><tbody>' +
-            s.sections.map(function (x) {
-              if (!x.rows.length) return '<tr><td>' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>';
-              return '<tr class="sec"><td>' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>' +
-                x.rows.map(function (r) { return '<tr class="click" data-acc="' + esc(r.code) + '"><td class="indent">' + esc(r.name) + '</td><td class="num">' + rpCell(r.amount) + '</td></tr>'; }).join('');
-            }).join('') + '<tr class="grand"><td>Total ' + title + '</td><td class="num">' + rpCell(s.total) + '</td></tr></tbody></table></div></div>';
+        var side = function (title, s, showCats) {
+          return '<div class="card"><div class="card-h"><h3>' + title + '</h3><div class="spacer"></div><b class="num">' + rpCell(s.total) + '</b></div><div class="table-wrap"><table class="t"><tbody>' +
+            (s.categories.length ? s.categories.map(function (c) {
+              return (showCats ? '<tr class="sec"><td style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">' + esc(c.label) + '</td><td></td></tr>' : '') +
+                c.sections.map(function (x) {
+                  if (!x.rows.length) return '<tr><td class="indent">' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>';
+                  if (x.rows.length === 1 && x.rows[0].name === x.label) return '<tr class="click" data-acc="' + esc(x.rows[0].code) + '"><td class="indent">' + esc(x.label) + '</td><td class="num">' + rpCell(x.total) + '</td></tr>';
+                  return '<tr><td class="indent" style="font-weight:700">' + esc(x.label) + '</td><td class="num" style="font-weight:700">' + rpCell(x.total) + '</td></tr>' +
+                    x.rows.map(function (r) { return '<tr class="click" data-acc="' + esc(r.code) + '"><td class="indent2">' + esc(r.name) + '</td><td class="num">' + rpCell(r.amount) + '</td></tr>'; }).join('');
+                }).join('') + (showCats ? '<tr class="total"><td>Total ' + esc(c.label.toLowerCase()) + '</td><td class="num">' + rpCell(c.total) + '</td></tr>' : '');
+            }).join('') : '<tr><td class="muted">Tidak ada saldo</td><td></td></tr>') +
+            '</tbody></table></div></div>';
         };
         $('#bsBody', el).innerHTML =
           '<div class="banner ' + (d.balanced ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.balanced ? '✓ Seimbang: Aset ' + rp(d.assets.total) + ' = Liabilitas + Ekuitas ' + rp(d.liabilities.total + d.equity.total) :
             'Neraca TIDAK seimbang — selisih ' + rp(d.difference) + '.' + (d.diagnostics.length ? '<ul style="margin:6px 0 0;padding-left:18px">' + d.diagnostics.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ' Jalankan Diagnostik di Pengaturan.')) + '</div>' +
-          '<div class="grid g2">' + side('Aset', d.assets) + '<div class="stack">' + side('Liabilitas', d.liabilities) + side('Ekuitas', d.equity) +
-          '<div class="card kpi"><div class="k-label">Total Liabilitas + Ekuitas</div><div class="k-value">' + rp(d.liabilities.total + d.equity.total) + '</div></div></div></div>' +
-          '<p class="muted small">Laba tahun berjalan dihitung sejak ' + fdate(d.fiscalYearStart) + '. Laba ditahan tahun lalu dihitung otomatis dari jurnal sebelum awal tahun buku.</p>';
+          '<div class="grid g2">' + side('Aset', d.assets, true) + '<div class="stack">' + side('Liabilitas', d.liabilities, true) + side('Ekuitas', d.equity, false) +
+          '<div class="kpi dark"><div class="k-label">Total Liabilitas + Ekuitas</div><div class="k-value">' + rp(d.liabilities.total + d.equity.total) + '</div></div></div></div>' +
+          '<p class="muted small">Laba tahun berjalan dihitung sejak ' + fdate(d.fiscalYearStart) + '. Kategori lancar / tidak lancar mengikuti pengaturan akun di Bagan Akun.</p>';
         $$('[data-acc]', el).forEach(function (tr) { tr.onclick = function () { openDrilldown(tr.dataset.acc, '2000-01-01', st.asOf); }; });
       }).catch(function (e) { $('#bsBody', el).innerHTML = errorBox(e, render); });
     }
     render();
   };
+
+  /* ================= AKUNTANSI ================= */
+  VIEWS.tb = function (el) {
+    var st = S.state.tb = S.state.tb || { asOf: today() };
+    function render() {
+      el.innerHTML = '<div class="stack"><div class="row"><label class="row small" style="gap:8px">Per tanggal <input class="input" style="width:170px" type="date" id="tbAsOf" value="' + esc(st.asOf) + '"></label><div class="spacer"></div>' +
+        exportButtons('TB', function () { return { asOf: st.asOf }; }) + '</div><div id="tbBody">' + skeleton(10) + '</div></div>';
+      $('#tbAsOf', el).onchange = function (e) { if (e.target.value) { st.asOf = e.target.value; render(); } };
+      call('report.tb', { asOf: st.asOf }).then(function (d) {
+        $('#tbBody', el).innerHTML = '<div class="banner ' + (d.balanced ? 'ok' : 'err') + '" style="margin-bottom:12px">' + (d.balanced ? '✓ Total debit = total kredit' : 'Neraca saldo tidak seimbang!') + '</div>' +
+          '<div class="card"><div class="table-wrap"><table class="t"><thead><tr><th>Kode</th><th>Nama akun</th><th class="num hide-m">Mutasi Debit</th><th class="num hide-m">Mutasi Kredit</th><th class="num">Saldo Debit</th><th class="num">Saldo Kredit</th></tr></thead><tbody>' +
+          d.rows.map(function (r) { return '<tr class="click" data-acc="' + esc(r.code) + '"><td style="font-weight:700">' + esc(r.code) + '</td><td>' + esc(r.name) + '</td><td class="num hide-m">' + rp(r.debit) + '</td><td class="num hide-m">' + rp(r.credit) + '</td><td class="num">' + (r.balanceDebit ? rp(r.balanceDebit) : '') + '</td><td class="num">' + (r.balanceCredit ? rp(r.balanceCredit) : '') + '</td></tr>'; }).join('') +
+          '<tr class="grand"><td colspan="2">Total</td><td class="num hide-m">' + rp(d.totals.debit) + '</td><td class="num hide-m">' + rp(d.totals.credit) + '</td><td class="num">' + rp(d.totals.bd) + '</td><td class="num">' + rp(d.totals.bc) + '</td></tr></tbody></table></div></div>';
+        $$('[data-acc]', el).forEach(function (tr) { tr.onclick = function () { S.state.gl = { preset: 'CUSTOM', from: '2000-01-01', to: st.asOf, account: tr.dataset.acc }; go('ledger'); }; });
+      }).catch(function (e) { $('#tbBody', el).innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+
+  VIEWS.ledger = function (el) {
+    var st = S.state.gl = S.state.gl || { preset: 'THIS_MONTH', account: '', page: 1 };
+    function render() {
+      var r = rangeFromPreset(st);
+      el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render) + '</div>' +
+        '<div class="row"><select class="input" style="max-width:360px" id="glAcc"><option value="">— Ringkasan semua akun —</option>' + options(postableAccounts(), st.account) + '</select><div class="spacer"></div>' +
+        exportButtons('GL', function () { return { from: r.from, to: r.to, account: st.account }; }) + '</div><div id="glBody">' + skeleton(10) + '</div></div>';
+      $('#glAcc', el).onchange = function (e) { st.account = e.target.value; st.page = 1; render(); };
+      var box = function () { return $('#glBody', el); };
+      if (!st.account) {
+        call('report.gl', { from: r.from, to: r.to }).then(function (d) {
+          box().innerHTML = '<div class="card"><div class="table-wrap"><table class="t"><thead><tr><th>Akun</th><th class="num hide-m">Saldo awal</th><th class="num hide-m">Debit</th><th class="num hide-m">Kredit</th><th class="num">Saldo akhir</th></tr></thead><tbody>' +
+            d.rows.map(function (x) { return '<tr class="click" data-acc="' + esc(x.code) + '"><td><b>' + esc(x.code) + '</b> · ' + esc(x.name) + '</td><td class="num hide-m">' + rpCell(x.opening) + '</td><td class="num hide-m">' + (x.debit ? rp(x.debit) : '') + '</td><td class="num hide-m">' + (x.credit ? rp(x.credit) : '') + '</td><td class="num" style="font-weight:700">' + rpCell(x.closing) + '</td></tr>'; }).join('') +
+            '<tr class="grand"><td>Total mutasi</td><td class="hide-m"></td><td class="num hide-m">' + rp(d.totals.debit) + '</td><td class="num hide-m">' + rp(d.totals.credit) + '</td><td class="num">' + (d.balanced ? 'Seimbang' : 'Tidak seimbang') + '</td></tr></tbody></table></div></div>' +
+            '<p class="muted small">Saldo ditampilkan sesuai saldo normal akun (akun kredit-normal seperti pendapatan, utang, modal tampil positif). Klik akun untuk melihat mutasinya.</p>';
+          $$('[data-acc]', box()).forEach(function (tr) { tr.onclick = function () { st.account = tr.dataset.acc; st.page = 1; render(); }; });
+        }).catch(function (e) { box().innerHTML = errorBox(e, render); });
+        return;
+      }
+      call('report.gl', { account: st.account, from: r.from, to: r.to, page: st.page, pageSize: 100 }).then(function (pg) {
+        box().innerHTML = '<div class="grid g3" style="margin-bottom:14px">' + kpiCard('Saldo awal', pg.opening, fdate(r.from), 'book') +
+          kpiCard('Mutasi bersih', pg.closing - pg.opening, pg.total + ' baris', 'cf') + kpiCard('Saldo akhir', pg.closing, fdate(r.to), 'wallet', 'dark') + '</div>' +
+          '<div class="card">' + (pg.rows.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Tanggal</th><th class="hide-m">No. jurnal</th><th class="hide-m">Referensi</th><th>Keterangan</th><th class="num">Debit</th><th class="num">Kredit</th><th class="num hide-m">Saldo</th></tr></thead><tbody>' +
+            pg.rows.map(function (x) {
+              var docT = SOURCE_TO_DOC[x.sourceType];
+              return '<tr' + (docT ? ' class="click" data-src="' + esc(docT + '|' + x.sourceId) + '"' : '') + '><td class="nowrap">' + fdate(x.date) + '</td><td class="nowrap hide-m" style="font-weight:700">' + esc(x.journalNo) + '</td><td class="hide-m small">' + esc(x.reference || '') + '</td><td>' + esc(x.description) + '</td>' +
+                '<td class="num">' + (x.debit ? rp(x.debit) : '') + '</td><td class="num">' + (x.credit ? rp(x.credit) : '') + '</td><td class="num hide-m" style="font-weight:700">' + rpCell(x.balance) + '</td></tr>';
+            }).join('') + '</tbody></table></div>' + pager(pg, function (p) { st.page = p; render(); }) : '<div class="empty">Tidak ada mutasi pada periode ini.</div>') + '</div>';
+        $$('[data-src]', box()).forEach(function (tr) { tr.onclick = function () { var p = tr.dataset.src.split('|'); openDocDetail(p[0], p[1]); }; });
+      }).catch(function (e) { box().innerHTML = errorBox(e, render); });
+    }
+    render();
+  };
+
+  var SOURCE_LABEL = { SALES: 'Penjualan', PURCHASE: 'Pembelian', EXPENSE: 'Biaya', PAYMENT: 'Kas & Bank', JOURNAL: 'Jurnal Umum', OPENING_BALANCE: 'Saldo Awal',
+    STOCK_ADJ: 'Penyesuaian Stok', REVERSAL: 'Pembalikan', DEPRECIATION: 'Penyusutan', ASSET: 'Perolehan Aset', ASSET_DISPOSAL: 'Pelepasan Aset', TRX: 'Transaksi v1' };
+  VIEWS.journallist = function (el) {
+    var st = S.state.jl = S.state.jl || { preset: 'THIS_MONTH', sourceType: '', status: '', search: '', page: 1 };
+    function render() {
+      var r = rangeFromPreset(st);
+      el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render) + '</div><div class="card"><div class="card-h">' +
+        '<input class="input" style="max-width:260px" name="search" placeholder="Cari no. jurnal, keterangan, referensi…" value="' + esc(st.search) + '">' +
+        '<select class="input" style="max-width:190px" name="sourceType"><option value="">Semua sumber</option>' + Object.keys(SOURCE_LABEL).filter(function (k) { return k !== 'TRX'; }).map(function (k) { return '<option value="' + k + '"' + (st.sourceType === k ? ' selected' : '') + '>' + SOURCE_LABEL[k] + '</option>'; }).join('') + '</select>' +
+        (isAdmin() ? '<select class="input" style="max-width:170px" name="status"><option value="">Terposting</option><option value="FAILED"' + (st.status === 'FAILED' ? ' selected' : '') + '>Gagal</option><option value="ALL"' + (st.status === 'ALL' ? ' selected' : '') + '>Semua</option></select>' : '') +
+        '</div><div id="jlBody">' + skeleton(8) + '</div></div></div>';
+      var tm;
+      $$('.card-h [name]', el).forEach(function (i) { i.addEventListener(i.name === 'search' ? 'input' : 'change', function () { clearTimeout(tm); tm = setTimeout(function () { st[i.name] = i.value; st.page = 1; load(); }, i.name === 'search' ? 350 : 0); }); });
+      function load() {
+        call('report.journals', { from: r.from, to: r.to, sourceType: st.sourceType, status: st.status, search: st.search, page: st.page, pageSize: 50 }).then(function (pg) {
+          var b = $('#jlBody', el); if (!b) return;
+          if (!pg.rows.length) { b.innerHTML = '<div class="empty">Tidak ada jurnal pada filter ini.</div>'; return; }
+          b.innerHTML = '<div class="table-wrap"><table class="t"><thead><tr><th>Tanggal</th><th class="hide-m">No. jurnal</th><th class="hide-m">Sumber</th><th>Keterangan</th><th class="num">Total</th><th class="hide-m">Status</th></tr></thead><tbody>' +
+            pg.rows.map(function (x) {
+              return '<tr class="click" data-j="' + esc(x.id) + '"><td class="nowrap">' + fdate(x.date) + '</td><td class="nowrap hide-m" style="font-weight:700">' + esc(x.no) + '</td><td class="small hide-m">' + esc(SOURCE_LABEL[x.sourceType] || x.sourceType) + '</td>' +
+                '<td>' + esc(x.description) + (x.reference ? '<div class="muted small">Ref: ' + esc(x.reference) + '</div>' : '') + '</td><td class="num">' + rp(x.total) + '</td>' +
+                '<td class="hide-m">' + badge(x.status) + (x.reversedByJournalId ? ' <span class="badge CANCELLED">Dibalik</span>' : '') + '</td></tr>';
+            }).join('') + '</tbody></table></div><div class="pager">Total nilai ' + rp(pg.totalAmount) + '</div>' + pager(pg, function (p) { st.page = p; load(); });
+          $$('[data-j]', b).forEach(function (tr) { tr.onclick = function () { openJournal(tr.dataset.j); }; });
+        }).catch(function (e) { $('#jlBody', el).innerHTML = errorBox(e, load); });
+      }
+      load();
+    }
+    render();
+  };
+
+  function openJournal(id) {
+    var d = openDrawer('Jurnal', skeleton(6));
+    call('journal.get', { id: id }).then(function (j) {
+      var docT = SOURCE_TO_DOC[j.sourceType];
+      var body = '<table class="t"><tr><td class="muted" style="width:140px">Tanggal</td><td>' + fdate(j.date) + '</td></tr><tr><td class="muted">Sumber</td><td>' + esc(SOURCE_LABEL[j.sourceType] || j.sourceType) + '</td></tr>' +
+        '<tr><td class="muted">Keterangan</td><td>' + esc(j.description) + '</td></tr>' + (j.reference ? '<tr><td class="muted">Referensi</td><td>' + esc(j.reference) + '</td></tr>' : '') +
+        '<tr><td class="muted">Dibuat oleh</td><td>' + esc(j.createdBy) + '</td></tr></table>' + journalTable(j);
+      var foot = (docT && j.sourceId ? '<button class="btn" id="jSrc">Buka dokumen sumber</button>' : '') +
+        (j.reversesJournalId ? '<button class="btn" data-jj="' + esc(j.reversesJournalId) + '">Jurnal yang dibalik</button>' : '') +
+        (j.reversedByJournalId ? '<button class="btn" data-jj="' + esc(j.reversedByJournalId) + '">Jurnal pembalik</button>' : '');
+      d = openDrawer('Jurnal ' + j.no, body, foot);
+      var f = d.parentNode;
+      if ($('#jSrc', f)) $('#jSrc', f).onclick = function () { openDocDetail(docT, j.sourceId); };
+      $$('[data-jj]', f).forEach(function (b) { b.onclick = function () { openJournal(b.dataset.jj); }; });
+    }).catch(function (e) { $('.drawer-b', d).innerHTML = errorBox(e); });
+  }
 
   /* ================= ASET ================= */
   VIEWS.assets = function (el) {
