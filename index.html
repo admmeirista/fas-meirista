@@ -297,7 +297,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="1eb23f6-a58ffc9a";</script>
+  <script>window.MFAS_API_URL="https://script.google.com/macros/s/AKfycbwEGUWcoMs_SX_XVmDS_2MPzyhrWt0bK46SCMItN0DA2X26cg0MaokMGGP8u0gG-z4/exec";window.MFAS_BUILD="d132782-36830d36";</script>
 </head>
 <body>
   <div class="bar-loader" id="loader"></div>
@@ -330,7 +330,7 @@
           <div class="auth-help" id="loginHelp"></div>
         </form>
       </div>
-      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.7.0</div>
+      <div class="auth-tag">MEIRISTA FINANCIAL &amp; ACCOUNTING SYSTEM · v0.8.0</div>
     </section>
   </div>
 
@@ -385,6 +385,7 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   var today = function () { return S.boot ? S.boot.app.today : new Date().toISOString().substring(0, 10); };
   var period = function (d) { return d.substring(0, 7); };
   var addMonths = function (p, n) { var y = +p.substring(0, 4), m = +p.substring(5, 7) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; return y + '-' + ('0' + (m + 1)).slice(-2); };
+  var addDays = function (d, n) { var q = d.split('-').map(Number); return new Date(Date.UTC(q[0], q[1] - 1, q[2] + n)).toISOString().substring(0, 10); };
   var lastDay = function (p) { var d = new Date(Date.UTC(+p.substring(0, 4), +p.substring(5, 7), 0)).getUTCDate(); return p + '-' + ('0' + d).slice(-2); };
   var MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
   var mlabel = function (p) { return MONTHS[+p.substring(5, 7) - 1] + ' ' + p.substring(0, 4); };
@@ -722,6 +723,8 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   /** Pemilih periode: Bulan ini / Bulan lalu / Tahun ini / Kustom. */
   function rangeFromPreset(st) {
     var t = today(), p = period(t);
+    if (st.preset === 'TODAY') return { from: t, to: t };
+    if (st.preset === 'THIS_WEEK') { var q = t.split('-').map(Number), dow = new Date(Date.UTC(q[0], q[1] - 1, q[2])).getUTCDay(); var mon = addDays(t, -((dow + 6) % 7)); return { from: mon, to: addDays(mon, 6) }; }
     if (st.preset === 'LAST_MONTH') { var lp = addMonths(p, -1); return { from: lp + '-01', to: lastDay(lp) }; }
     if (st.preset === 'THIS_YEAR') return { from: t.substring(0, 4) + '-01-01', to: t.substring(0, 4) + '-12-31' };
     if (st.preset === 'MONTH') return { from: st.month + '-01', to: lastDay(st.month) };
@@ -823,35 +826,68 @@ var BRAND_MARK = 'data:image/webp;base64,UklGRhgOAABXRUJQVlA4WAoAAAAwAAAAXwAAXwA
   /* ================= DASHBOARD ================= */
   VIEWS.dashboard = function (el) {
     var st = S.state.dash = S.state.dash || { preset: 'THIS_MONTH' };
-    var presets = [['THIS_MONTH', 'Bulan ini'], ['LAST_MONTH', 'Bulan lalu'], ['THIS_YEAR', 'Tahun ini'], ['CUSTOM', 'Kustom']];
+    var presets = [['TODAY', 'Hari ini'], ['THIS_WEEK', 'Minggu ini'], ['THIS_MONTH', 'Bulan ini'], ['LAST_MONTH', 'Bulan lalu'], ['THIS_YEAR', 'Tahun ini'], ['CUSTOM', 'Kustom']];
     function render() {
       var r = rangeFromPreset(st);
       el.innerHTML = '<div class="stack"><div class="row">' + periodPicker(st, render, presets) + '<div class="spacer"></div>' +
-        (canInput() ? '<div class="row no-print hide-m"><button class="btn primary" data-q="SALES">' + icon('plus') + 'Penjualan</button><button class="btn" data-q="EXPENSE">Biaya</button><button class="btn" data-q="CASH">Kas &amp; Bank</button><button class="btn" data-q="ASSET">Tambah Aset</button></div>' : '') +
-        '</div><div id="dashBody">' + skeleton(6) + '</div></div>';
-      $$('[data-q]', el).forEach(function (b) { b.onclick = function () { var q = b.dataset.q; if (q === 'ASSET') openAssetForm(); else if (q === 'SALES') openSalesForm(); else if (q === 'EXPENSE') openExpenseForm(); else openQuickMenu(); }; });
+        (canInput() ? '<div class="row no-print hide-m"><button class="btn primary" data-q="SALES">' + icon('plus') + 'Penjualan</button><button class="btn" data-q="EXPENSE">Biaya</button><button class="btn" data-q="CASH">Kas &amp; Bank</button></div>' : '') +
+        '</div><div id="dashBody">' + skeleton(8) + '</div></div>';
+      $$('[data-q]', el).forEach(function (b) { b.onclick = function () { var q = b.dataset.q; if (q === 'SALES') openSalesForm(); else if (q === 'EXPENSE') openExpenseForm(); else openQuickMenu(); }; });
       call('dashboard.get', { preset: 'CUSTOM', from: r.from, to: r.to }).then(function (d) {
-        var k = d.kpi;
-        var labels = d.trend.map(function (t) { return mshort(t.period); });
+        var k = d.kpi, labels = d.trend.map(function (t) { return mshort(t.period); });
         var hasData = d.trend.some(function (t) { return t.revenue || t.expenses || t.cash; }) || k.totalAssets;
-        $('#dashBody', el).innerHTML =
-          (canEntry() ? '<div class="row no-print" style="margin-bottom:12px;display:none" id="qm"></div>' : '') +
-          (d.cogsMissing ? '<div class="banner warn" style="margin-bottom:16px">HPP belum tercatat untuk penjualan periode ini — laba kotor & laba bersih mungkin belum lengkap.</div>' : '') +
+        var html = (d.cogsMissing ? '<div class="banner warn" style="margin-bottom:14px">HPP belum tercatat untuk penjualan periode ini — isi harga beli acuan produk atau catat pembelian / saldo awal stok.</div>' : '') +
           '<div class="grid g3">' +
-          kpiCard('Total Penjualan', k.sales, 'Penjualan bersih ' + rp(k.netSales), 'receipt', 'dark') +
-          kpiCard('Laba Kotor', k.grossProfit, 'Penjualan bersih − HPP', 'trend') +
-          kpiCard('Laba Bersih', k.netProfit, 'Setelah seluruh beban', 'coins', 'ok') +
-          kpiCard('Saldo Kas & Bank', k.cashBalance, 'Per ' + fdate(d.to), 'wallet') +
-          kpiCard('Total Pengeluaran', k.totalExpenses, 'HPP + beban operasional + beban lain', 'cf') +
-          kpiCard('Total Aset', k.totalAssets, 'Per ' + fdate(d.to), 'building') + '</div>' +
-          (hasData ? '<div class="grid g2" style="margin-top:16px">' +
-            '<div class="card"><div class="card-h"><h3>Pendapatan vs Beban Bulanan</h3><div class="spacer"></div><div class="legend"><span><i style="background:#3b8a58"></i>Pendapatan</span><span><i style="background:#e8693a"></i>Beban</span></div></div><div class="card-b">' +
-            barChart(labels, [{ name: 'Pendapatan', color: '#3b8a58', values: d.trend.map(function (t) { return t.revenue; }) }, { name: 'Beban', color: '#e8693a', values: d.trend.map(function (t) { return t.expenses; }) }]) + '</div></div>' +
-            '<div class="card"><div class="card-h"><h3>Laba Bersih Bulanan</h3></div><div class="card-b">' +
+          kpiCard('Penjualan', k.sales, k.salesCount + ' transaksi · bersih ' + rp(k.netSales), 'receipt', 'dark') +
+          kpiCard('Pembelian', k.purchases, k.purchaseCount + ' faktur pembelian', 'asset') +
+          kpiCard('Laba Kotor', k.grossProfit, 'Penjualan bersih − HPP ' + rp(k.cogs), 'trend') +
+          kpiCard('Laba Bersih', k.netProfit, 'Setelah seluruh beban', 'coins', k.netProfit >= 0 ? 'ok' : 'alert') +
+          kpiCard('Kas', k.cash, 'Per ' + fdate(d.to), 'wallet') +
+          kpiCard('Bank', k.bank, 'Total kas & bank ' + rp(k.cashBalance), 'building') +
+          kpiCard('Piutang', k.receivables, d.receivables.count + ' faktur belum lunas', 'down') +
+          kpiCard('Utang', k.payables, d.payables.count + ' tagihan belum dibayar', 'logout') +
+          kpiCard('Persediaan', k.inventory, 'Nilai stok (rata-rata)', 'asset') + '</div>';
+        if (hasData) {
+          html += '<div class="grid g2" style="margin-top:16px">' +
+            '<div class="card"><div class="card-h"><h3>Penjualan vs Beban</h3><div class="spacer"></div><div class="legend"><span><i style="background:#3b8a58"></i>Penjualan</span><span><i style="background:#e8693a"></i>Beban</span></div></div><div class="card-b">' +
+            barChart(labels, [{ name: 'Penjualan', color: '#3b8a58', values: d.trend.map(function (t) { return t.revenue; }) }, { name: 'Beban', color: '#e8693a', values: d.trend.map(function (t) { return t.expenses; }) }]) + '</div></div>' +
+            '<div class="card"><div class="card-h"><h3>Tren Laba Bersih</h3></div><div class="card-b">' +
             barChart(labels, [{ name: 'Laba', color: '#28302b', negColor: '#c9443a', values: d.trend.map(function (t) { return t.profit; }) }]) + '</div></div>' +
-            '<div class="card" style="grid-column:1/-1"><div class="card-h"><h3>Tren Saldo Kas & Bank</h3><span class="muted small">akhir bulan</span></div><div class="card-b">' +
-            lineChart(labels, d.trend.map(function (t) { return t.cash; }), '#e8693a') + '</div></div></div>'
-            : '<div class="card empty" style="margin-top:16px">Belum ada transaksi terposting. Mulai dengan mencatat saldo awal kas & bank (Admin: Transaksi → Jurnal Umum) lalu transaksi harian.</div>');
+            '<div class="card"><div class="card-h"><h3>Arus Kas Bulanan</h3><div class="spacer"></div><div class="legend"><span><i style="background:#3c6fa8"></i>Masuk</span><span><i style="background:#c9443a"></i>Keluar</span></div></div><div class="card-b">' +
+            barChart(labels, [{ name: 'Kas masuk', color: '#3c6fa8', values: d.trend.map(function (t) { return t.cashIn; }) }, { name: 'Kas keluar', color: '#c9443a', values: d.trend.map(function (t) { return t.cashOut; }) }]) + '</div></div>' +
+            '<div class="card"><div class="card-h"><h3>Saldo Kas & Bank</h3><span class="muted small">akhir bulan</span></div><div class="card-b">' +
+            lineChart(labels, d.trend.map(function (t) { return t.cash; }), '#e8693a') + '</div></div></div>';
+          var mkTotal = d.byMarketplace.reduce(function (s, m) { return s + m.sales; }, 0) || 1;
+          html += '<div class="grid g2" style="margin-top:16px">' +
+            '<div class="card"><div class="card-h"><h3>Penjualan per Marketplace</h3><span class="muted small">' + fdate(d.from) + ' – ' + fdate(d.to) + '</span></div><div class="card-b">' +
+            (d.byMarketplace.length ? d.byMarketplace.map(function (m) {
+              var pct = Math.round(m.sales / mkTotal * 100);
+              return '<div style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><b>' + esc(m.name) + '</b><span class="num"><b>' + rp(m.sales) + '</b> <span class="muted small">' + pct + '%</span></span></div>' +
+                '<div style="height:8px;background:var(--line-2);border-radius:6px;margin:6px 0;overflow:hidden"><i style="display:block;height:100%;width:' + pct + '%;background:var(--acc);border-radius:6px"></i></div>' +
+                '<div class="muted small">' + m.orders + ' order · biaya ' + rp(m.fees) + ' · HPP ' + rp(m.cogs) + ' · laba kotor ' + rp(m.sales - m.cogs) + '</div></div>';
+            }).join('') : '<div class="empty">Belum ada penjualan pada periode ini.</div>') + '</div></div>' +
+            '<div class="card"><div class="card-h"><h3>Produk Terlaris</h3></div>' + (d.topProducts.length ? '<div class="table-wrap"><table class="t"><thead><tr><th>Produk</th><th class="num">Qty</th><th class="num">Penjualan</th><th class="num hide-m">Margin</th></tr></thead><tbody>' +
+              d.topProducts.map(function (p) { return '<tr><td><b>' + esc(p.sku) + '</b><div class="muted small">' + esc(p.name) + '</div></td><td class="num">' + NF.format(p.qty) + '</td><td class="num">' + rp(p.revenue) + '</td><td class="num hide-m">' + rpCell(p.margin) + (p.revenue ? '<div class="muted small">' + Math.round(p.margin / p.revenue * 100) + '%</div>' : '') + '</td></tr>'; }).join('') +
+              '</tbody></table></div>' : '<div class="empty">Belum ada penjualan produk pada periode ini.</div>') + '</div></div>';
+        } else {
+          html += '<div class="card empty" style="margin-top:16px"><b>Belum ada transaksi terposting</b>Mulai dengan Saldo Awal (Akuntansi → Jurnal Umum) dan Saldo Awal Stok (Persediaan → Penyesuaian), lalu catat penjualan & biaya harian.</div>';
+        }
+        var partyList = function (title, o, kind) {
+          return '<div class="card"><div class="card-h"><h3>' + title + '</h3><div class="spacer"></div><b class="num">' + rp(o.total) + '</b></div>' +
+            (o.byParty.length ? '<table class="t"><tbody>' + o.byParty.map(function (x) {
+              return '<tr class="click" data-go="' + kind + '"><td><b>' + esc(x.party) + '</b><div class="muted small">' + x.docs + ' dokumen · sejak ' + fdate(x.oldest) + '</div></td><td class="num">' + rp(x.amount) + '</td></tr>'; }).join('') + '</tbody></table>'
+              : '<div class="empty">Tidak ada.</div>') + '</div>';
+        };
+        html += '<div class="grid g3" style="margin-top:16px">' +
+          '<div class="card"><div class="card-h"><h3>Transaksi Terbaru</h3></div>' + (d.recent.length ? '<table class="t"><tbody>' + d.recent.map(function (x) {
+            return '<tr class="click" data-doc="' + esc(x.type + '|' + x.id) + '"><td><b>' + esc(x.no) + '</b><div class="muted small">' + fdate(x.date) + ' · ' + esc(x.party || DOC_UI[x.type].title) + '</div></td><td class="num">' + rp(x.amount) + '<div>' + badge(x.status) + '</div></td></tr>';
+          }).join('') + '</tbody></table>' : '<div class="empty">Belum ada transaksi.</div>') + '</div>' +
+          partyList('Piutang Belum Lunas', d.receivables, 'sales') + partyList('Utang Belum Dibayar', d.payables, 'purchases') + '</div>';
+        $('#dashBody', el).innerHTML = html;
+        $$('[data-doc]', el).forEach(function (tr) { tr.onclick = function () { var p = tr.dataset.doc.split('|'); openDocDetail(p[0], p[1]); }; });
+        $$('[data-go]', el).forEach(function (tr) { tr.onclick = function () {
+          var v = tr.dataset.go; S.state[v === 'sales' ? 'docSALES' : 'docPURCHASE'] = { page: 1, search: '', status: 'POSTED', from: '', to: '', paymentType: '', paymentStatus: 'UNPAID' }; go(v);
+        }; });
       }).catch(function (e) { $('#dashBody', el).innerHTML = errorBox(e, render); });
     }
     render();
